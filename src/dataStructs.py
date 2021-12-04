@@ -45,3 +45,14 @@ class Student:
 
     def __str__(self):
         return f"{self.first} {self.last}: {self.number} {self.schedule}"
+
+@dataclass
+class AbsentTeacher:
+    first: str
+    last: str 
+    length: str
+    date: str
+    note: str
+
+    def __str__(self):
+        return f"{self.first} {self.last} {self.length} {self.date} {self.note}"
