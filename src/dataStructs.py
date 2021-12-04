@@ -36,6 +36,14 @@ class Number:
     def __str__(self):
         return self.number
     
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        if not isinstance(other, Number):
+            return False
+        return self.number == other.number
+
 @dataclass
 class Student:
     first: str
