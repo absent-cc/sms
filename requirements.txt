@@ -1,0 +1,4 @@
+schoolopy
+pytextnow
+pyyaml
+dataclasses
