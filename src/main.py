@@ -1,5 +1,5 @@
 from schoology.absence import absence
-from sms.sms import sms
+from textnow.sms import sms
 import yaml
 from datetime import datetime, timedelta
 
@@ -10,7 +10,11 @@ sckeys = [cfg['north']['key'], cfg['south']['key']]
 scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
 absent = absence(sckeys, scsecrets)
 
-sms = sms(cfg['textnow']['sid'], cfg['textnow']['csrf'], cfg['textnow']['username'])
+sid = cfg['textnow']['sid']
+csrf = cfg['textnow']['csrf']
+username = cfg['textnow']['username']
+
+sms = sms(sid,csrf,username)
 
 date = datetime.now() - timedelta(hours=24)
 # date = datetime.datetime(2021, 12, 3)
@@ -21,3 +25,4 @@ for i in test_arr:
     print(i)
 
 sms.send('6175059626',"Text")
+print(sms.receive())
