@@ -1,7 +1,6 @@
-from absentTeacher import AbsentTeacher
+from schoology.absentTeacher import AbsentTeacher
 import schoolopy
 import yaml
-import json
 from datetime import datetime, timedelta
 
 class absence:
@@ -60,7 +59,7 @@ class absence:
                     note = None
                 else:
                     note = raw[i*8+3]
-                entry = AbsentTeacher(raw[i*8+2],raw[i*8+1],raw[i*8+4],None,note)
+                entry = AbsentTeacher(raw[i*8+2],raw[i*8+1],raw[i*8+4],str(date.strftime("%m/%-d/%Y")),note)
                 absences.append(entry)        
         return absences
     
