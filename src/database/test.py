@@ -26,5 +26,6 @@ test_classes = {teacher1: [test_student1, test_student2], teacher2: [test_studen
 # writeToPickle(test_dict, "data/test.pkl")
 # test_handle = DatabaseHandler("src/database/test.pkl")
 test_handle = DatabaseHandler("data/test.pkl")
+print(test_handle.readSavedDirectory)
 # print(test_handle.readSavedDirectory('data/directory.pkl'))
 # test_handle.writeDirectory(test_handle.directory_path)
