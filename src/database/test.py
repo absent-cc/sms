@@ -18,13 +18,13 @@ teacher2 = Teacher("JOSHUA", "HUANG")
 test_classes = {teacher1: [test_student1, test_student2], teacher2: [test_student1]}
 
 # print(test_classes)
-pp.pprint(test_classes)
+# pp.pprint(test_classes)
 # print(test_teacher)
 # print(test_student)
 
 # test_dict = {"Kevin": test_student}
 # writeToPickle(test_dict, "data/test.pkl")
 # test_handle = DatabaseHandler("src/database/test.pkl")
-# test_handle = DatabaseHandler("data/test.pkl")
+test_handle = DatabaseHandler("data/test.pkl")
 # print(test_handle.readSavedDirectory('data/directory.pkl'))
 # test_handle.writeDirectory(test_handle.directory_path)
