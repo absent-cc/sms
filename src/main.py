@@ -3,6 +3,7 @@ from textnow.sms import sms
 import yaml
 from datetime import datetime, timedelta
 
+
 with open('secrets.yml', 'r') as f:
     cfg = yaml.safe_load(f)
 
@@ -25,4 +26,7 @@ for i in test_arr:
     print(i)
 
 sms.send('6175059626',"Text")
-print(sms.receive())
+
+for i in sms.receive():
+    print(i)
+    print(type(i))
