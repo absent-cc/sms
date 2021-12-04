@@ -1,12 +1,16 @@
 from absence import absence
 import schoolopy
 import yaml
-from datetime import date
+from datetime import datetime, timedelta
 
 with open('secrets.yml', 'r') as f:
     cfg = yaml.safe_load(f)
 
-absent = absence(cfg['key'], cfg['secret'])
+keys = [cfg['north']['key'], cfg['south']['key']]
+secrets = [cfg['north']['secret'], cfg['south']['secret']]
+absent = absence(keys, secrets)
 
-print(absent.filter_absences_north(date = date.today()))
-print(absent.filter_absences(date = date.today()))
+date = datetime.now() - timedelta(hours=5)
+
+print(absent.filter_absences_north(date))
+print(absent.filter_absences_south(date))
