@@ -3,12 +3,11 @@ import pickle
 
 class DatabaseHandler:
     directory: dict[Teacher: list[Student]]
-
+    
     def __init__(self, directory_path):
         self.directory_path = directory_path
-        with open(directory_path, 'r+') as f:
-            directory_file = f.read()
-        print(directory_file)
+        # self.directory = self.readSavedDirectory(directory_path)
+        # print(self.directory)
     
     def readSavedDirectory(self, path):
         if path.lower().endswith(('.pkl')):

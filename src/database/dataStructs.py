@@ -8,6 +8,14 @@ class Teacher:
     def __str__(self):
         return f"{self.first} {self.last}"
 
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        if not isinstance(other, Teacher):
+            return False
+        return self.first == other.first and self.first == other.last
+
 @dataclass
 class Schedule:
     A: Teacher
