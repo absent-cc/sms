@@ -6,9 +6,8 @@ class DatabaseHandler:
 
     def __init__(self, directory_path):
         self.directory_path = directory_path
-        with open(directory_path, 'r+') as f:
-            directory_file = f.read()
-        print(directory_file)
+        self.directory = self.readSavedDirectory(directory_path)
+        print(self.directory)
     
     def readSavedDirectory(self, path):
         if path.lower().endswith(('.pkl')):
@@ -20,3 +19,6 @@ class DatabaseHandler:
     def writeDirectory(self, directory, path='data/directory.pkl'):
         with open(path, 'wb') as f:
             pickle.dump(directory, f)
+
+    def addStudent(self, student: Student):
+        pass
