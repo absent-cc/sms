@@ -41,7 +41,7 @@ class Schedule:
 @dataclass
 class Number:
     number: str
-
+    
     def __str__(self):
         return self.number
     

@@ -27,3 +27,6 @@ print(Kevin)
 print(Roshan)
 
 db = DatabaseHandler()
+db.addStudent(Kevin)
+print(db.classes)
+print(db.directory)

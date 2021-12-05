@@ -17,7 +17,7 @@ class DatabaseHandler:
 
     # Note: For classes, teacher maps to a set of students in order to ensure uniquness and no repeats, rather than a non-unique list.
 
-    def __init__(self, directory_path='data/directory.pkl', classes_path='data/classes.pkl'):
+    def __init__(self, directory_path: str ='data/directory.pkl', classes_path: str ='data/classes.pkl'):
         os.environ['PYTHONHASHSEED'] = '1' # Set hash seed to 0 to ensure reproducibility between sessions for dictionary keys
         self.directory_path = directory_path
         self.directory = self.readPickle(directory_path)
@@ -27,7 +27,7 @@ class DatabaseHandler:
     def readPickle(self, path):
         if path.lower().endswith(('.pkl')): # Check if path points to a pickle file
             if not os.stat(path).st_size == 0: # Check if pickle file is empty
-                with open(path, 'wb') as f: 
+                with open(path, 'rb') as f: 
                     return pickle.load(f) # Load pickle file
             else:
                 return {} # There is no file, so return an empty dictionary
@@ -35,18 +35,19 @@ class DatabaseHandler:
             raise Exception('Directory Path is not a pickle file')
 
     # Write objects to a pickle file
-    def writeToPickle(self, object, path):
+    def writeToPickle(self, object, path) -> bool:
         with open(path, 'wb') as f:
             pickle.dump(object, f)
+            return True
     
     # Save current instance of directory to pickle file
-    def saveDirectory(self, directory, path='data/directory.pkl'):
-        self.writeToPickle(directory, path)
+    def saveDirectory(self, directory, path='data/directory.pkl') -> bool:
+        return self.writeToPickle(directory, path)
 
     # Save current instance of classes to pickle file
-    def saveClasses(self, classes, path='data/classes.pkl'):
-        self.writeToPickle(classes, path)
-    
+    def saveClasses(self, classes, path='data/classes.pkl') -> bool:
+        return self.writeToPickle(classes, path)
+        
     # Add student to user directory
     def addStudent(self, student: Student) -> bool:
         if student.number not in self.directory:
