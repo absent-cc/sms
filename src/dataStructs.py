@@ -86,3 +86,6 @@ class AbsentTeacher:
 class Message:
     number: Number
     content: str
+
+    def __str__(self):
+        return f"{self.number} {self.content}"

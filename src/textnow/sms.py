@@ -1,5 +1,6 @@
 import pytextnow
 from dataStructs import Number, Message
+from ..database.databaseHandler import DatabaseHandler
 
 class sms:
 
@@ -21,7 +22,8 @@ class sms:
 class ui:
 
     def __init__(self):
-        pass 
+        self.db = DatabaseHandler() 
 
-    def gen_response(self, msg):
-        pass
+    def gen_response(self, unreads):
+        for msg in unreads:
+            if msg.number in db.directory()
