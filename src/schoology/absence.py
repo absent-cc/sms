@@ -1,4 +1,4 @@
-from dataStructs import AbsentTeacher
+from dataStructs import *
 import schoolopy
 import yaml
 from datetime import datetime, timedelta
