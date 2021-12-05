@@ -12,16 +12,16 @@ class DatabaseHandler:
     # Directory is meant to keep track of who is part of the abSENT system (think of user directory)
 
     # Type defintions:
-    classes: dict[Teacher: set()]
-    directory: dict[Number: Student]
+    classes: Classes
+    directory: Directory
 
     # Note: For classes, teacher maps to a set of students in order to ensure uniquness and no repeats, rather than a non-unique list.
 
     def __init__(self, directory_path: str ='data/directory.pkl', classes_path: str ='data/classes.pkl'):
         os.environ['PYTHONHASHSEED'] = '1' # Set hash seed to 0 to ensure reproducibility between sessions for dictionary keys
         self.directory_path = directory_path
-        self.directory = self.readPickle(directory_path)
-        self.classes = self.readPickle(classes_path)
+        self.directory = self.readDirectory(directory_path)
+        self.classes = self.readClasses(classes_path)
     
     # Read objects from pickle file
     def readPickle(self, path):
@@ -30,9 +30,21 @@ class DatabaseHandler:
                 with open(path, 'rb') as f: 
                     return pickle.load(f) # Load pickle file
             else:
-                return {} # There is no file, so return an empty dictionary
+                return None # There is no file, so return an empty dictionary
         else:
             raise Exception('Directory Path is not a pickle file')
+
+    def readDirectory(self, path: str ='data/directory.pkl') -> Directory:
+        res = self.readPickle(path)
+        if res == None:
+            return Directory()
+        return res
+    
+    def readClasses(self, path: str = 'data/classes.pkl') -> Classes:
+        res = self.readPickle(path)
+        if res == None:
+            return Classes()
+        return res
 
     # Write objects to a pickle file
     def writeToPickle(self, object, path) -> bool:
@@ -49,7 +61,7 @@ class DatabaseHandler:
         return self.writeToPickle(classes, path)
         
     # Add student to user directory
-    def addStudent(self, student: Student) -> bool:
+    def addStudentToDirectory(self, student: Student) -> bool:
         if student.number not in self.directory:
             self.directory[student.number] = student
             self.saveDirectory(self.directory)
@@ -57,7 +69,7 @@ class DatabaseHandler:
         return False
     
     # Remove student from entire abSENT system (directory and classes)
-    def removeStudent(self, student: Student) -> bool:
+    def removeStudentFromDirectory(self, student: Student) -> bool:
         # Remove student from directory
         if student.number in self.directory:
             del self.directory[student.number]
@@ -86,20 +98,34 @@ class DatabaseHandler:
             return True
         return False
     
-    # Add student to its respective teacher's classes
+    # Add student to its respective teachers' classes
     def addStudentToClass(self, student: Student, teacher: Teacher) -> bool:
         if teacher in self.classes:
-            print(self.classes[teacher])
-            print(type(self.classes[teacher]))
             self.classes[teacher].add(student)
             self.saveClasses(self.classes)
             return True
         return False
     
-    # Remove student from its respective teacher's classes
+    # Remove student from its respective teachers' classes
     def removeStudentFromClass(self, student: Student, teacher: Teacher) -> bool:
         if student.number in self.directory and teacher in self.classes:
             self.classes[teacher].remove(student)
             self.saveClasses(self.classes)
             return True
         return False
+
+    def addStudent(self, student: Student) -> tuple[bool, str]:
+        res = self.addStudentToDirectory(student)
+        if res == True:
+            flag = ""
+            for teacher in student.schedule:
+                res = self.addStudentToClass(student, teacher)
+                if res == False:
+                    flag += f"Added {teacher} to classes\n"
+                    self.addTeacher(teacher)
+                    self.addStudentToClass(student, teacher)
+            return (True, flag)
+        return False, "Student already exists"
+    
+    def changeClass(self, student: Student):
+        pass
