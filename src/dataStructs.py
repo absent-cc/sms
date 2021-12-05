@@ -14,7 +14,7 @@ class Teacher:
     def __eq__(self, other):
         if not isinstance(other, Teacher):
             return False
-        return self.first == other.first and self.first == other.last
+        return self.first == other.first and self.last == other.last
 
 @dataclass
 class Schedule:
@@ -28,14 +28,31 @@ class Schedule:
 
     def __str__(self):
         return f"A: {self.A}, B: {self.B}, C: {self.C}, D: {self.D}, E: {self.E}, F: {self.F}, G: {self.G}"
+    
+    def __iter__(self):
+            yield self.A
+            yield self.B
+            yield self.C
+            yield self.D
+            yield self.E
+            yield self.F
+            yield self.G
 
 @dataclass
 class Number:
     number: str
-
+    
     def __str__(self):
         return self.number
     
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        if not isinstance(other, Number):
+            return False
+        return self.number == other.number
+
 @dataclass
 class Student:
     first: str
@@ -45,6 +62,14 @@ class Student:
 
     def __str__(self):
         return f"{self.first} {self.last}: {self.number} {self.schedule}"
+    
+    def __eq__(self, other):
+        if not isinstance(other, Student):
+            return False
+        return self.number == other.number
+    
+    def __hash__(self):
+        return hash(str(self))
 
 @dataclass
 class AbsentTeacher:
@@ -56,3 +81,4 @@ class AbsentTeacher:
 
     def __str__(self):
         return f"{self.first} {self.last} {self.length} {self.date} {self.note}"
+    
