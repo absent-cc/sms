@@ -1,6 +1,6 @@
 import pytextnow
 from dataStructs import Number, Message
-from ..database.databaseHandler import DatabaseHandler
+from database.dataBaseHandler import DatabaseHandler
 
 class sms:
 
@@ -24,6 +24,16 @@ class ui:
     def __init__(self):
         self.db = DatabaseHandler() 
 
-    def gen_response(self, unreads):
-        for msg in unreads:
-            if msg.number in db.directory()
+    def gen_response(self, msg):
+        response = False
+        print(str(msg.content.lower()))
+        if msg.content.lower() in 'c':
+            response = "Service cancelled! Sorry to see you go."
+        elif msg.content.lower() in 'e':
+            response = "something something edit something"
+        elif msg.number in self.db.directory.directory:
+            response = "You are already subscribed to our service! Respond 'c' to cancel or 'e' to edit your schedule."
+        
+        if msg.content.lower() == 'subscribe':
+            response = "something something subcribe"
+        return response

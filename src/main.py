@@ -1,7 +1,10 @@
 from schoology.absence import absence
-from textnow.sms import sms
+from textnow.sms import sms, ui
 import yaml
 from datetime import datetime, timedelta
+from database.dataBaseHandler import DatabaseHandler
+from dataStructs import *
+import time
 
 with open('secrets.yml', 'r') as f:
     cfg = yaml.safe_load(f)
@@ -15,16 +18,28 @@ csrf = cfg['textnow']['csrf']
 username = cfg['textnow']['username']
 
 sms = sms(sid,csrf,username)
+ui = ui()
+db = DatabaseHandler()
 
-date = datetime.now() - timedelta(hours=48)
+#date = datetime.now() - timedelta(hours=48)
 # date = datetime.datetime(2021, 12, 3)
 
-test_arr = absent.filter_absences_north(date)
+#test_arr = absent.filter_absences_north(date)
 
-for i in test_arr:
-    print(i)
+#for i in test_arr:
+#    print(i)
 
-sms.send('6175059626',"Text")
+#sms.send('6175059626',"Text")
 
-for i in sms.receive():
-    print(str(i))
+#test_num = Number("+16175059626")
+#test_teacher = Teacher("Kevin", "Yang")
+#test_schedule = Schedule(test_teacher, test_teacher, test_teacher, test_teacher, test_teacher, test_teacher, None)
+
+#test_student1 = Student("Kevin", "Yang", test_num, test_schedule)
+#db.addStudentToDirectory(test_student1)
+while True:
+    for msg in sms.receive():
+        sms.send(str(msg.number),ui.gen_response(msg))
+    time.sleep(0.2)
+#for i in sms.receive():
+#    print(ui.gen_response(i))
