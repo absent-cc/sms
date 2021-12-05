@@ -50,7 +50,7 @@ class DatabaseHandler:
     def writeToPickle(self, object, path) -> bool:
         with open(path, 'wb') as f:
             pickle.dump(object, f)
-            return True
+            return True # Object sucessfully written to {path}.pkl
     
     # Save current instance of directory to pickle file
     def saveDirectory(self, directory, path='data/directory.pkl') -> bool:
@@ -62,70 +62,92 @@ class DatabaseHandler:
         
     # Add student to user directory
     def addStudentToDirectory(self, student: Student) -> bool:
+        # Check if student is already in directory
         if student.number not in self.directory:
-            self.directory[student.number] = student
-            self.saveDirectory(self.directory)
-            return True
-        return False
-    
-    # Remove student from entire abSENT system (directory and classes)
-    def removeStudentFromDirectory(self, student: Student) -> bool:
-        # Remove student from directory
-        if student.number in self.directory:
-            del self.directory[student.number]
-            self.saveDirectory(self.directory)
+            self.directory[student.number] = student # Create new number, student pair in directory
+            self.saveDirectory(self.directory) # Save changes
+            return True # Student sucessfully added to directory
+        return False # Student already exists in directory
 
-            # Remove student from classes
-            for block in student.schedule: # Iterate through the student's schedule
-                # Remove student from its respective class 
-                self.removeStudentFromClass(student, block)
-            return True
-        return False
+    # Remove student from directory 
+    def removeStudentFromDirectory(self, student: Student) -> bool:
+        # Check if student is in directory
+        if student.number in self.directory:
+            del self.directory[student.number] # Delete number key from directory dictionary
+            self.saveDirectory(self.directory) # Save changes
+            return True # Student sucessfully removed from directory
+        return False # Student does not exist in directory
     
     # Add teacher to classes
     def addTeacher(self, teacher: Teacher) -> bool:
+        # Check if teacher is already in classes
         if teacher not in self.classes:
-            self.classes[teacher] = set()
-            self.saveClasses(self.classes)
-            return True
-        return False
+            self.classes[teacher] = set() # Create a new key, value pair for teacher. Set its class to empty
+            self.saveClasses(self.classes) # Save changes
+            return True # Teacher sucessfully added to classes
+        return False # Teacher already exists in classes
     
     # Remove teacher from classes
     def removeTeacher(self, teacher: Teacher) -> bool:
         if teacher in self.classes:
-            del self.classes[teacher]
-            self.saveClasses(self.classes)
+            del self.classes[teacher] # Delete teacher entry from classes
+            self.saveClasses(self.classes) # Save changes
             return True
-        return False
+        return False # Teacher not in classses, cannot remove student
     
     # Add student to its respective teachers' classes
     def addStudentToClass(self, student: Student, teacher: Teacher) -> bool:
         if teacher in self.classes:
-            self.classes[teacher].add(student)
-            self.saveClasses(self.classes)
-            return True
+            self.classes[teacher].add(student) # Add student to teacher's class
+            self.saveClasses(self.classes) # Save Changes
+            return True # Student sucessfully added to class
         return False
     
     # Remove student from its respective teachers' classes
     def removeStudentFromClass(self, student: Student, teacher: Teacher) -> bool:
-        if student.number in self.directory and teacher in self.classes:
+        if teacher in self.classes:
+            # Remove student from teacher's class
             self.classes[teacher].remove(student)
             self.saveClasses(self.classes)
-            return True
-        return False
+            # If a teacher's class becomes empty, delete the teacher
+            if self.classes[teacher] == set():
+                self.removeTeacher(teacher)
+            return True # Student sucessfully removed from class
+        return False # Teacher not in classes, cannot remove student
 
     def addStudent(self, student: Student) -> tuple[bool, str]:
+        # Add student to directory
         res = self.addStudentToDirectory(student)
+        # If student sucessfully added to directory,
+        # add student to all of its classes
         if res == True:
-            flag = ""
+            trace = ""
             for teacher in student.schedule:
+                # Add student to teacher's class
                 res = self.addStudentToClass(student, teacher)
+                # If false, add teacher into classes
                 if res == False:
-                    flag += f"Added {teacher} to classes\n"
+                    trace += f"Added {teacher} to classes\n" # Produce a trace for logging
                     self.addTeacher(teacher)
                     self.addStudentToClass(student, teacher)
-            return (True, flag)
+            return (True, trace)
         return False, "Student already exists"
     
+    def removeStudent(self, student: Student) -> tuple[bool, str]:
+        # Remove student from directory
+        res = self.removeStudentFromDirectory(student)
+        # If student sucessfully removed from directory,
+        # remove student from all of its classes
+        if res == True:
+            trace = ""
+            for teacher in student.schedule:
+                # Remove student from teacher's class
+                res = self.removeStudentFromClass(student, teacher)
+                # If false, do nothing and record the trace
+                if res == False:
+                    trace += f"Student or Teacher not in system"
+            return (True, trace)
+        return False, "Student does not exist"
+
     def changeClass(self, student: Student):
         pass

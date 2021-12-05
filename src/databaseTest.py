@@ -23,8 +23,10 @@ Roshan_Num = Number("6175525098")
 Roshan = Student("Roshan", "Karim", Roshan_Num, Roshan_schedule)
 
 db = DatabaseHandler()
-# db.addStudent(Kevin)
-print(db.directory)
+db.addStudent(Kevin)
+db.addStudent(Roshan)
+print(db.removeStudent(Kevin))
+print(db.classes)
 
 # db.addStudentToDirectory(Kevin)
 # print(db.directory)

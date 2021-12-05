@@ -120,6 +120,9 @@ class Classes:
     def __setitem__(self, key, value):
         self.classes[key] = value
     
+    def __delitem__(self, key):
+        del self.classes[key]
+    
 @dataclass
 class Directory:
     directory: dict[Number: Student]
@@ -141,3 +144,6 @@ class Directory:
     
     def __setitem__(self, key, value):
         self.directory[key] = value
+    
+    def __delitem__(self, key):
+        del self.directory[key]
