@@ -149,5 +149,23 @@ class DatabaseHandler:
             return (True, trace)
         return False, "Student does not exist"
 
-    def changeClass(self, student: Student):
-        pass
+    def changeClass(self, student: Student, old_teacher: Teacher, new_teacher: Teacher) -> tuple[bool, str]:
+        # Remove student from old teacher's class
+        res_remove = self.removeStudentFromClass(student, old_teacher)
+        # If student sucessfully removed from old teacher's class,
+        # add student to new teacher's class
+        if res_remove == True:
+            res_add = self.addStudentToClass(student, new_teacher)
+            # If student sucessfully added to new teacher's class,
+            # return true and empty trace
+            if res_add == True:
+                return (True, "")
+            # If student not added to new teacher's class,
+            # add new teacher to classes
+            else:
+                self.addTeacher(new_teacher)
+                self.addStudentToClass(student, new_teacher)
+                return (True, "")
+        # If student not removed from old teacher's class,
+        # return false and empty trace
+        return (False, "")

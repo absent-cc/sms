@@ -28,6 +28,9 @@ db.addStudent(Roshan)
 print(db.removeStudent(Kevin))
 print(db.classes)
 
+db.changeClass(Roshan, JOE, NORM)
+print(db.classes)
+
 # db.addStudentToDirectory(Kevin)
 # print(db.directory)
 # print(db.addStudent(Kevin))
