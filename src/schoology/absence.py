@@ -1,4 +1,4 @@
-from schoology.absentTeacher import AbsentTeacher
+from dataStructs import AbsentTeacher
 import schoolopy
 import yaml
 from datetime import datetime, timedelta

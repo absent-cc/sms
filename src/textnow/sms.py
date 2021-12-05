@@ -1,4 +1,5 @@
 import pytextnow
+from dataStructs import Number, Message
 
 class sms:
 
@@ -12,8 +13,8 @@ class sms:
         unreads = []
         for msg in self.client.get_unread_messages():
             msg.mark_as_read()
-            tuple = (msg.number,msg.content)
-            unreads.append(tuple)
+            entry = Message(Number(msg.number),msg.content)
+            unreads.append(entry)
 
         return unreads
 
