@@ -81,3 +81,4 @@ class AbsentTeacher:
 
     def __str__(self):
         return f"{self.first} {self.last} {self.length} {self.date} {self.note}"
+    
