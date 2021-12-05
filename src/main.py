@@ -16,7 +16,7 @@ username = cfg['textnow']['username']
 
 sms = sms(sid,csrf,username)
 
-date = datetime.now() - timedelta(hours=24)
+date = datetime.now() - timedelta(hours=48)
 # date = datetime.datetime(2021, 12, 3)
 
 test_arr = absent.filter_absences_north(date)
@@ -26,4 +26,5 @@ for i in test_arr:
 
 sms.send('6175059626',"Text")
 
-print(sms.receive())
+for i in sms.receive():
+    print(str(i))

@@ -96,6 +96,9 @@ class Message:
     number: Number
     content: str
 
+    def __str__(self):
+        return f"{self.number} {self.content}"
+
 @dataclass
 class Classes:
     classes: dict[Teacher: set()]
