@@ -6,10 +6,13 @@ import os
 class Logger():
     def __init__(self, path: str = "data/log.txt"):
         self.path = path
+        # Check if log file exists
+        # If not, create it
         if not os.path.exists(self.path):
             with open(self.path, 'w') as f:
                 f.write("TIME | ACTION | DETAILS\n")      
 
+    # Default method for logging
     def log(self, message):
         current_time = datetime.now()
         with open(self.path, 'a') as f:
@@ -31,6 +34,7 @@ class Logger():
     def removedTeacher(self, teacher: Teacher):
         self.log(f"TEACHER REMOVED \t| {teacher.first} {teacher.last}")
 
+    # Method to reset log file
     def resetLog(self):
         with open(self.path, 'w') as f:
             f.write("TIME | ACTION | DETAILS\n")      
