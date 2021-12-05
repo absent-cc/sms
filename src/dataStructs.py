@@ -5,6 +5,12 @@ class Teacher:
     first: str
     last: str
 
+    def __init__(self, first, last):
+        self.first = first.upper()
+        self.last = last.upper()
+    
+    def __repr__(self) -> str:
+        return f"Teacher: {self.first} {self.last}"
     def __str__(self):
         return f"{self.first} {self.last}"
 
@@ -63,6 +69,9 @@ class Student:
     def __str__(self):
         return f"{self.first} {self.last}: {self.number} {self.schedule}"
     
+    def __repr__(self):
+        return f"{self.first} {self.last}"
+
     def __eq__(self, other):
         if not isinstance(other, Student):
             return False
@@ -70,7 +79,7 @@ class Student:
     
     def __hash__(self):
         return hash(str(self))
-
+    
 @dataclass
 class AbsentTeacher:
     first: str
@@ -89,3 +98,55 @@ class Message:
 
     def __str__(self):
         return f"{self.number} {self.content}"
+
+@dataclass
+class Classes:
+    classes: dict[Teacher: set()]
+
+    def __init__(self, classes = {}):
+        self.classes = classes
+    
+    def __str__(self):
+        string = ""
+        for teacher in self.classes:
+            string += f"{teacher}:\n"
+            for student in self.classes[teacher]:
+                string += f"\t{student.first} {student.last}\n"
+        return string
+
+    def __iter__(self):
+        yield from self.classes.keys()
+
+    def __getitem__(self, key):
+        return self.classes[key]
+    
+    def __setitem__(self, key, value):
+        self.classes[key] = value
+    
+    def __delitem__(self, key):
+        del self.classes[key]
+    
+@dataclass
+class Directory:
+    directory: dict[Number: Student]
+
+    def __init__(self, directory = {}):
+        self.directory = directory
+
+    def __str__(self):
+        string = ""
+        for number in self.directory:
+            string += f"{number}: {self.directory[number].first} {self.directory[number].last}\n"
+        return string
+
+    def __iter__(self):
+        yield from self.directory.keys()
+    
+    def __getitem__(self, key):
+        return self.directory[key]
+    
+    def __setitem__(self, key, value):
+        self.directory[key] = value
+    
+    def __delitem__(self, key):
+        del self.directory[key]

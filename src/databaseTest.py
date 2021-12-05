@@ -1,6 +1,5 @@
 from database.dataBaseHandler import *
 
-
 NORM = Teacher("RYAN", "NORMANDIN")
 PAL = Teacher("ALEX", "PALILUNAS")
 BECKER = Teacher("RACHEL", "BECKER")
@@ -23,10 +22,25 @@ Roshan_schedule = Schedule(JOE, MAMA, ALFRED, JACK, JOHN, CENA, None)
 Roshan_Num = Number("6175525098")
 Roshan = Student("Roshan", "Karim", Roshan_Num, Roshan_schedule)
 
-print(Kevin)
-print(Roshan)
-
 db = DatabaseHandler()
 db.addStudent(Kevin)
+db.addStudent(Roshan)
+print(db.removeStudent(Kevin))
 print(db.classes)
-print(db.directory)
+
+db.changeClass(Roshan, JOE, NORM)
+print(db.classes)
+
+# db.addStudentToDirectory(Kevin)
+# print(db.directory)
+# print(db.addStudent(Kevin))
+# print(db.classes)
+# print(db.addStudent(Roshan))
+# db.addStudent(Kevin)
+# print(db.classes)
+# print(db.classes.classes)
+
+# for teacher in db.classes.classes:
+#     print(teacher)
+#     print("HI")
+# print(db.classes.classes)
