@@ -63,7 +63,10 @@ class ui:
                 teachers.append(teacher)
                 continue
             teacher = teacher.split(' ')
-            teacher = Teacher(teacher[0],teacher[1])
+            try:
+                teacher = Teacher(teacher[0],teacher[1])
+            except IndexError:
+                return False
             teachers.append(teacher)
         
         for teacher in teachers:
@@ -81,7 +84,7 @@ class ui:
         while True:
             # Get first and last name, as well as number.
 
-            msg = str(self.sms.await_response(msg.number).content)
+            msg = str(self.sms.await_response(num.number).content)
             msg = msg.split(' ')
             try:
                 first = msg[0]
@@ -98,8 +101,14 @@ class ui:
         msg = msg.split('\n')
 
         # Define schedule.
-        
-        schedule = self.gen_schedule(msg)
+        while True:
+            schedule = self.gen_schedule(msg)
+            if schedule != False:
+                break;
+            else:
+                self.sms.send(num.number, f"You have entered invalid teacher names. Please correct this and try again")
+                msg = self.sms.await_response(num.number).content
+                msg = msg.split('\n') 
 
         # Define student object.
 
