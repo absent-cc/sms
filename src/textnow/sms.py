@@ -1,14 +1,4 @@
-i        teachers = []
-        for teacher in msg:
-            if teacher == 'None':
-                teacher = None
-                teachers.append(teacher)
-                continue
-            teacher = teacher.split(' ')
-            teacher = Teacher(teacher[0],teacher[1])
-            teachers.append(teacher)
-        
-        schedule=Schedule(teachers[0],teachers[1],teachers[2],teachers[3],teachers[4],teachers[5],teachers[6])mport pytextnow
+import pytextnow
 import time
 from dataStructs import *
 from database.dataBaseHandler import DatabaseHandler
@@ -53,11 +43,14 @@ class ui:
     def main(self, msg):
         if msg.number in self.db.directory.directory:
             if msg.content.lower() == "c":
+                self.db.removeStudent(self.db.directory.directory[msg.number])
                 self.sms.send(msg.number.number, "Service cancelled. Sorry to see you go!")
             elif msg.content.lower() == "e":
                 self.edit(msg)
+            else:
+                self.sms.send(msg.number.number, "You are already subscribed. Text 'c' to cancel or 'e' to edit.")
         
-        if msg.content.lower() == "subscribe":
+        elif msg.content.lower() == "subscribe":
             self.welcome(msg)
             pass
     
@@ -73,20 +66,30 @@ class ui:
             teacher = Teacher(teacher[0],teacher[1])
             teachers.append(teacher)
         
+        for teacher in teachers:
+            if teacher not in self.db.classes.classes:
+                self.db.addTeacher(teacher)
+
         schedule=Schedule(teachers[0],teachers[1],teachers[2],teachers[3],teachers[4],teachers[5],teachers[6])
         return schedule
 
     def welcome(self, msg):
         
-        # Get first and last name, as well as number.
-
         num = msg.number
-
         self.sms.send(num.number, "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists. Please text your first and last name, seperated by spaces.")
-        msg = str(self.sms.await_response(msg.number).content)
-        msg = msg.split(' ')
-        first = msg[0]
-        last = msg[1]
+
+        while True:
+            # Get first and last name, as well as number.
+
+            msg = str(self.sms.await_response(msg.number).content)
+            msg = msg.split(' ')
+            try:
+                first = msg[0]
+                last = msg[1]
+                break;
+            except IndexError:
+                self.sms.send(num.number, "That's not a valid name. Enter your first and last name seperated by spaces.")
+                continue
         
         # Get schedule
 
@@ -102,9 +105,13 @@ class ui:
 
         student = Student(first,last,num,schedule)
         
-        print(student)
+        # Add student.
+        self.db.addStudent(student)
+        
+        # Confirmation.
+        self.sms.send(num.number, f"Subscription complete. Welcome to abSENT!")
+        self.sms.send(num.number, f"Here is your information. If anything is incorrect or if your schedule changes in the future, edit it by texting 'e'. {student.first} {student.last} @ {student.number}")
+        self.sms.send(num.number, f"{student.schedule}")
 
-        pass
-    
     def edit(self, msg):
         pass
