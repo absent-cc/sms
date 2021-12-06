@@ -18,7 +18,7 @@ csrf = cfg['textnow']['csrf']
 username = cfg['textnow']['username']
 
 sms = sms(sid,csrf,username)
-ui = ui()
+ui = ui(sms)
 db = DatabaseHandler()
 
 #date = datetime.now() - timedelta(hours=48)
@@ -39,7 +39,7 @@ db = DatabaseHandler()
 #db.addStudentToDirectory(test_student1)
 while True:
     for msg in sms.receive():
-        sms.send(str(msg.number),ui.gen_response(msg))
+        ui.main(msg)
     time.sleep(0.2)
 #for i in sms.receive():
 #    print(ui.gen_response(i))
