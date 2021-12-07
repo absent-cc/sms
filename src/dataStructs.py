@@ -11,6 +11,7 @@ class Teacher:
     
     def __repr__(self) -> str:
         return f"Teacher: {self.first} {self.last}"
+
     def __str__(self):
         return f"{self.first} {self.last}"
 

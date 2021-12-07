@@ -167,3 +167,9 @@ class DatabaseHandler:
         # If student not removed from old teacher's class,
         # return false and empty trace
         return (False, "")
+    
+    # Grab student info from directory
+    def getStudent(self, number: int) -> Student:
+        # Check if student is in directory
+        if number in self.directory:
+            return self.directory[number]
