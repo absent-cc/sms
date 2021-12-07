@@ -32,14 +32,15 @@ date = datetime.now() - timedelta(hours=5)
 #sms.send('6175059626',"Text")
 
 #test_num = Number("6175525098")
-#test_teacher = Teacher("Kevin", "Yang")
+#test_teacher = Teacher("Brian", "Reardon")
+#db.removeTeacher(test_teacher)
 #test_schedule = Schedule(test_teacher, test_teacher, test_teacher, test_teacher, test_teacher, test_teacher, None)
 
 #test_student1 = Student("Roshan", "Karim", test_num, test_schedule)
 #db.addStudentToDirectory(test_student1)
 
 print(db.classes.classes)
-print(db.directory.directory[Number('+16175059626')])
+#print(db.directory.directory[Number('+16175059626')])
 while True:
     for msg in sms.receive():
         ui.main(msg)

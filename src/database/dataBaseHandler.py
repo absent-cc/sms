@@ -1,7 +1,6 @@
 from dataStructs import *
 import pickle
-
-import os # To edit PYTHONHASHSEED environment variable
+import os
 
 class DatabaseHandler:
     # abSENT's database consists of two structures:
@@ -11,14 +10,13 @@ class DatabaseHandler:
     # Classes is used to notify each student when a teacher is absent
     # Directory is meant to keep track of who is part of the abSENT system (think of user directory)
 
-    # Type defintions:
+    # Type definitions:
     classes: Classes
     directory: Directory
 
     # Note: For classes, teacher maps to a set of students in order to ensure uniquness and no repeats, rather than a non-unique list.
 
     def __init__(self, directory_path: str ='data/directory.pkl', classes_path: str ='data/classes.pkl'):
-        os.environ['PYTHONHASHSEED'] = '1' # Set hash seed to 0 to ensure reproducibility between sessions for dictionary keys
         self.directory_path = directory_path
         self.directory = self.readDirectory(directory_path)
         self.classes = self.readClasses(classes_path)
