@@ -77,8 +77,11 @@ class ui:
             except IndexError:
                 return False
             teachers.append(teacher)
+        
+        if len(teachers) != 7:
+            return False
 
-        schedule=Schedule(teacher for teacher in teachers)
+        schedule=Schedule(teachers[0], teachers[1], teachers[2], teachers[3], teachers[4], teachers[5], teachers[6])
         return schedule
 
     # Welcome function for new users. Is called upon receipt of 'subscribe'.
