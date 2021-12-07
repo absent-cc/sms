@@ -72,7 +72,7 @@ class absence:
         if raw is None:
             return None
         else:
-            raw = raw.split("\r\n")
+            raw = raw.split("\n")
             for i in range(int(len(raw)/7)): 
                 if raw[i*7+4] == '':
                     note = None
