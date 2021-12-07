@@ -169,7 +169,7 @@ class DatabaseHandler:
         return (False, "")
     
     # Grab student info from directory
-    def getStudent(self, number: int) -> Student:
+    def getStudent(self, number: Number) -> Student:
         # Check if student is in directory
         if number in self.directory:
             return self.directory[number]
