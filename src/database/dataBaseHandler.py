@@ -147,7 +147,13 @@ class DatabaseHandler:
             return (True, trace)
         return False, "Student does not exist"
 
-    def changeClass(self, student: Student, old_teacher: Teacher, new_teacher: Teacher) -> tuple[bool, str]:
+    def changeClass(self, student: Student, block: str, new_teacher: Teacher) -> tuple[bool, str]:
+        # Check if block is valid
+        if block in student.schedule.mapper:
+            # Grab old_teacher name through mapper dictionary | Block -> Teacher
+            old_teacher = student.schedule.mapper[block]
+        else:
+            return False, "Block does not exist"
         # Remove student from old teacher's class
         res_remove = self.removeStudentFromClass(student, old_teacher)
         # If student sucessfully removed from old teacher's class,
@@ -166,10 +172,16 @@ class DatabaseHandler:
                 return (True, "")
         # If student not removed from old teacher's class,
         # return false and empty trace
-        return (False, "")
+        return (False, "Teacher not in classes")
     
     # Grab student info from directory
     def getStudent(self, number: Number) -> Student:
         # Check if student is in directory
         if number in self.directory:
             return self.directory[number]
+    
+    def reset(self):
+        self.directory = Directory()
+        self.classes = Classes()
+        self.saveDirectory(self.directory)
+        self.saveClasses(self.classes)

@@ -23,12 +23,14 @@ Roshan_Num = Number("6175525098")
 Roshan = Student("Roshan", "Karim", Roshan_Num, Roshan_schedule)
 
 db = DatabaseHandler()
+db.reset()
+# db.addStudent(Kevin)
 db.addStudent(Kevin)
-db.addStudent(Roshan)
-print(db.removeStudent(Kevin))
-print(db.classes)
+# print(db.removeStudent(Kevin))
+# print(db.classes)
 
-db.changeClass(Roshan, JOE, NORM)
+print(Roshan.schedule.mapper['B'])
+print(db.changeClass(Roshan, "B", JOHN))
 print(db.classes)
 
 # db.addStudentToDirectory(Kevin)

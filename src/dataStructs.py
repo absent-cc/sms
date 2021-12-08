@@ -45,6 +45,19 @@ class Schedule:
             yield self.F
             yield self.G
 
+    # Creates a mapper dictionary that maps blocks to teachers
+    @property
+    def mapper(self):
+        return {
+            "A": self.A,
+            "B": self.B,
+            "C": self.C,
+            "D": self.D,
+            "E": self.E,
+            "F": self.F,
+            "G": self.G
+        }
+
 @dataclass
 class Number:
     number: str
