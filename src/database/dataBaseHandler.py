@@ -149,9 +149,10 @@ class DatabaseHandler:
 
     def changeClass(self, student: Student, block: str, new_teacher: Teacher) -> tuple[bool, str]:
         # Check if block is valid
-        if block in student.schedule.mapper:
+        print(student.schedule.keys())
+        if block in student.schedule.keys():
             # Grab old_teacher name through mapper dictionary | Block -> Teacher
-            old_teacher = student.schedule.mapper[block]
+            old_teacher = student.schedule[block]
         else:
             return False, "Block does not exist"
         # Remove student from old teacher's class
@@ -160,6 +161,7 @@ class DatabaseHandler:
         # add student to new teacher's class
         if res_remove == True:
             res_add = self.addStudentToClass(student, new_teacher)
+            student.schedule[block] = new_teacher
             # If student sucessfully added to new teacher's class,
             # return true and empty trace
             if res_add == True:

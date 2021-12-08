@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import pretty_errors
 
 @dataclass
 class Teacher:
@@ -23,41 +24,63 @@ class Teacher:
             return False
         return self.first == other.first and self.last == other.last
 
-@dataclass
-class Schedule:
-    A: Teacher
-    B: Teacher
-    C: Teacher
-    D: Teacher
-    E: Teacher
-    F: Teacher
-    G: Teacher
+# @dataclass
+# class Schedule:
+#     A: Teacher
+#     B: Teacher
+#     C: Teacher
+#     D: Teacher
+#     E: Teacher
+#     F: Teacher
+#     G: Teacher
 
+#     def __str__(self):
+#         return f"A: {self.A}, B: {self.B}, C: {self.C}, D: {self.D}, E: {self.E}, F: {self.F}, G: {self.G}"
+    
+#     def __iter__(self):
+#             yield self.A
+#             yield self.B
+#             yield self.C
+#             yield self.D
+#             yield self.E
+#             yield self.F
+#             yield self.G
+
+@dataclass
+class Schedule(dict):
+    # schedule: dict[str, Teacher]
+    # kevin: str
+
+    def __init__(self, A=None, B=None, C=None, D=None, E=None, F=None, G=None):
+        self.schedule = {
+            'A': A,
+            'B': B,
+            'C': C,
+            'D': D,
+            'E': E,
+            'F': F,
+            'G': G
+        }
+    
     def __str__(self):
-        return f"A: {self.A}, B: {self.B}, C: {self.C}, D: {self.D}, E: {self.E}, F: {self.F}, G: {self.G}"
+        return f"A: {self.schedule['A']}, B: {self.schedule['B']}, C: {self.schedule['C']}, D: {self.schedule['D']}, E: {self.schedule['E']}, F: {self.schedule['F']}, G: {self.schedule['G']}"
     
     def __iter__(self):
-            yield self.A
-            yield self.B
-            yield self.C
-            yield self.D
-            yield self.E
-            yield self.F
-            yield self.G
+        yield from self.schedule.values()
 
-    # Creates a mapper dictionary that maps blocks to teachers
-    @property
-    def mapper(self):
-        return {
-            "A": self.A,
-            "B": self.B,
-            "C": self.C,
-            "D": self.D,
-            "E": self.E,
-            "F": self.F,
-            "G": self.G
-        }
+    def __getitem__(self, key):
+        return self.schedule[key]
+    
+    def __setitem__(self, key, value):
+        self.schedule[key] = value
 
+    def __delitem__(self, key):
+        del self.schedule[key]
+    
+    def keys(self):
+        return self.__dict__.keys()
+
+    # Remove self.schedule, make it self and see if that works
 @dataclass
 class Number:
     number: str
@@ -114,11 +137,10 @@ class Message:
         return f"{self.number} {self.content}"
 
 @dataclass
-class Classes:
-    classes: dict[Teacher: set()]
+class Classes(dict):
 
     def __init__(self, classes = {}):
-        self.classes = classes
+        self.classes: dict[Teacher: set()] = classes
     
     def __str__(self):
         string = ""
@@ -142,10 +164,8 @@ class Classes:
     
 @dataclass
 class Directory:
-    directory: dict[Number: Student]
-
     def __init__(self, directory = {}):
-        self.directory = directory
+        self.directory: dict[Number: Student] = directory
 
     def __str__(self):
         string = ""
