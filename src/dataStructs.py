@@ -197,15 +197,14 @@ class Directory:
     
     def __delitem__(self, key):
         del self.directory[key]
-<<<<<<< HEAD
 
+    def __contains__(self, item):
+        return item in self.directory.keys()
+    
 @dataclass
 class TextNowCreds:
     username: str
     sid: str
     csrf: str
-=======
-    
-    def __contains__(self, item):
-        return item in self.directory.keys()
->>>>>>> main
+
+
