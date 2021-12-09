@@ -59,10 +59,23 @@ def sc_listener():
 
 # Configure and start threads.
 
-threads = {
-        'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
-        'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
-}
+#threads = {
+#        'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
+#        'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
+#}
 
-threads['sms'].start()
-threads['sc'].start()
+rknum = Number('+16175059626')
+
+txt = sms(sid, csrf, username)
+th = ui(txt, rknum)
+
+th.start()
+
+for i in range(50000):
+    print('please make the pain stop')
+    time.sleep(1)
+
+th.join()
+
+#threads['sms'].start()
+#threads['sc'].start()

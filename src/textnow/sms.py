@@ -1,5 +1,7 @@
 import pytextnow
 import time
+import threading
+from threading import Thread
 from dataStructs import *
 from database.dataBaseHandler import DatabaseHandler
 
@@ -19,29 +21,29 @@ class sms:
             unreads.append(entry)
         return unreads
 
-    def await_response(self, num):
-        while True:
+    def message_from_number(self, num):
+        unreads = []
 
-            unreads = []
+        for msg in self.receive():
+            if str(msg.number) in str(num):
+                unreads.append(msg)
+            
+        return unreads
 
-            for msg in self.receive():
-                if str(msg.number) in str(num):
-                    unreads.append(msg)
+class ui(Thread):
 
-            if len(unreads) == 0:
-                time.sleep(0.2)
-                continue
-            return unreads[0]
-
-class ui:
-
-    def __init__(self, sms):
+    def __init__(self, sms, num):
+        Thread.__init__(self)
         self.db = DatabaseHandler() 
         self.sms = sms
-    
+        self.num = num
+
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
 
-    def main(self, msg):
+    def run(self):
+        msg = []
+        while msg == []:
+            msg = self.sms.message_from_number(self.num)
 
         # Check if they are already subscribed.
         if msg.number in self.db.directory.directory:
@@ -130,7 +132,9 @@ class ui:
         self.sms.send(num.number, f"{student.schedule}")
 
     # Edit function for users who mispelled teacher names or wish to update their schedule term by term.
-    
+
+"""
+
     def edit(self, msg):
 
         # Preliminary.
@@ -167,3 +171,6 @@ class ui:
         self.db.changeClass(student, oldTeacher, newTeacher)
         self.sms.send(num.number, "Confirmed! Your new schedule is as follows:")
         self.sms.send(num.number, f"{student.schedule}")
+
+
+"""
