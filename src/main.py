@@ -65,10 +65,11 @@ def sc_listener():
 #}
 
 rknum = Number('+16175059626')
+creds = TextNowCreds(username, sid, csrf)
 
-txt = sms(sid, csrf, username)
-th = ui(txt, rknum)
+msg = Message("+16175059626",'Subscribe')
 
+th = ui(rknum, creds, msg)
 th.start()
 
 for i in range(50000):

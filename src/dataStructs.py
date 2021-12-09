@@ -164,3 +164,9 @@ class Directory:
     
     def __delitem__(self, key):
         del self.directory[key]
+
+@dataclass
+class TextNowCreds:
+    username: str
+    sid: str
+    csrf: str
