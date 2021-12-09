@@ -2,6 +2,8 @@ from dataStructs import *
 import pickle
 import os
 
+from typing import Tuple
+
 class DatabaseHandler:
     # abSENT's database consists of two structures:
     # 1. Classes: a dictionary that maps a teacher to a set of students
@@ -104,23 +106,23 @@ class DatabaseHandler:
     # Remove student from its respective teachers' classes
     def removeStudentFromClass(self, student: Student, teacher: Teacher) -> bool:
         if teacher in self.classes:
-            # Remove student from teacher's class
             self.classes[teacher].remove(student)
             self.saveClasses(self.classes)
             # If a teacher's class becomes empty, delete the teacher
-            if self.classes[teacher] == set():
+            if len(self.classes[teacher]) == 0:
                 self.removeTeacher(teacher)
             return True # Student sucessfully removed from class
         return False # Teacher not in classes, cannot remove student
 
-    def addStudent(self, student: Student) -> tuple[bool, str]:
+    def addStudent(self, student: Student) -> Tuple[bool,str]:
         # Add student to directory
         res = self.addStudentToDirectory(student)
         # If student sucessfully added to directory,
         # add student to all of its classes
         if res == True:
             trace = ""
-            for teacher in student.schedule:
+            for block in student.schedule:
+                teacher = student.schedule[block]
                 # Add student to teacher's class
                 res = self.addStudentToClass(student, teacher)
                 # If false, add teacher into classes
@@ -131,7 +133,7 @@ class DatabaseHandler:
             return (True, trace)
         return False, "Student already exists"
     
-    def removeStudent(self, student: Student) -> tuple[bool, str]:
+    def removeStudent(self, student: Student) -> Tuple[bool,str]:
         # Remove student from directory
         res = self.removeStudentFromDirectory(student)
         # If student sucessfully removed from directory,
@@ -147,11 +149,11 @@ class DatabaseHandler:
             return (True, trace)
         return False, "Student does not exist"
 
-    def changeClass(self, student: Student, block: str, new_teacher: Teacher) -> tuple[bool, str]:
+    def changeClass(self, student: Student, block: str, new_teacher: Teacher) -> Tuple[bool,str]:
         # Check if block is valid
-        if block in student.schedule.mapper:
+        if block in student.schedule:
             # Grab old_teacher name through mapper dictionary | Block -> Teacher
-            old_teacher = student.schedule.mapper[block]
+            old_teacher = student.schedule[block]
         else:
             return False, "Block does not exist"
         # Remove student from old teacher's class
@@ -160,6 +162,7 @@ class DatabaseHandler:
         # add student to new teacher's class
         if res_remove == True:
             res_add = self.addStudentToClass(student, new_teacher)
+            student.schedule[block] = new_teacher
             # If student sucessfully added to new teacher's class,
             # return true and empty trace
             if res_add == True:
@@ -175,7 +178,7 @@ class DatabaseHandler:
         return (False, "Teacher not in classes")
     
     # Grab student info from directory
-    def getStudent(self, number: int) -> Student:
+    def getStudent(self, number: Number) -> Student:
         # Check if student is in directory
         if number in self.directory:
             return self.directory[number]
