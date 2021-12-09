@@ -10,3 +10,11 @@ That said and done, a call to the last DB with the teacher Ids will return a lis
 
 ### Why?
 Why not?
+
+### Contributors
+[Roshan Karim](https://github.com/karimroshan) - (primarily) SMS code and threading.
+
+[Kevin Yang](https://github.com/bykevinyang) - (primarily) DB management.
+
+### Disclaimer:
+abSENT as a project is not affiliated with any of the entities who's students it serves. We are students and have written this project just for fun, as a minor QOL improvement in the morning.
