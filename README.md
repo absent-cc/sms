@@ -9,7 +9,7 @@ Students sign up by texting our phone number, and input their full schedule. Thi
 That said and done, a call to the last DB with the teacher Ids will return a list of classes that that teacher teaches, and now it is simply a matter of recursing through the fourth DB and sending messages to each student within all class-ids of the absent teacher.
 
 ### Why?
-Why not?
+Becuase why not?
 
 ### Contributors
 [Roshan Karim](https://github.com/karimroshan) - (primarily) SMS code and threading.
