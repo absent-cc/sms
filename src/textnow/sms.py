@@ -1,5 +1,7 @@
 import pytextnow
 import time
+import threading
+from threading import Thread
 from dataStructs import *
 from database.dataBaseHandler import DatabaseHandler
 
@@ -19,6 +21,17 @@ class sms:
             unreads.append(entry)
         return unreads
 
+    def listen(self):
+        messages = []
+        for msg in self.client.get_unread_messages():
+            entry = msg
+            messages.append(entry)
+        return messages
+    
+    def mark_as_read(self, msg):
+        msg.mark_as_read()
+        return True
+
     def await_response(self, num):
         while True:
 
@@ -33,32 +46,34 @@ class sms:
                 continue
             return unreads[0]
 
-class ui:
+class ui(Thread):
 
-    def __init__(self, sms):
+    def __init__(self, num: Number, creds: TextNowCreds, msg: Message):
+        Thread.__init__(self)
         self.db = DatabaseHandler() 
-        self.sms = sms
-    
+        self.sms = sms(creds.sid, creds.csrf, creds.username)
+        self.msg = msg
+        self.num = num
+
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
 
-    def main(self, msg):
-
+    def run(self):
         # Check if they are already subscribed.
-        if msg.number in self.db.directory.directory:
+        if self.msg.number in self.db.directory:
             # Cancellation
-            if msg.content.lower() == "c":
-                self.db.removeStudent(self.db.directory.directory[msg.number])
-                self.sms.send(msg.number.number, "Service cancelled. Sorry to see you go!")
+            if self.msg.content.lower() == "c":
+                self.db.removeStudent(self.db.directory.directory[self.msg.number])
+                self.sms.send(self.msg.number.number, "Service cancelled. Sorry to see you go!")
             # Editing
-            elif msg.content.lower() == "e":
-                self.edit(msg)
+            elif self.msg.content.lower() == "e":
+                self.edit(self.msg)
             # Neither
             else:
-                self.sms.send(msg.number.number, "You are already subscribed. Text 'c' to cancel or 'e' to edit.")
+                self.sms.send(self.msg.number.number, "You are already subscribed. Text 'c' to cancel or 'e' to edit.")
         
         # If they aren't subscribed and would like to be, run the welcome function.
-        elif msg.content.lower() == "subscribe":
-            self.welcome(msg)
+        elif self.msg.content.lower() == "subscribe":
+            self.welcome(self.msg)
             pass
     
     # Takes a list of teacher names (both first and last within a string) ordered from A to G block, returns a Schedule object comprised of Teacher objects.
@@ -88,7 +103,7 @@ class ui:
 
     def welcome(self, msg):
         
-        num = msg.number
+        num = msg
         self.sms.send(num.number, "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists. Please text your first and last name, seperated by spaces.")
 
         # Get first and last name, as well as number.
@@ -119,7 +134,7 @@ class ui:
                 msg = msg.split('\n') 
 
         # Define student object.
-        student = Student(first,last,num,schedule)
+        student = Student(first,last,num.number,schedule)
         
         # Add student.
         self.db.addStudent(student)
@@ -130,7 +145,9 @@ class ui:
         self.sms.send(num.number, f"{student.schedule}")
 
     # Edit function for users who mispelled teacher names or wish to update their schedule term by term.
-    
+
+"""
+
     def edit(self, msg):
 
         # Preliminary.
@@ -167,3 +184,6 @@ class ui:
         self.db.changeClass(student, oldTeacher, newTeacher)
         self.sms.send(num.number, "Confirmed! Your new schedule is as follows:")
         self.sms.send(num.number, f"{student.schedule}")
+
+
+"""
