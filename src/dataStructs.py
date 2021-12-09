@@ -66,7 +66,7 @@ class Schedule(dict):
         return f"A: {self.schedule['A']}, B: {self.schedule['B']}, C: {self.schedule['C']}, D: {self.schedule['D']}, E: {self.schedule['E']}, F: {self.schedule['F']}, G: {self.schedule['G']}"
     
     def __iter__(self):
-        yield from self.schedule.values()
+        yield from self.schedule.keys()
 
     def __getitem__(self, key):
         return self.schedule[key]
@@ -78,7 +78,13 @@ class Schedule(dict):
         del self.schedule[key]
     
     def keys(self):
-        return self.__dict__.keys()
+        return self.schedule.keys()
+    
+    def values(self):
+        return self.schedule.values()
+    
+    def __contains__(self, item):
+        return item in self.schedule.keys()
 
     # Remove self.schedule, make it self and see if that works
 @dataclass
@@ -104,7 +110,7 @@ class Student:
     schedule: Schedule
 
     def __str__(self):
-        return f"{self.first} {self.last}: {self.number} {self.schedule}"
+        return f"{self.first} {self.last}: {self.number}"
     
     def __repr__(self):
         return f"{self.first} {self.last}"
@@ -116,6 +122,8 @@ class Student:
     
     def __hash__(self):
         return hash(str(self))
+    
+    
     
 @dataclass
 class AbsentTeacher:
@@ -140,7 +148,7 @@ class Message:
 class Classes(dict):
 
     def __init__(self, classes = {}):
-        self.classes: dict[Teacher: set()] = classes
+        self.classes: dict[Teacher: set(Student)] = classes
     
     def __str__(self):
         string = ""
@@ -154,13 +162,18 @@ class Classes(dict):
         yield from self.classes.keys()
 
     def __getitem__(self, key):
-        return self.classes[key]
+        if key in self.classes:
+            return self.classes[key]
+        raise KeyError(f"{key} not in classes")
     
     def __setitem__(self, key, value):
         self.classes[key] = value
     
     def __delitem__(self, key):
         del self.classes[key]
+    
+    def __contains__(self, item):
+        return item in self.classes.keys()
     
 @dataclass
 class Directory:
@@ -184,3 +197,6 @@ class Directory:
     
     def __delitem__(self, key):
         del self.directory[key]
+    
+    def __contains__(self, item):
+        return item in self.directory.keys()
