@@ -40,6 +40,11 @@ class absence:
                     current_table = update
                 elif str(date.strftime('%b. %-d')) in text[0]:
                     current_table = update
+                elif str(date.strftime('%B %-d')) in text[0]:
+                    current_table = update
+                # This is what I'd like to refer to as the Susan Spiritizo clause.
+                elif str(date.strftime('%m/%-d/%Y')) in text[0]:
+                    current_table= update
         return current_table
 
     # Takes the raw North attendance table from the prior function and parses it, using the AbsentTeacher dataclass. Returns an array of entries utilizing this class. 
@@ -51,9 +56,13 @@ class absence:
         if raw is None:
             return None
         else:
+            # Scans for position, this signifies start of table.
             raw = raw.split("\n")
-            for i in range(12):
+            while raw[0] != "Position":
                 raw.pop(0)
+            for i in range(8):
+                raw.pop(0)
+
             for i in range(int(len(raw)/8)):
                 if raw[i*8+3] == '':
                     note = None

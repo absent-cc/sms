@@ -18,8 +18,8 @@ username = cfg['textnow']['username']
 sckeys = [cfg['north']['key'], cfg['south']['key']]
 scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
 
-date = datetime.now() - timedelta(hours=5)
 creds = TextNowCreds(username, sid, csrf)
+
 # Functions for threads.
 
 def threadwrapper(func):
@@ -33,9 +33,11 @@ def threadwrapper(func):
                 print('abSENT - Exited normally, bad thread, restarting')
     return wrapper
 
+# Listen for SMS and call threadclass upon new initial contact.
+
 def sms_listener():
     
-    txt = sms(sid, csrf, username) 
+    txt = sms(creds) 
     activethreads = {
     }
     
@@ -49,6 +51,8 @@ def sms_listener():
                 activethreads[Number(msg.number)].start()
                 print(activethreads[Number(msg.number)], "started")
 
+        # Thread cleaner.
+
         dead = []
 
         for number in activethreads:
@@ -61,13 +65,14 @@ def sms_listener():
 
         time.sleep(0.2)
 
+# Listen for Schoology updates.
+
 def sc_listener():
     
     absent = absence(sckeys, scsecrets)
 
     while True:
         date = datetime.now() - timedelta(hours=5)
-
         print(absent.filter_absences_north(date))
         print("\n\n")
         print(absent.filter_absences_south(date))
@@ -82,5 +87,6 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
+
 threads['sms'].start()
-#threads['sc'].start()
+threads['sc'].start()
