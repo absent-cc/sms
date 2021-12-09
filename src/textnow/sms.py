@@ -21,14 +21,16 @@ class sms:
             unreads.append(entry)
         return unreads
 
-    def message_from_number(self, num):
-        unreads = []
-
-        for msg in self.receive():
-            if str(msg.number) in str(num):
-                unreads.append(msg)
-            
-        return unreads
+    def listen(self):
+        messages = []
+        for msg in self.client.get_unread_messages():
+            entry = msg
+            messages.append(entry)
+        return messages
+    
+    def mark_as_read(self, msg):
+        msg.mark_as_read()
+        return True
 
     def await_response(self, num):
         while True:
@@ -56,9 +58,8 @@ class ui(Thread):
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
 
     def run(self):
-        print(self.db.directory)
         # Check if they are already subscribed.
-        if self.msg.number in self.db.directory.directory:
+        if self.msg.number in self.db.directory:
             # Cancellation
             if self.msg.content.lower() == "c":
                 self.db.removeStudent(self.db.directory.directory[self.msg.number])

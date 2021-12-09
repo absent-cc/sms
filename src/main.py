@@ -1,5 +1,6 @@
 import threading, time, yaml
-from textnow.sms import *
+from textnow.sms import sms
+from textnow.ui import ui
 from schoology.absence import *
 from datetime import datetime, timedelta
 
@@ -18,7 +19,7 @@ sckeys = [cfg['north']['key'], cfg['south']['key']]
 scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
 
 date = datetime.now() - timedelta(hours=5)
-
+creds = TextNowCreds(username, sid, csrf)
 # Functions for threads.
 
 def threadwrapper(func):
@@ -34,14 +35,31 @@ def threadwrapper(func):
 
 def sms_listener():
     
-    txt = sms(sid, csrf, username)
-    txtui = ui(txt) 
-
+    txt = sms(sid, csrf, username) 
+    activethreads = {
+    }
+    
     while True:
-        for msg in txt.receive():
+
+        for msg in txt.listen():
             print(msg)
-            txtui.main(msg)
-            time.sleep(0.2)
+            if Number(msg.number) not in activethreads:
+                txt.mark_as_read(msg)
+                activethreads.update({Number(msg.number): ui(creds, msg)})
+                activethreads[Number(msg.number)].start()
+                print(activethreads[Number(msg.number)], "started")
+
+        dead = []
+
+        for number in activethreads:
+            if not activethreads[number].is_alive():
+                dead.append(number)
+
+        for number in dead:
+            print(activethreads[number], "killed")
+            activethreads.pop(number)
+
+        time.sleep(0.2)
 
 def sc_listener():
     
@@ -59,24 +77,10 @@ def sc_listener():
 
 # Configure and start threads.
 
-#threads = {
-#        'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
-#        'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
-#}
+threads = {
+        'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
+        'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
+}
 
-rknum = Number('+16175059626')
-creds = TextNowCreds(username, sid, csrf)
-
-msg = Message("+16175059626",'Subscribe')
-
-th = ui(rknum, creds, msg)
-th.start()
-
-for i in range(50000):
-    print('please make the pain stop')
-    time.sleep(1)
-
-th.join()
-
-#threads['sms'].start()
+threads['sms'].start()
 #threads['sc'].start()
