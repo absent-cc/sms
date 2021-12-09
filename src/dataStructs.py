@@ -24,28 +24,6 @@ class Teacher:
             return False
         return self.first == other.first and self.last == other.last
 
-# @dataclass
-# class Schedule:
-#     A: Teacher
-#     B: Teacher
-#     C: Teacher
-#     D: Teacher
-#     E: Teacher
-#     F: Teacher
-#     G: Teacher
-
-#     def __str__(self):
-#         return f"A: {self.A}, B: {self.B}, C: {self.C}, D: {self.D}, E: {self.E}, F: {self.F}, G: {self.G}"
-    
-#     def __iter__(self):
-#             yield self.A
-#             yield self.B
-#             yield self.C
-#             yield self.D
-#             yield self.E
-#             yield self.F
-#             yield self.G
-
 @dataclass
 class Schedule(dict):
     # schedule: dict[str, Teacher]
@@ -86,7 +64,6 @@ class Schedule(dict):
     def __contains__(self, item):
         return item in self.schedule.keys()
 
-    # Remove self.schedule, make it self and see if that works
 @dataclass
 class Number:
     number: str
@@ -121,9 +98,7 @@ class Student:
         return self.number == other.number
     
     def __hash__(self):
-        return hash(str(self))
-    
-    
+        return hash(str(self)) 
     
 @dataclass
 class AbsentTeacher:
@@ -206,5 +181,3 @@ class TextNowCreds:
     username: str
     sid: str
     csrf: str
-
-
