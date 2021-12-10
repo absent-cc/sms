@@ -46,7 +46,7 @@ def sms_listener():
         for msg in txt.listen():
             print(msg)
             if Number(msg.number) not in activethreads:
-                txt.mark_as_read(msg)
+                txt.markAsRead(msg)
                 activethreads.update({Number(msg.number): ui(creds, msg)})
                 activethreads[Number(msg.number)].start()
                 print(activethreads[Number(msg.number)], "started")
@@ -73,9 +73,9 @@ def sc_listener():
 
     while True:
         date = datetime.now() - timedelta(hours=5)
-        print(absent.filter_absences_north(date))
+        print(absent.filterAbsencesNorth(date))
         print("\n\n")
-        print(absent.filter_absences_south(date))
+        print(absent.filterAbsencesSouth(date))
         print("\n\n\n\n")
         
         time.sleep(10)
