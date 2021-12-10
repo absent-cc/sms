@@ -67,18 +67,40 @@ class DatabaseHandler():
 
     def getTeacher(self, teacher: Teacher):
         if teacher.id == None:
-            query = f"SELECT * FROM student_directory WHERE number = {teacher.number} LIMIT 1"
+            query = f"SELECT * FROM teacher_directory WHERE first_name = '{teacher.first}' AND 'last_name = '{teacher.last}' LIMIT 1"
         else:
-            query = f"SELECT * FROM student_directory WHERE student_id = {teacher.id} LIMIT 1"
+            query = f"SELECT * FROM teacher_directory WHERE teacher_id = '{teacher.id}' LIMIT 1"
         return self.cursor.execute(query).fetchone()
     
     def getStudent(self, student: Student):
         if student.id == None:
-            query = f"SELECT * FROM student_directory WHERE number = {student.number} LIMIT 1"
+            query = f"SELECT * FROM student_directory WHERE number = '{student.number}' LIMIT 1"
         else:
-            query = f"SELECT * FROM student_directory WHERE student_id = {student.id} LIMIT 1"
+            query = f"SELECT * FROM student_directory WHERE student_id = '{student.id}' LIMIT 1"
         return self.cursor.execute(query).fetchone()
     
+    def getTeacherID(self, teacher: Teacher):
+        if teacher.id == None:
+            query = f"SELECT teacher_id FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
+            res = self.cursor.execute(query).fetchone()
+            if res == (1,):
+                return res[0]
+            else:
+                return None
+        else:
+            return teacher.id
+    
+    def getStudentID(self, student: Student):
+        if student.id == None:
+            query = f"SELECT student_id FROM student_directory WHERE number = '{student.number}' LIMIT 1"
+            res = self.cursor.execute(query).fetchone()
+            if res == (1,):
+                return res[0]
+            else:
+                return None
+        else:
+            return student.id
+        
     def addStudentToUserDirectory(self, student: Student):
         new_id = self.newUserID()
         query = f"""
@@ -109,8 +131,20 @@ class DatabaseHandler():
         self.connection.commit()
         return new_id
     
-    def addClassToClasses(self, teacher_id: int, block: str, student_id: int):
-        pass
+    def addClassToClasses(self, teacher_id: int, block: SchoolBlock, student_id: int):
+        str_block = BlockMapper()[block] 
+        new_id = self.newClassID()
+        query = f"""
+        INSERT INTO classes VALUES (
+            '{new_id}',
+            '{teacher_id}',
+            '{str_block}',
+            '{student_id}'
+            )
+        """
+        self.cursor.execute(query)
+        self.connection.commit()
+        return new_id
     # def addStudent(self, student: Student, schedule: Schedule):
     #     res = self.checkIfInUserDirectory(student)
     #     if not res:
@@ -153,8 +187,10 @@ if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
     NORM = Teacher("RYAN", "NORMANDIN", SchoolName.NEWTON_SOUTH)
     BECKER = Teacher("RACHEAL", "BECKER", SchoolName.NEWTON_SOUTH)
-    schedule = Schedule()
+    schedule = Schedule(NORM)
+
     db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
     db.addStudentToUserDirectory(kevin)
     db.addTeacherToTeacherDirectory(NORM)
     db.addTeacherToTeacherDirectory(BECKER)
+    db.addClassToClasses(db.getTeacherID(NORM), SchoolBlock.A, db.getStudentID(kevin))

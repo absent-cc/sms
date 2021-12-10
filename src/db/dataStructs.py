@@ -55,6 +55,9 @@ class Teacher:
     school: SchoolName
     id: int = None
 
+    def __str__(self) -> str:
+        return f"{self.first} {self.last}"
+
 @dataclass
 class Schedule(dict):
     def __init__(self,  A: Teacher = None, 
@@ -65,23 +68,23 @@ class Schedule(dict):
                         F: Teacher = None, 
                         G: Teacher = None):
         self.schedule = {
-            'A': A,
-            'B': B,
-            'C': C,
-            'D': D,
-            'E': E,
-            'F': F,
-            'G': G
+            SchoolBlock.A: A,
+            SchoolBlock.B: B,
+            SchoolBlock.C: C,
+            SchoolBlock.D: D,
+            SchoolBlock.E: E,
+            SchoolBlock.F: F,
+            SchoolBlock.G: G,
         }
     
     def __str__(self):
-        return f""" A: {self.schedule['A']}, 
-                    B: {self.schedule['B']}, 
-                    C: {self.schedule['C']}, 
-                    D: {self.schedule['D']}, 
-                    E: {self.schedule['E']}, 
-                    F: {self.schedule['F']}, 
-                    G: {self.schedule['G']}"""
+        return f"""A: {self.schedule[SchoolBlock.A]},
+                    B: {self.schedule[SchoolBlock.B]},
+                    C: {self.schedule[SchoolBlock.C]},
+                    D: {self.schedule[SchoolBlock.D]},
+                    E: {self.schedule[SchoolBlock.E]},
+                    F: {self.schedule[SchoolBlock.F]},
+                    G: {self.schedule[SchoolBlock.G]}"""
     
     def __iter__(self):
         yield from self.schedule.keys()
