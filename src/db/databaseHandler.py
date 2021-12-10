@@ -109,6 +109,8 @@ class DatabaseHandler():
         self.connection.commit()
         return new_id
     
+    def addClassToClasses(self, teacher_id: int, block: str, student_id: int):
+        pass
     # def addStudent(self, student: Student, schedule: Schedule):
     #     res = self.checkIfInUserDirectory(student)
     #     if not res:

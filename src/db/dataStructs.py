@@ -13,6 +13,32 @@ class SchoolName(Enum):
         else:
             return "Unknown School"
 
+class BlockMapper(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update({
+            SchoolBlock.A: "A",
+            SchoolBlock.B: "B",
+            SchoolBlock.C: "C",
+            SchoolBlock.D: "D",
+            SchoolBlock.E: "E",
+            SchoolBlock.F: "F",
+            SchoolBlock.G: "G",
+        })
+
+class SchoolBlock(Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    E = "E"
+    F = "F"
+    G = "G"
+
+    def __str__(self) -> str:
+        mapper = BlockMapper()
+        return mapper[self]
+
 @dataclass
 class Student:
     number: str
