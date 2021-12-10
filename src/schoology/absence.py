@@ -7,7 +7,7 @@ class absence:
 
     # Sets up the two API objects as entries within a list 'api' . 
 
-    def __init__(self, keys, secrets):
+    def __init__(self, keys: list, secrets: list):
         self.keys = keys
         self.secrets = secrets
         self.api = ["",""]
@@ -18,7 +18,7 @@ class absence:
 
     # Gets the feed, accepting an argument 'school' which is either 0 or 1, 0 corresponding to North and 1 corresponding to South (this value being the same as the school's index within the API array). Grabs all updates posted by individuals of interest and saves them to an array 'feed', and returns that array.
 
-    def get_feed(self, school):
+    def getFeed(self, school: int):
         teachers=["Tracy Connolly","Casey Friend","Suzanne Spirito"]
         feed = []
         for update in self.api[school].get_feed():
@@ -29,8 +29,8 @@ class absence:
 
     # Gets the absence table for the date requested as defined by 'date'. Returns just this update for furthing processing. The date argument ultimately comes from the call of this function in main.py.
 
-    def get_absences_table(self, date, school):
-        feed = self.get_feed(school)
+    def getAbsenceTable(self, date, school: int):
+        feed = self.getFeed(school)
         current_table = None
         for update in feed:
             text = update.split("\n")
@@ -49,10 +49,10 @@ class absence:
 
     # Takes the raw North attendance table from the prior function and parses it, using the AbsentTeacher dataclass. Returns an array of entries utilizing this class. 
 
-    def filter_absences_north(self, date):       
+    def filterAbsencesNorth(self, date):       
         absences = []
 
-        raw = self.get_absences_table(date,0)
+        raw = self.getAbsenceTable(date,0)
         if raw is None:
             return None
         else:
@@ -74,10 +74,10 @@ class absence:
     
     # Same as the above, but the parsing is handled slightly differently due to the South absence table being differenct in formatting.
 
-    def filter_absences_south(self, date):
+    def filterAbsencesSouth(self, date):
         absences = []
              
-        raw = self.get_absences_table(date,1)
+        raw = self.getAbsenceTable(date,1)
         if raw is None:
             return None
         else:

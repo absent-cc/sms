@@ -140,7 +140,5 @@ cython_debug/
 # Our stuff
 abSENT
 secrets.yml
-secrets.yml.north
-secrets.yml.south
 config.yml
 

@@ -34,9 +34,9 @@ class ui(Thread):
         elif self.msg.content.lower() == "subscribe":
             self.welcome(self.msg)
     
-    # Creates schedule object
+    # Creates schedule object by converting teacher first and last into teacher objects and adding them to a schedule object.
 
-    def gen_schedule(self, raw: list):
+    def makeSchedule(self, raw: list):
 
         teachers = []
         for teacher in raw:
@@ -66,7 +66,7 @@ class ui(Thread):
 
         # Get first and last name, as well as number.
         while True:
-            msg = self.sms.await_response(str(number))
+            msg = self.sms.awaitResponse(str(number))
             if msg == False:
                 return False
             msg = str(msg.content).split(' ')
@@ -80,7 +80,7 @@ class ui(Thread):
 
         # Get schedule
         self.sms.send(str(number), f"Hello {first} {last}! Please enter your teachers below, in order from A-Block to G-Block. Place each teacher on a new line. Use 'None' to represent free blocks.")
-        msg = self.sms.await_response(str(number))
+        msg = self.sms.awaitResponse(str(number))
         if msg == False:
             return False
 
@@ -88,12 +88,12 @@ class ui(Thread):
                                                                                                                                                                                                                   
         # Define schedule.                                                                                                                                                                                        
         while True:
-                schedule = self.gen_schedule(msg)                                                                                                                                               
+                schedule = self.makeSchedule(msg)                                                                                                                                               
                 if schedule != False:                                                                                                                                                                   
                     break;                                                                                                                                                                                            
                 else:                                                                                                                                                                           
                     self.sms.send(str(number), "You have entered invalid teacher names. Please correct this and try again")                                                                         
-                    msg = self.sms.await_response(str(number))                      
+                    msg = self.sms.awaitResponse(str(number))                      
                     if msg == False:
                         return False
                     msg = msg.content.split('\n') 
@@ -117,7 +117,7 @@ class ui(Thread):
         number = msg.number
         student = self.db.directory[number]
         self.sms.send(str(number), "Thanks for using abSENT. I understand you'd like to edit your classes. Please respond with the block you'd like to change, any letter A to G.")
-        msg = self.sms.await_response(str(number))
+        msg = self.sms.awaitResponse(str(number))
 
         if msg == False:
             return False
@@ -133,7 +133,7 @@ class ui(Thread):
 
             except KeyError:
                 self.sms.send(str(number), "That isn't a valid block. Please enter a letter from A to G.")
-                msg = self.sms.await_response(str(number))
+                msg = self.sms.awaitResponse(str(number))
                 
                 if msg == False:
                     return False
@@ -142,7 +142,7 @@ class ui(Thread):
         
         # Acquire name of teacher to be added.
         self.sms.send(str(number), f"Got it! You are no longer in {oldTeacher}'s class. Please tell me the first and last name of the teacher you now have, seperated by spaces.")
-        msg = self.sms.await_response(str(number))
+        msg = self.sms.awaitResponse(str(number))
 
         if msg == False:
             return False
@@ -157,7 +157,7 @@ class ui(Thread):
                 break;
             except IndexError:
                 self.sms.send(str(number), "The teacher name you provided is invalid. Please send the first and last name of the teacher desired, seperated by spaces.")
-                msg = self.sms.await_response(str(number))
+                msg = self.sms.awaitResponse(str(number))
 
                 if msg == False:
                     return False
