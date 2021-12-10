@@ -5,9 +5,17 @@ class SchoolName(Enum):
     NEWTON_SOUTH = "NSHS"
     NEWTON_NORTH = "NNHS"
 
+    def __str__(self) -> str:
+        if self == SchoolName.NEWTON_SOUTH:
+            return "NSHS"
+        elif self == SchoolName.NEWTON_NORTH:
+            return "NNHS"
+        else:
+            return "Unknown School"
+
 @dataclass
 class Student:
-    number: int
+    number: str
     first: str
     last: str
     school: SchoolName
@@ -20,7 +28,7 @@ class Teacher:
     last: str
     school: SchoolName
     id: int = None
-    
+
 @dataclass
 class Schedule(dict):
     def __init__(self,  A: Teacher = None, 
@@ -41,7 +49,13 @@ class Schedule(dict):
         }
     
     def __str__(self):
-        return f"A: {self.schedule['A']}, B: {self.schedule['B']}, C: {self.schedule['C']}, D: {self.schedule['D']}, E: {self.schedule['E']}, F: {self.schedule['F']}, G: {self.schedule['G']}"
+        return f""" A: {self.schedule['A']}, 
+                    B: {self.schedule['B']}, 
+                    C: {self.schedule['C']}, 
+                    D: {self.schedule['D']}, 
+                    E: {self.schedule['E']}, 
+                    F: {self.schedule['F']}, 
+                    G: {self.schedule['G']}"""
     
     def __iter__(self):
         yield from self.schedule.keys()
