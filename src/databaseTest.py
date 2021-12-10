@@ -1,4 +1,4 @@
-from database.dataBaseHandler import *
+# from database.dataBaseHandler import *
 
 NORM = Teacher("RYAN", "NORMANDIN")
 PAL = Teacher("ALEX", "PALILUNAS")
