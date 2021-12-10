@@ -90,6 +90,7 @@ class Schedule(dict):
         yield from self.schedule.keys()
 
     def __getitem__(self, key):
+        
         return self.schedule[key]
     
     def __setitem__(self, key, value):

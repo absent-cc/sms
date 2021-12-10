@@ -2,6 +2,8 @@ from dataStructs import *
 
 import sqlite3
 
+from typing import Tuple
+
 class DatabaseHandler():
 
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
@@ -67,7 +69,7 @@ class DatabaseHandler():
 
     def getTeacher(self, teacher: Teacher):
         if teacher.id == None:
-            query = f"SELECT * FROM teacher_directory WHERE first_name = '{teacher.first}' AND 'last_name = '{teacher.last}' LIMIT 1"
+            query = f"SELECT * FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
         else:
             query = f"SELECT * FROM teacher_directory WHERE teacher_id = '{teacher.id}' LIMIT 1"
         return self.cursor.execute(query).fetchone()
@@ -131,8 +133,10 @@ class DatabaseHandler():
         self.connection.commit()
         return new_id
     
-    def addClassToClasses(self, teacher_id: int, block: SchoolBlock, student_id: int):
+    def addClassToClasses(self, teacher_id: int, block: SchoolBlock, student_id: int) -> Tuple[bool, int]:
         str_block = BlockMapper()[block] 
+        if teacher_id == None or str_block == None or student_id == None:
+            return False, None
         new_id = self.newClassID()
         query = f"""
         INSERT INTO classes VALUES (
@@ -144,7 +148,12 @@ class DatabaseHandler():
         """
         self.cursor.execute(query)
         self.connection.commit()
-        return new_id
+        return True, new_id
+    
+    # def addStudent(self, student: Student):
+    #     res = self.
+    #     new_id = self.addStudentToUserDirectory(student)
+
     # def addStudent(self, student: Student, schedule: Schedule):
     #     res = self.checkIfInUserDirectory(student)
     #     if not res:
@@ -185,12 +194,20 @@ class DatabaseHandler():
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
+
     NORM = Teacher("RYAN", "NORMANDIN", SchoolName.NEWTON_SOUTH)
-    BECKER = Teacher("RACHEAL", "BECKER", SchoolName.NEWTON_SOUTH)
+    PAL = Teacher("ALEX", "PALILUNAS", SchoolName.NEWTON_SOUTH)
+    BECKER = Teacher("RACHEL", "BECKER", SchoolName.NEWTON_SOUTH)
+    KOZUCH = Teacher("MICAEL", "KOZUCH", SchoolName.NEWTON_SOUTH)
+    CROSBY = Teacher("ALAN", "CROSBY", SchoolName.NEWTON_SOUTH)
+    RUGG = Teacher("ILANA", "RUGG", SchoolName.NEWTON_SOUTH)
+
     schedule = Schedule(NORM)
 
     db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
     db.addStudentToUserDirectory(kevin)
     db.addTeacherToTeacherDirectory(NORM)
     db.addTeacherToTeacherDirectory(BECKER)
-    db.addClassToClasses(db.getTeacherID(NORM), SchoolBlock.A, db.getStudentID(kevin))
+    print(db.addClassToClasses(db.getTeacherID(CROSBY), SchoolBlock.A, db.getStudentID(kevin)))
+    print(db.getStudent(kevin))
+    print(db.getTeacher(NORM))
