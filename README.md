@@ -1,20 +1,24 @@
 # abSENT
+ ![abSENT Github Banner](marketing/banner.png)
 
-### What is it?
-A Python based server software utilizing the Schoolopy API for schoology and the pytextnow "API" for TextNow to send alerts to students when their teachers are absent. 
+## What is it?
+An SMS schoology 🤖 bot that 💬 texts NPS students when their  👩‍🏫 teachers are 📝 absent. Supports both Newton high schools, 🐯Newton South & 🦁Newton North.
 
-### How's it work?
-Students sign up by texting our phone number, and input their full schedule. This is then saved to our SQLite database using 5 tables. One table stores students and their characteristics (name and phone number), another stores teachers and their characteristics (just name, here), and the final data table is simple a list of classes that each teacher teaches. Because of the lack of information, it is assumed that a teacher teaches every block and classes are indexed as such although this is likely inaccurate. The remaining two tables are used as reference tables, the first used to link student-ids to their class-ids and the latter to link teacher-ids with class-ids. 
+Running on a 🐍Python based server, it uses the [Schoolopy](https://github.com/ErikBoesen/schoolopy) API to grab teacher absences from Schoology, which is processed and then texted through using the [PyTextNow](https://github.com/leogomezz4t/PyTextNow_API) API to the students who have absent teachers.
 
-That said and done, a call to the last DB with the teacher Ids will return a list of classes that that teacher teaches, and now it is simply a matter of recursing through the fourth DB and sending messages to each student within all class-ids of the absent teacher.
+## How does it work?
+Students sign up by texting abSENT's phone number and inputting their schedule. The schedule is then saved as an SQLite database using 5 tables.
 
-### Why?
-Becuase why not?
+One table stores students and their characteristics (name and phone number), another stores teachers and their characteristics (name), and the final table is an array of classes that maps teacher & block -> student. The remaining tables are relational that connect the classes to students, and classes to teachers. 
 
-### Contributors
-[Roshan Karim](https://github.com/karimroshan) - (primarily) SMS code and threading.
+Every school day, abSENT retrives the day's teacher absences and then queries the SQLite database by teacher ID and Block to find students who have absent teachers. These students are then notifed over text that their teacher is absent.
 
-[Kevin Yang](https://github.com/bykevinyang) - (primarily) DB management.
+## Why?
+We got sick of checking schoology 😋 and luckily, we know how to \*somewhat\* write code.
 
-### Disclaimer:
+## Contributors
+- [Kevin Yang](https://github.com/bykevinyang) - (primarily) DB management, UI/UX, & marketing
+- [Roshan Karim](https://github.com/karimroshan) - (primarily) SMS code, threading, & UI/UX
+
+## Disclaimer:
 abSENT as a project is not affiliated with any of the entities who's students it serves. We are students and have written this project just for fun, as a minor QOL improvement in the morning.
