@@ -9,9 +9,9 @@ Running on a 🐍Python based server, it uses the [Schoolopy](https://github.com
 ## How does it work?
 Students sign up by 💬 texting abSENT's phone number and inputting their 📅 schedule. The schedule is then saved as an SQLite database using 5 tables:
 
-- One table stores students and their characteristics (name and phone number)
-- Another stores teachers and their characteristics (name)
-- The third table is an array of classes that maps teacher & block -> student. 
+- One table stores 👩‍🎓 students and their characteristics (name and phone number)
+- Another stores 👨‍🏫 teachers and their characteristics (name)
+- The third table is an array of 🏫 classes that maps 👩‍🏫 teacher & 🔤 block ->  👩‍🎓 student. 
 - The remaining tables are relational that connect the class IDs to student IDs, and class IDs to teacher IDs. 
 
 Every school day, abSENT retrives the day's 👨‍🏫 teacher absences and then queries the SQLite database by teacher ID and block to find students who have absent teachers. These students are then notifed over 💬 text that their teacher is absent.
