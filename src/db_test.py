@@ -1,5 +1,5 @@
 from dataStructs import *
-from db.databaseHandler import *
+from database.databaseHandler import *
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
@@ -12,19 +12,25 @@ if __name__ == "__main__":
     CROSBY = Teacher("ALAN", "CROSBY", SchoolName.NEWTON_SOUTH)
     RUGG = Teacher("ILANA", "RUGG", SchoolName.NEWTON_SOUTH)
 
-    schedule = Schedule(NORM, PAL, BECKER, KOZUCH, CROSBY, RUGG)
+    JOE = Teacher("JOE", "SMITH", SchoolName.NEWTON_SOUTH)
+    JANE = Teacher("JANE", "SMITH", SchoolName.NEWTON_SOUTH)
+    JEFF = Teacher("JEFF", "SMITH", SchoolName.NEWTON_SOUTH)
+    JERRY = Teacher("JERRY", "SMITH", SchoolName.NEWTON_SOUTH)
+
+    schedule = Schedule(PAL, PAL, BECKER, KOZUCH, CROSBY, RUGG)
 
     db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
     db.addStudentToStudentDirectory(kevin)
-    db.addTeacherToTeacherDirectory(NORM)
+    # db.addTeacherToTeacherDirectory(NORM)
     db.addTeacherToTeacherDirectory(BECKER)
     # print(db.addClassToClasses(db.getTeacherID(NORM), SchoolBlock.A, db.getStudentID(kevin)))
     # db.addStudentToUserDirectory(roshan) 
-    db.addTeacherToTeacherDirectory(PAL)
+    # db.addTeacherToTeacherDirectory(PAL)
     print(db.getStudent(kevin))
     print(db.getStudent(roshan))
-    print(db.getTeacher(NORM))
+    # print(db.getTeacher(NORM))
     print(db.addStudent(kevin, schedule))
     print(db.student_id)
     print(db.queryStudentsByAbsentTeacher(NORM, SchoolBlock.A))
+    print(db.changeClass(kevin, SchoolBlock.A, JOE))
     # print(db.removeStudentFromUserDirectory(kevin))

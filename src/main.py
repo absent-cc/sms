@@ -3,7 +3,6 @@ from textnow.sms import sms
 from textnow.ui import ui
 from schoology.absence import *
 from datetime import datetime, timedelta
-from db.databaseHandler import DatabaseHandler
 from dataStructs import *
 
 # Open secrets file.
