@@ -9,7 +9,7 @@ class DatabaseHandler():
 
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
         self.classes_id = 0
-        self.user_id = 0
+        self.student_id = 0
         self.teacher_id = 0
 
         self.db_path = f"data/{school.name}_{db_path}"
@@ -55,70 +55,111 @@ class DatabaseHandler():
         self.cursor.execute(create_teacher_directory)
         self.cursor.execute(create_classes)
 
+    # Reset the database, for development purposes only!
     def reset(self):
         import os
+        # If the database exists, delete it
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
     # Generate new ids for user, teacher, and class
-    def newUserID(self):
-        self.user_id += 1
-        return self.user_id
+    ## Generate new user id
+    def newStudentID(self):
+        # user_id universal for instance
+        # Used to generate new user id's for table entries
+        self.student_id += 1
+        return self.student_id
     
+    ## Generate new teacher id
     def newTeacherID(self):
+        # teacher_id universal for instance
+        # Used to generate new teacher ids for table entries
         self.teacher_id += 1
         return self.teacher_id
 
+    ## Generate new class id
     def newClassID(self):
+        # classes_id universal for instance
+        # Used to generate new user id's for table entries
         self.classes_id += 1
         return self.classes_id
 
+    # Get teacher object from DB based off of inputted teacher
     def getTeacher(self, teacher: Teacher):
+        # Check if teacher object already has an id
         if teacher.id == None:
+            # If not, search teachers in DB by first + last name
             query = f"SELECT * FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
         else:
+            # If teacher object already has an id, search teachers in DB by id
             query = f"SELECT * FROM teacher_directory WHERE teacher_id = '{teacher.id}' LIMIT 1"
+        # Conduct query
         res = self.cursor.execute(query).fetchone()
+        # If teacher is found (not None), return teacher object
         if res != None:
             teacher = Teacher(res[1], res[2], SchoolNameMapper()[res[3]], res[0])
             return teacher
         return None
     
+    # Get student object from DB based off of inputted student
     def getStudent(self, student: Student):
+        # Check if student object already has an id
         if student.id == None:
+            # If not, search students in DB by number
             query = f"SELECT * FROM student_directory WHERE number = '{student.number}' LIMIT 1"
         else:
+            # If student object already has an id, search students in DB by id
             query = f"SELECT * FROM student_directory WHERE student_id = '{student.id}' LIMIT 1"
+        # Conduct query
         res = self.cursor.execute(query).fetchone()
+        # If student is found (not None), return student object
         if res != None:
             student = Student(res[1], res[2], res[3], SchoolNameMapper()[res[4]], res[5], res[0])
             return student
         return None
     
+    # Get teacher id from DB based off of inputted teacher
+    ## Used to check if a teacher is in DB or not
     def getTeacherID(self, teacher: Teacher):
+        # Check if teacher object already has an id
         if teacher.id == None:
+            # If not, search teachers in DB by first + last name
             query = f"SELECT teacher_id FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
+            # Conduct query
             res = self.cursor.execute(query).fetchone()
+            # If teacher is found (not None), return teacher id (first in results list)
             if res != None:
                 return res[0]
             else:
                 return None
         else:
+            # If teacher object already has an id, return id
             return teacher.id
     
+    # Get student id from DB based off of inputted student
+    ## Used to check if a student is in DB or not
     def getStudentID(self, student: Student):
+        # Check if student object already has an id
         if student.id == None:
+            # If not, search students in DB by number
             query = f"SELECT student_id FROM student_directory WHERE number = '{student.number}' LIMIT 1"
+            # Conduct query
             res = self.cursor.execute(query).fetchone()
+            # If student is found (not None), return student id (first in results list)
             if res != None:
                 return res[0]
             else:
                 return None
         else:
+            # If student object already has an id, return id
             return student.id
-        
-    def addStudentToUserDirectory(self, student: Student):
-        new_id = self.newUserID()
+
+    # Add student to student directory
+    ## Does not check whether or not student is already in DB, assumes not
+    def addStudentToStudentDirectory(self, student: Student):
+        # Generate new student id
+        new_id = self.newStudentID()
+        # Insert student into student directory
         query = f"""
         INSERT INTO student_directory VALUES (
             '{new_id}',
@@ -129,20 +170,29 @@ class DatabaseHandler():
             '{student.grade}'
             )
         """
+        # Conduct query
         self.cursor.execute(query)
         self.connection.commit()
+        # Return the newly generated id for student object manipulation
         return new_id
     
-    def removeStudentFromUserDirectory(self, student: Student) -> bool:
+    # Remove student from student directory
+    def removeStudentFromStudentDirectory(self, student: Student) -> bool:
+        # You can only remove student if there is a student id 
         if student.id == None:
             return False
+        # Remove student from student directory
         query = f"DELETE FROM student_directory WHERE student_id = '{student.id}'"
         self.cursor.execute(query)
         self.connection.commit()
         return True
 
+    # Add teacher to teacher directory
+    ## Does not check whether or not teacher is already in DB, assumes not
     def addTeacherToTeacherDirectory(self, teacher: Teacher):
+        # Generate new teacher id
         new_id = self.newTeacherID()
+        # Insert teacher into teacher directory
         query = f"""
         INSERT INTO teacher_directory VALUES (
             '{new_id}',
@@ -155,8 +205,11 @@ class DatabaseHandler():
         self.connection.commit()
         return new_id
     
+    # Create a class entry for data table classes
     def addClassToClasses(self, teacher_id: int, block: SchoolBlock, student_id: int) -> Tuple[bool, int]:
-        str_block = BlockMapper()[block] 
+        # Mapp enum SchoolBlock to string savable to DB
+        str_block = BlockMapper()[block]
+        # If any of the inputs are invalid, return False
         if teacher_id == None or str_block == None or student_id == None:
             return False, None
         new_id = self.newClassID()
@@ -172,6 +225,7 @@ class DatabaseHandler():
         self.connection.commit()
         return True, new_id
     
+    # Change existing class entry in data table classes
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         new_teacher_id = self.getTeacherID(new_teacher)
         student_id = self.getStudentID(student)
@@ -187,7 +241,9 @@ class DatabaseHandler():
             self.connection.commit()
             return True
         return False
-    
+
+    # Creates a new class entry in data table classes for student + teachers in their schedule
+    ## General function to call when you want to add a user to abSENT system
     def addStudent(self, student: Student, schedule: Schedule) -> bool:
         res_student = self.getStudent(student)
         if res_student == None:
