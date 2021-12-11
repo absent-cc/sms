@@ -3,6 +3,8 @@ from textnow.sms import sms
 from textnow.ui import ui
 from schoology.absence import *
 from datetime import datetime, timedelta
+from db.databaseHandler import DatabaseHandler
+from dataStructs import *
 
 # Open secrets file.
 
@@ -40,7 +42,7 @@ def sms_listener():
     txt = sms(creds) 
     activethreads = {
     }
-    
+
     while True:
 
         for msg in txt.listen():
@@ -78,7 +80,7 @@ def sc_listener():
         print(absent.filterAbsencesSouth(date))
         print("\n\n\n\n")
         
-        time.sleep(10)
+        time.sleep(100)
 
 # Configure and start threads.
 
