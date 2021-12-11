@@ -64,7 +64,7 @@ class DatabaseHandler():
         self.cursor.execute(grab_max_student_id)
         res = self.cursor.fetchone()[0]
         if res != None:
-            student_id = res[0]
+            student_id = res
         else:
             student_id = 0
 
@@ -260,6 +260,7 @@ class DatabaseHandler():
         student_id = self.getStudentID(student)
         if new_teacher_id == None:
             self.addTeacherToTeacherDirectory(new_teacher)
+            new_teacher_id = self.getTeacherID(new_teacher)
         if student_id != None:
             str_block = BlockMapper()[block] 
             query = f"""
@@ -333,4 +334,5 @@ if __name__ == "__main__":
     print(db.getStudent(roshan))
     print(db.getTeacher(NORM))
     print(db.addStudent(kevin, schedule))
+    # print(db.changeClass(kevin, SchoolBlock.A, PAL))
     # print(db.removeStudentFromUserDirectory(kevin))
