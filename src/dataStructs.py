@@ -1,5 +1,5 @@
 from enum import Enum
-from dataclasses import FrozenInstanceError, dataclass
+from dataclasses import dataclass
 
 class SchoolNameMapper(dict):
     def __init__(self):
@@ -118,3 +118,43 @@ class Schedule(dict):
     
     def __contains__(self, item):
         return item in self.schedule.keys()
+    
+@dataclass
+class AbsentTeacher:
+    first: str
+    last: str 
+    length: str
+    date: str
+    note: str
+
+    def __str__(self):
+        return f"{self.first} {self.last} {self.length} {self.date} {self.note}"
+
+@dataclass
+class Number:
+    number: str
+    
+    def __str__(self):
+        return self.number
+    
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        if not isinstance(other, Number):
+            return False
+        return self.number == other.number
+
+@dataclass
+class Message:
+    number: Number
+    content: str
+
+    def __str__(self):
+        return f"{self.number} {self.content}"
+
+@dataclass
+class TextNowCreds:
+    username: str
+    sid: str
+    csrf: str
