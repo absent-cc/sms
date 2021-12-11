@@ -13,8 +13,8 @@ class DatabaseHandler():
         self.teacher_id = 0
 
         self.db_path = f"data/{school.name}_{db_path}"
-        
-        self.reset()
+
+        #self.reset()
 
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
@@ -175,8 +175,9 @@ class DatabaseHandler():
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         new_teacher_id = self.getTeacherID(new_teacher)
         student_id = self.getStudentID(student)
-        print(new_teacher_id, student_id)
-        if new_teacher_id != None and student_id != None:
+        if new_teacher_id == None:
+            self.addTeacherToTeacherDirectory(new_teacher)
+        if student_id != None:
             str_block = BlockMapper()[block] 
             query = f"""
             UPDATE classes 

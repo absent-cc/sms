@@ -33,6 +33,19 @@ class BlockMapper(dict):
             SchoolBlock.F: "F",
             SchoolBlock.G: "G",
         })
+    
+class ReverseBlockMapper(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update({
+            "A": SchoolBlock.A,
+            "B": SchoolBlock.B,
+            "C": SchoolBlock.C,
+            "D": SchoolBlock.D,
+            "E": SchoolBlock.E,
+            "F": SchoolBlock.F,
+            "G": SchoolBlock.G
+        })
 
 class SchoolBlock(Enum):
     A = "A"
