@@ -2,7 +2,7 @@ import time
 import threading
 from threading import Thread
 from dataStructs import *
-from db.databaseHandler import DatabaseHandler
+from database.databaseHandler import DatabaseHandler
 from .sms import sms
 
 class ui(Thread):
