@@ -259,8 +259,7 @@ class DatabaseHandler():
         new_teacher_id = self.getTeacherID(new_teacher)
         student_id = self.getStudentID(student)
         if new_teacher_id == None:
-            self.addTeacherToTeacherDirectory(new_teacher)
-            new_teacher_id = self.getTeacherID(new_teacher)
+            new_teacher_id = self.addTeacherToTeacherDirectory(new_teacher)
         if student_id != None:
             str_block = BlockMapper()[block] 
             query = f"""
