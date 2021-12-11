@@ -1,17 +1,9 @@
-from types import resolve_bases
 from dataStructs import *
-
 import sqlite3
-
-from typing import Tuple
+from typing import Tuple, List
 
 class DatabaseHandler():
-
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
-        self.classes_id = 0
-        self.student_id = 0
-        self.teacher_id = 0
-
         self.db_path = f"data/{school.name}_{db_path}"
         
         self.reset()
@@ -55,6 +47,43 @@ class DatabaseHandler():
         self.cursor.execute(create_teacher_directory)
         self.cursor.execute(create_classes)
 
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+    
+    def loadMaxIDs(self) -> Tuple[int, int, int]:
+
+        grab_max_student_id = """
+        SELECT MAX(student_id) FROM student_directory
+        """
+        grab_max_teacher_id = """
+        SELECT MAX(teacher_id) FROM teacher_directory
+        """
+        grab_max_class_id = """
+        SELECT MAX(class_id) FROM classes
+        """
+        
+        self.cursor.execute(grab_max_student_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            student_id = res[0]
+        else:
+            student_id = 0
+
+        self.cursor.execute(grab_max_teacher_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            teacher_id = res
+        else:
+            teacher_id = 0
+
+        self.cursor.execute(grab_max_class_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            classes_id = res
+        else:
+            classes_id = 0
+        
+        return (student_id, teacher_id, classes_id)
+        
     # Reset the database, for development purposes only!
     def reset(self):
         import os
@@ -229,7 +258,6 @@ class DatabaseHandler():
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         new_teacher_id = self.getTeacherID(new_teacher)
         student_id = self.getStudentID(student)
-        print(new_teacher_id, student_id)
         if new_teacher_id != None and student_id != None:
             str_block = BlockMapper()[block] 
             query = f"""
@@ -259,6 +287,25 @@ class DatabaseHandler():
                 self.addClassToClasses(teacher_id, block, student_id)
         return True
 
+    def queryStudentsByAbsentTeacher(self, teacher: Teacher, block: SchoolBlock) -> List[Student]:
+        teacher_id = self.getTeacherID(teacher)
+        if teacher_id == None:
+            return []
+        str_block = BlockMapper()[block]
+        query = f"""
+        SELECT *
+        FROM student_directory
+        WHERE student_id IN (
+            SELECT student_id
+            FROM classes
+            WHERE teacher_id = '{teacher_id}' AND block = '{str_block}'
+        )
+        """
+        res = self.cursor.execute(query).fetchall()
+        students = []
+        for col in res:
+            students.append(Student(col[1], col[2], col[3], col[4], col[5], col[0]))
+        return students
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
