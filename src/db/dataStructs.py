@@ -1,6 +1,14 @@
 from enum import Enum
 from dataclasses import FrozenInstanceError, dataclass
 
+class SchoolNameMapper(dict):
+    def __init__(self):
+        super().__init__()
+        self.update({
+            "NSHS": SchoolName.NEWTON_SOUTH,
+            "NNHS": SchoolName.NEWTON_NORTH
+        })
+
 class SchoolName(Enum):
     NEWTON_SOUTH = "NSHS"
     NEWTON_NORTH = "NNHS"
@@ -13,6 +21,32 @@ class SchoolName(Enum):
         else:
             return "Unknown School"
 
+class BlockMapper(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update({
+            SchoolBlock.A: "A",
+            SchoolBlock.B: "B",
+            SchoolBlock.C: "C",
+            SchoolBlock.D: "D",
+            SchoolBlock.E: "E",
+            SchoolBlock.F: "F",
+            SchoolBlock.G: "G",
+        })
+
+class SchoolBlock(Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    E = "E"
+    F = "F"
+    G = "G"
+
+    def __str__(self) -> str:
+        mapper = BlockMapper()
+        return mapper[self]
+
 @dataclass
 class Student:
     number: str
@@ -22,12 +56,18 @@ class Student:
     grade: int
     id: int = None
 
+    def __str__(self) -> str:
+        return f"{self.first} {self.last}"
+
 @dataclass
 class Teacher:
     first: str
     last: str
     school: SchoolName
     id: int = None
+
+    def __str__(self) -> str:
+        return f"{self.first} {self.last}"
 
 @dataclass
 class Schedule(dict):
@@ -39,28 +79,29 @@ class Schedule(dict):
                         F: Teacher = None, 
                         G: Teacher = None):
         self.schedule = {
-            'A': A,
-            'B': B,
-            'C': C,
-            'D': D,
-            'E': E,
-            'F': F,
-            'G': G
+            SchoolBlock.A: A,
+            SchoolBlock.B: B,
+            SchoolBlock.C: C,
+            SchoolBlock.D: D,
+            SchoolBlock.E: E,
+            SchoolBlock.F: F,
+            SchoolBlock.G: G,
         }
     
     def __str__(self):
-        return f""" A: {self.schedule['A']}, 
-                    B: {self.schedule['B']}, 
-                    C: {self.schedule['C']}, 
-                    D: {self.schedule['D']}, 
-                    E: {self.schedule['E']}, 
-                    F: {self.schedule['F']}, 
-                    G: {self.schedule['G']}"""
+        return f"""A: {self.schedule[SchoolBlock.A]},
+                    B: {self.schedule[SchoolBlock.B]},
+                    C: {self.schedule[SchoolBlock.C]},
+                    D: {self.schedule[SchoolBlock.D]},
+                    E: {self.schedule[SchoolBlock.E]},
+                    F: {self.schedule[SchoolBlock.F]},
+                    G: {self.schedule[SchoolBlock.G]}"""
     
     def __iter__(self):
         yield from self.schedule.keys()
 
     def __getitem__(self, key):
+        
         return self.schedule[key]
     
     def __setitem__(self, key, value):
