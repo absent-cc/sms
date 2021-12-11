@@ -1,3 +1,4 @@
+from types import resolve_bases
 from dataStructs import *
 
 import sqlite3
@@ -41,10 +42,17 @@ class DatabaseHandler():
                 teacher_id INTEGER,
                 block TEXT,
                 student_id INTEGER,
-                FOREIGN KEY(teacher_id) REFERENCES student_directory(teacher_id),
-                FOREIGN KEY(student_id) REFERENCES teacher_directory(student_id)
+                FOREIGN KEY(student_id) 
+                    REFERENCES student_directory(student_id)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE
+                FOREIGN KEY(teacher_id) 
+                    REFERENCES teacher_directory(teacher_id)
             )
             """
+
+        # FIGURE OUT WHO PARENT AND WHO IS CHILD!
+
         self.cursor.execute(create_student_directory)
         self.cursor.execute(create_teacher_directory)
         self.cursor.execute(create_classes)
@@ -72,20 +80,28 @@ class DatabaseHandler():
             query = f"SELECT * FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
         else:
             query = f"SELECT * FROM teacher_directory WHERE teacher_id = '{teacher.id}' LIMIT 1"
-        return self.cursor.execute(query).fetchone()
+        res = self.cursor.execute(query).fetchone()
+        if res != None:
+            teacher = Teacher(res[1], res[2], SchoolNameMapper()[res[3]], res[0])
+            return teacher
+        return None
     
     def getStudent(self, student: Student):
         if student.id == None:
             query = f"SELECT * FROM student_directory WHERE number = '{student.number}' LIMIT 1"
         else:
             query = f"SELECT * FROM student_directory WHERE student_id = '{student.id}' LIMIT 1"
-        return self.cursor.execute(query).fetchone()
+        res = self.cursor.execute(query).fetchone()
+        if res != None:
+            student = Student(res[1], res[2], res[3], SchoolNameMapper()[res[4]], res[5], res[0])
+            return student
+        return None
     
     def getTeacherID(self, teacher: Teacher):
         if teacher.id == None:
             query = f"SELECT teacher_id FROM teacher_directory WHERE first_name = '{teacher.first}' AND last_name = '{teacher.last}' LIMIT 1"
             res = self.cursor.execute(query).fetchone()
-            if res == (1,):
+            if res != None:
                 return res[0]
             else:
                 return None
@@ -96,7 +112,7 @@ class DatabaseHandler():
         if student.id == None:
             query = f"SELECT student_id FROM student_directory WHERE number = '{student.number}' LIMIT 1"
             res = self.cursor.execute(query).fetchone()
-            if res == (1,):
+            if res != None:
                 return res[0]
             else:
                 return None
@@ -119,6 +135,14 @@ class DatabaseHandler():
         self.connection.commit()
         return new_id
     
+    def removeStudentFromUserDirectory(self, student: Student) -> bool:
+        if student.id == None:
+            return False
+        query = f"DELETE FROM student_directory WHERE student_id = '{student.id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
+        return True
+
     def addTeacherToTeacherDirectory(self, teacher: Teacher):
         new_id = self.newTeacherID()
         query = f"""
@@ -149,6 +173,22 @@ class DatabaseHandler():
         self.cursor.execute(query)
         self.connection.commit()
         return True, new_id
+    
+    def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
+        new_teacher_id = self.getTeacherID(new_teacher)
+        student_id = self.getStudentID(student)
+        print(new_teacher_id, student_id)
+        if new_teacher_id != None and student_id != None:
+            str_block = BlockMapper()[block] 
+            query = f"""
+            UPDATE classes 
+            SET teacher_id = '{new_teacher_id}' 
+            WHERE student_id = '{student_id}' AND block = '{str_block}'
+            """
+            self.cursor.execute(query)
+            self.connection.commit()
+            return True
+        return False
     
     # def addStudent(self, student: Student):
     #     res = self.
@@ -194,6 +234,7 @@ class DatabaseHandler():
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
+    roshan = Student("6175525098", "Roshan", "Karim", SchoolName.NEWTON_NORTH, 10)
 
     NORM = Teacher("RYAN", "NORMANDIN", SchoolName.NEWTON_SOUTH)
     PAL = Teacher("ALEX", "PALILUNAS", SchoolName.NEWTON_SOUTH)
@@ -208,6 +249,10 @@ if __name__ == "__main__":
     db.addStudentToUserDirectory(kevin)
     db.addTeacherToTeacherDirectory(NORM)
     db.addTeacherToTeacherDirectory(BECKER)
-    print(db.addClassToClasses(db.getTeacherID(CROSBY), SchoolBlock.A, db.getStudentID(kevin)))
+    # print(db.addClassToClasses(db.getTeacherID(NORM), SchoolBlock.A, db.getStudentID(kevin)))
+    # db.addStudentToUserDirectory(roshan) 
+    db.addTeacherToTeacherDirectory(PAL)
     print(db.getStudent(kevin))
+    print(db.getStudent(roshan))
     print(db.getTeacher(NORM))
+    # print(db.removeStudentFromUserDirectory(kevin))

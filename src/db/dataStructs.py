@@ -1,6 +1,14 @@
 from enum import Enum
 from dataclasses import FrozenInstanceError, dataclass
 
+class SchoolNameMapper(dict):
+    def __init__(self):
+        super().__init__()
+        self.update({
+            "NSHS": SchoolName.NEWTON_SOUTH,
+            "NNHS": SchoolName.NEWTON_NORTH
+        })
+
 class SchoolName(Enum):
     NEWTON_SOUTH = "NSHS"
     NEWTON_NORTH = "NNHS"
@@ -47,6 +55,9 @@ class Student:
     school: SchoolName
     grade: int
     id: int = None
+
+    def __str__(self) -> str:
+        return f"{self.first} {self.last}"
 
 @dataclass
 class Teacher:
