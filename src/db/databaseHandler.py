@@ -51,8 +51,6 @@ class DatabaseHandler():
             )
             """
 
-        # FIGURE OUT WHO PARENT AND WHO IS CHILD!
-
         self.cursor.execute(create_student_directory)
         self.cursor.execute(create_teacher_directory)
         self.cursor.execute(create_classes)
@@ -190,52 +188,26 @@ class DatabaseHandler():
             return True
         return False
     
-    # def addStudent(self, student: Student):
-    #     res = self.
-    #     new_id = self.addStudentToUserDirectory(student)
+    def addStudent(self, student: Student, schedule: Schedule) -> bool:
+        res_student = self.getStudent(student)
+        if res_student == None:
+            student_id = self.addStudentToUserDirectory(student)
+        else:
+            student_id = res_student.id
+        for block in schedule:
+            teacher = schedule[block]
+            if teacher != None:
+                teacher_id = self.getTeacherID(teacher)
+                if teacher_id == None:
+                    teacher_id = self.addTeacherToTeacherDirectory(teacher)
+                self.addClassToClasses(teacher_id, block, student_id)
+        return True
 
-    # def addStudent(self, student: Student, schedule: Schedule):
-    #     res = self.checkIfInUserDirectory(student)
-    #     if not res:
-    #         for block in schedule:
-    #             teacher = schedule[block]
-    #             if teacher is not None:
-    #                 teacher = self.getTeacher(teacher)
-    #                 if 
-    #                 if self.checkIfInTeacherDirectory(teacher):
-    #                     self.addStudentToClasses(student, teacher, block)
-    #                 else:
-    #                     print("Teacher not in directory")
-    #             else:
-    #                 print(f"No class during {block} block")
-    #         return True
-    #     return False
-
-    # def checkIfInUserDirectory(self, student: Student):
-    #     query = f"SELECT * FROM student_directory WHERE student_id = {student.id} LIMIT 1"
-    #     if self.cursor.execute(query).fetchone() == (1,):
-    #         return True
-    #     else:
-    #         return False
-        
-    # def checkIfInTeacherDirectory(self, teacher: Teacher):
-    #     query = f"SELECT * FROM teacher_directory WHERE teacher_id = {teacher.id} LIMIT 1"
-    #     if self.cursor.execute(query).fetchone() == (1,):
-    #         return True
-    #     else:
-    #         return False
-
-    # def addStudentToClasses(self, student: Student, teacher: Teacher, block: str):
-    #     classes_id = self.newClassID()
-    #     teacher_id = self.getTeacherID(teacher)
-    #     student_id = self.getStudentID(student)
-    #     self.cursor.execute("INSERT INTO classes VALUES (?, ?, ?, ?)", (classes_id, teacher_id, block, student_id))
-    #     self.connection.commit() 
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
     roshan = Student("6175525098", "Roshan", "Karim", SchoolName.NEWTON_NORTH, 10)
-
+    
     NORM = Teacher("RYAN", "NORMANDIN", SchoolName.NEWTON_SOUTH)
     PAL = Teacher("ALEX", "PALILUNAS", SchoolName.NEWTON_SOUTH)
     BECKER = Teacher("RACHEL", "BECKER", SchoolName.NEWTON_SOUTH)
@@ -243,7 +215,7 @@ if __name__ == "__main__":
     CROSBY = Teacher("ALAN", "CROSBY", SchoolName.NEWTON_SOUTH)
     RUGG = Teacher("ILANA", "RUGG", SchoolName.NEWTON_SOUTH)
 
-    schedule = Schedule(NORM)
+    schedule = Schedule(NORM, PAL, BECKER, KOZUCH, CROSBY, RUGG)
 
     db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
     db.addStudentToUserDirectory(kevin)
@@ -255,4 +227,5 @@ if __name__ == "__main__":
     print(db.getStudent(kevin))
     print(db.getStudent(roshan))
     print(db.getTeacher(NORM))
+    print(db.addStudent(kevin, schedule))
     # print(db.removeStudentFromUserDirectory(kevin))
