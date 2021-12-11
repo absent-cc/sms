@@ -258,7 +258,6 @@ class DatabaseHandler():
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         new_teacher_id = self.getTeacherID(new_teacher)
         student_id = self.getStudentID(student)
-        print(new_teacher_id, student_id)
         if new_teacher_id != None and student_id != None:
             str_block = BlockMapper()[block] 
             query = f"""
