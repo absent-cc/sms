@@ -6,7 +6,7 @@ class DatabaseHandler():
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
         self.db_path = f"data/{school.name}_{db_path}"
 
-        #self.reset()
+        self.reset()
 
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
@@ -256,15 +256,26 @@ class DatabaseHandler():
 
     # Change existing class entry in data table classes
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
+        # Map enum SchoolBlock to string savable to DB
         str_block = BlockMapper()[block]
+        
+        # If teacher is none type, delete specific entry for changing
+        ## Note: abSENT does not store the lack of a class in the DB
         if new_teacher == None:
+            if student.id == None:
+                student.id = self.getStudentID(student)
             query = f"""
-            DELETE FROM classes WHERE block = '{str_block}' 
+            DELETE FROM classes WHERE block = '{str_block}' AND student_id = '{student.id}'
             """
             self.cursor.execute(query)
             self.connection.commit()
             return True
+
+        # Grab teacher id from DB
         new_teacher_id = self.getTeacherID(new_teacher)
+
+        # If teacher id is none, then teacher does not exist
+        # Add that teacher to directory
         if new_teacher_id == None:
             new_teacher_id = self.addTeacherToTeacherDirectory(new_teacher)
         
