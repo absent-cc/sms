@@ -15,7 +15,6 @@ class ui(Thread):
         self.number = Number(msg.number)
 
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
-
     def run(self):
         
         # Creates temporary DBs.
@@ -51,6 +50,7 @@ class ui(Thread):
             'about': self.about
         }
 
+        # Check if response in responsesDict, if so run response function.
         if db != None:
             content = self.msg.content.lower()
             if content in responsesDict:
@@ -66,6 +66,7 @@ class ui(Thread):
         else:
             self.sms.send(str(self.number), askForSubscription)
 
+    # For new users, upon sending a subscribe message.
     def welcome(self, msg: Message):
 
         # Sends welcome.
@@ -103,7 +104,7 @@ class ui(Thread):
         db.addStudent(student, schedule)
 
         # Confirmation message.
-        successMessageOne = "Great! You've signed up sucessfully. Here is your schedule"
+        successMessageOne = "Great! You've signed up sucessfully. Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "Make any edits by entering 'EDIT'."
         successMessageFour = f"Welcome to abSENT, {name[0]} {name[1]}!"
@@ -115,6 +116,7 @@ class ui(Thread):
 
         return True
 
+    # Upon a cancel message.
     def cancel(self, db: DatabaseHandler, resStudent: Student):
         
         # Cancels and sends message.
@@ -124,6 +126,7 @@ class ui(Thread):
 
         return True
 
+    # Upon an about request.
     def about(self, x, y):
 
         # Sets message and sends.
@@ -132,11 +135,12 @@ class ui(Thread):
 
         return True
 
+    # Upon an edit request.
     def edit(self, db: DatabaseHandler, resStudent: Student):
-
+        
         # A bunch of messages.
         initialMessageOne = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name."
-        initialMessageTwo = "For example: D John Doe"
+        initialMessageTwo = "For example: D John Doe. Alternatively, for a free block: D Free Block"
         invalidMessageTeacher = "You have provided an invalid teacher. Please restart the edit process."
         invaldMessageBlock = "You have entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
@@ -151,8 +155,7 @@ class ui(Thread):
             return False
 
         # Format input.
-        rawInput = rawInput.content.upper()
-        teacherAttributes = rawInput.split(" ", 2)
+        teacherAttributes = rawInput.content.upper().split(" ", 2)
 
         # Check if teacher is good.
         if len(teacherAttributes) != 3:
@@ -176,6 +179,7 @@ class ui(Thread):
 
         return True
 
+    # Upon a status request.
     def status(self, db: DatabaseHandler, student: Student):
         
         # Get the schedule.
@@ -192,11 +196,14 @@ class ui(Thread):
         self.sms.send(str(self.number), statusMessageTwo)
 
         return True
-
-    def sqlInjectionCheck(self, msg: Message):
-
-        sqlInjectionMessage = "You are a filthy SQL injector. Please leave immediately."
     
+    # For use when parsing user input: checks if the names provided users are containing characters needed for SQL injection attacks.
+    def sqlInjectionCheck(self, msg: Message):
+        
+        # Message.  
+        sqlInjectionMessage = "You are a filthy SQL injector. Please leave immediately."
+
+        # Check for the invalid symbols, and send message if invalid symbol is used.
         if '\'' in msg.content or ';' in msg.content:
             self.sms.send(str(self.number), sqlInjectionMessage)
             return True
@@ -205,12 +212,13 @@ class ui(Thread):
 
     def getName(self):
 
+        # Initial variables including messages and blank names.
         last = None
         first = None
-
         initialMessage = "Please text your first and last name, seperated by spaces."
         invalidMessage = "That's not a valid name. Enter your first and last name seperated by spaces."
 
+        # Send initial message.
         self.sms.send(str(self.number), initialMessage)
 
         # Test name, return name if tests correctly.
@@ -232,17 +240,18 @@ class ui(Thread):
                 last = msg[1] 
             else:
                 self.sms.send(str(self.number), invalidMessage)
-        
         return (first, last)
     
+    # Get the school name of the user.
     def getSchool(self, name: tuple):
-
+        
+        # Initial vars, messages + blank school value.
         school = None
-
         initialMessage = f"Hello {name[0]} {name[1]}! Please enter the school you go to, (N)orth or (S)outh."
         invalidMessage = "You have sent an invalid school name. Please reply with (N)orth or (S)outh."
         self.sms.send(str(self.number), initialMessage)
         
+        # Main thread.
         while school == None:
             msg = self.sms.awaitResponse(str(self.number))
             
@@ -258,25 +267,26 @@ class ui(Thread):
                 school = SchoolNameMapper()["NSHS"]
             else:
                 self.sms.send(str(self.number), invalidMessage)
-        
         return school
     
+    # Get the grade of the user.
     def getYear(self):
 
+        # Initial vars, including blank year value.
         year = None
-
         initialMessage = "Please enter your grade, a number from 9 to 12."
         invalidMessage = "That is not a valid grade number. Please enter a number from 9 to 12."
-        
         validNumbers = {
             '9': 9,
             '10': 10,
             '11': 11,
             '12': 12
         }
-
+        
+        # Send initial message.
         self.sms.send(str(self.number), initialMessage)
 
+        # Main thread.
         while year == None:
             msg = self.sms.awaitResponse(str(self.number))
 
@@ -289,11 +299,12 @@ class ui(Thread):
                 year = validNumbers.get(msg)
             else:
                 self.sms.send(str(self.number), invalidMessage)
-
         return year
 
+    # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName):
 
+        # A bunch of messages.
         initialMessageOne = "Please enter each of your teachers in a new message, in this format:"
         initialMessageTwo = "A John Doe"
         initialMessageThree = "B Joe Mama"
@@ -305,17 +316,18 @@ class ui(Thread):
         self.sms.send(str(self.number), initialMessageTwo)
         self.sms.send(str(self.number), initialMessageThree)
 
+        # Creates schedue object, get's initial raw user input, creates a new var for it formatted.
         schedule = Schedule()
-
         rawInput = self.sms.awaitResponse(self.number)
         content = rawInput.content.upper()
 
+        # Main thread.
         while content != "DONE":
-            
             # Obligatory SQL injection.
             if self.sqlInjectionCheck(rawInput):
                 return None
 
+            # Split up the content got from the user.
             teacherAttributes = content.split(" ", 2)
             
             # Check if teacher is good.
@@ -324,6 +336,7 @@ class ui(Thread):
                 rawInput = self.sms.awaitResponse(self.number)
                 content = rawInput.content.upper()
                 continue
+
             # Check if block is good.
             if teacherAttributes[0] not in ReverseBlockMapper():
                 self.sms.send(str(self.number), invalidMessageBlock)
@@ -331,6 +344,7 @@ class ui(Thread):
                 content = rawInput.content.upper()
                 continue
             
+            # Creates a teacher object.
             block = teacherAttributes[0]
             first = teacherAttributes[1]
             last = teacherAttributes[2]
@@ -338,9 +352,9 @@ class ui(Thread):
             enumBlock = ReverseBlockMapper()[block]
             schedule[enumBlock] = teacher
 
+            # Adds the teacher object to the scheduule object.
             rawInput = self.sms.awaitResponse(self.number)
             content = rawInput.content.upper()
-
         return schedule
 
 

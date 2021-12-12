@@ -257,18 +257,36 @@ class DatabaseHandler():
     # Change existing class entry in data table classes
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         new_teacher_id = self.getTeacherID(new_teacher)
-        student_id = self.getStudentID(student)
-        if new_teacher_id == None:
-            new_teacher_id = self.addTeacherToTeacherDirectory(new_teacher)
-        if student_id != None:
-            str_block = BlockMapper()[block] 
+        str_block = BlockMapper()[block]
+        if new_teacher.first == "FREE" and new_teacher.last == "BLOCK":
             query = f"""
-            UPDATE classes 
-            SET teacher_id = '{new_teacher_id}' 
-            WHERE student_id = '{student_id}' AND block = '{str_block}'
+            DELETE FROM classes WHERE block = '{str_block}' 
             """
             self.cursor.execute(query)
             self.connection.commit()
+        elif new_teacher_id == None:
+            new_teacher_id = self.addTeacherToTeacherDirectory(new_teacher)
+        
+        if student.id != None:
+            # Get teacher id for the given block and student. 
+            query = f"""
+            SELECT teacher_id
+            FROM classes
+            WHERE student_id = '{student.id}' AND block = '{str_block}'
+            """
+            res = self.cursor.execute(query).fetchone()
+            # If student has a free, we can just add this teacher to the directory.
+            if res == None:
+                self.addClassToClasses(new_teacher_id, block, student.id)
+            # Else, update the class entry that already exists.
+            else:
+                query = f"""
+                UPDATE classes 
+                SET teacher_id = '{new_teacher_id}' 
+                WHERE teacher_id = '{res[0]}'
+                """
+                self.cursor.execute(query)
+                self.connection.commit()
             return True
         return False
 

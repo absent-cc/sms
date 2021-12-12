@@ -6,23 +6,17 @@ from datetime import datetime, timedelta
 from dataStructs import *
 
 # Open secrets file.
-
 with open('secrets.yml', 'r') as f:
     cfg = yaml.safe_load(f)
 
 # Define API variables.
-
 sid = cfg['textnow']['sid']
-csrf = cfg['textnow']['csrf']
 username = cfg['textnow']['username']
-
 sckeys = [cfg['north']['key'], cfg['south']['key']]
 scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
+creds = TextNowCreds(username, sid)
 
-creds = TextNowCreds(username, sid, csrf)
-
-# Functions for threads.
-
+# Make threads regenerate on fault.
 def threadwrapper(func):
     def wrapper():
         while True:
@@ -35,59 +29,59 @@ def threadwrapper(func):
     return wrapper
 
 # Listen for SMS and call threadclass upon new initial contact.
-
 def sms_listener():
     
-    txt = sms(creds) 
+    # Define initial vars.
+    textnow = sms(creds) 
     activethreads = {
     }
 
     while True:
 
-        for msg in txt.listen():
-            print(msg)
-            if Number(msg.number) not in activethreads:
-                txt.markAsRead(msg)
-                activethreads.update({Number(msg.number): ui(creds, msg)})
-                activethreads[Number(msg.number)].start()
-                print(activethreads[Number(msg.number)], "started")
+        # Create thread for each new initial contact.
+        for msg in textnow.listen():
+            number = Number(msg.number)
+            if number not in activethreads:
+                textnow.markAsRead(msg)
+                activethreads.update({number: ui(creds, msg)})
+                activethreads[number].start()
+                print(f"Thread created: {str(number)}.")
 
         # Thread cleaner.
-
         dead = []
-
         for number in activethreads:
             if not activethreads[number].is_alive():
                 dead.append(number)
-
         for number in dead:
-            print(activethreads[number], "killed")
+            print(f"Thread terminated: {str(number)}.")
             activethreads.pop(number)
 
-        time.sleep(0.2)
+        # Wait for a bit.
+        time.sleep(1)
 
 # Listen for Schoology updates.
-
 def sc_listener():
     
+    # Define initial var.
     absent = absence(sckeys, scsecrets)
 
+    # Print Schoology.
     while True:
+        # Grab current date, run functions using current date + print.
         date = datetime.now() - timedelta(hours=5)
         print(absent.filterAbsencesNorth(date))
         print("\n\n")
         print(absent.filterAbsencesSouth(date))
         print("\n\n\n\n")
-        
+
+        # Wait for a bit.
         time.sleep(100)
 
 # Configure and start threads.
-
 threads = {
         'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
-
 
 threads['sms'].start()
 threads['sc'].start()

@@ -170,4 +170,3 @@ class Message:
 class TextNowCreds:
     username: str
     sid: str
-    csrf: str
