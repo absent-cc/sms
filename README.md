@@ -3,7 +3,7 @@
 
 ## What is it?
 An SMS schoology bot that texts NPS students when their teachers are absent. Supports both Newton high schools, [Newton South](https://www.newton.k12.ma.us/nshs) & [Newton North](https://www.newton.k12.ma.us/nnhs).
-abSENT uses the [Schoolopy](https://github.com/ErikBoesen/schoolopy) API to grab teacher absences from Schoology, which are processed. Alers are then texted through TextNow using the [PyTextNow](https://github.com/leogomezz4t/PyTextNow_API) API, to students who have teachers that are absent.
+abSENT uses the [Schoolopy](https://github.com/ErikBoesen/schoolopy) API wrapper to grab teacher absences from Schoology, which are processed. Alerts are then texted through TextNow using the [PyTextNow](https://github.com/leogomezz4t/PyTextNow_API) API wrapper, to students who have teachers that are absent.
 
 ## How does it work?
 Students sign up by texting abSENT's phone number and inputting their schedule. The schedule is then saved as an SQLite database using 3 tables:
