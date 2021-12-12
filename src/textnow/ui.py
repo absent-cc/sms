@@ -174,6 +174,9 @@ class ui(Thread):
         teacher = Teacher(first, last, school)
         enumBlock = ReverseBlockMapper()[block]
 
+        if teacher.first == "FREE" and teacher.last == "BLOCK":
+            teacher = None
+
         db.changeClass(resStudent, enumBlock, teacher)
         self.sms.send(str(self.number), successMessage)
 

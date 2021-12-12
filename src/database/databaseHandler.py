@@ -253,18 +253,19 @@ class DatabaseHandler():
         self.cursor.execute(query)
         self.connection.commit()
         return True, new_id
-    
+
     # Change existing class entry in data table classes
     def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
-        new_teacher_id = self.getTeacherID(new_teacher)
         str_block = BlockMapper()[block]
-        if new_teacher.first == "FREE" and new_teacher.last == "BLOCK":
+        if new_teacher == None:
             query = f"""
             DELETE FROM classes WHERE block = '{str_block}' 
             """
             self.cursor.execute(query)
             self.connection.commit()
-        elif new_teacher_id == None:
+            return True
+        new_teacher_id = self.getTeacherID(new_teacher)
+        if new_teacher_id == None:
             new_teacher_id = self.addTeacherToTeacherDirectory(new_teacher)
         
         if student.id != None:
