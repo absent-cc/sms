@@ -6,17 +6,14 @@ from dataStructs import *
 class sms:
 
     # "Logs" into API. In reality, each API request is simply using auth header. There is no concept of a session.
-
     def __init__(self, creds: TextNowCreds):
-        self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid, csrf_cookie=creds.csrf)
+        self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid,)
 
     # Sends a message.
-
     def send(self, number: str, message: str):
         self.client.send_sms(number, message)
 
     # Gets all unreads and marks them as read.
-
     def receive(self):
         unreads = []
         for msg in self.client.get_unread_messages():
@@ -26,7 +23,6 @@ class sms:
         return unreads
 
     # Gets all unreads.
-
     def listen(self):
         messages = []
         for msg in self.client.get_unread_messages():
@@ -35,13 +31,11 @@ class sms:
         return messages
     
     # Marks a message as read.
-
     def markAsRead(self, msg):
         msg.mark_as_read()
         return True
 
     # Blocks and waits for a message from a specific number.
-
     def awaitResponse(self, number: Number):
         start_time = time.time()
         while True:
@@ -50,12 +44,11 @@ class sms:
                 return None
 
             unreads = []
-
             for msg in self.listen():
                 if str(msg.number) == str(number):
                     self.markAsRead(msg)
                     unreads.append(Message(Number(number), msg.content))
-                    
+            
             if len(unreads) == 0:
                 time.sleep(0.2)
                 continue
