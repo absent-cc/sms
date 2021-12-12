@@ -12,8 +12,8 @@ class sms:
 
     # Sends a message.
 
-    def send(self, num: str, message: str):
-        self.client.send_sms(num, message)
+    def send(self, number: str, message: str):
+        self.client.send_sms(number, message)
 
     # Gets all unreads and marks them as read.
 
@@ -42,19 +42,19 @@ class sms:
 
     # Blocks and waits for a message from a specific number.
 
-    def awaitResponse(self, num: Number):
+    def awaitResponse(self, number: Number):
         start_time = time.time()
         while True:
             # Timeout functionality.
             if start_time + 60 < time.time():
-                return False
+                return None
 
             unreads = []
 
             for msg in self.listen():
-                if str(msg.number) in str(num):
-                    unreads.append(Message(Number(msg.number),msg.content))
+                if str(msg.number) == str(number):
                     self.markAsRead(msg)
+                    unreads.append(Message(Number(number), msg.content))
                     
             if len(unreads) == 0:
                 time.sleep(0.2)

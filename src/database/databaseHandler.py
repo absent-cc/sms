@@ -277,7 +277,7 @@ class DatabaseHandler():
     def addStudent(self, student: Student, schedule: Schedule) -> bool:
         res_student = self.getStudent(student)
         if res_student == None:
-            student_id = self.addStudentToUserDirectory(student)
+            student_id = self.addStudentToStudentDirectory(student)
         else:
             student_id = res_student.id
         for block in schedule:
@@ -308,6 +308,41 @@ class DatabaseHandler():
         for col in res:
             students.append(Student(col[1], col[2], col[3], col[4], col[5], col[0]))
         return students
+
+    def getScheduleByStudent(self, student: Student):
+        schedule = Schedule()
+        teachers = self.getTeachersFromStudent(student)
+        # Query teacher objects for blocks and generate schedule.
+        for teacher in teachers:
+            query = f"""
+            SELECT block
+            FROM classes
+            WHERE teacher_id = '{teacher.id}' AND student_id = '{student.id}'
+            """
+            res = self.cursor.execute(query).fetchall()
+            enum_block = ReverseBlockMapper()[res[0][0]]
+            schedule[enum_block] = teacher
+        return schedule
+    
+    def getTeachersFromStudent(self, student: Student):
+        # Get raw teacher data by student.
+        if student.id == None:
+            return None
+        query = f"""
+        SELECT *
+        FROM teacher_directory
+        WHERE teacher_id in (
+            SELECT teacher_id
+            FROM classes
+            WHERE student_id = '{student.id}'
+        )
+        """
+        res = self.cursor.execute(query).fetchall()
+        teachers = []
+        # Create teacher objects.
+        for teacher in res:
+            teachers.append(Teacher(teacher[1], teacher[2], SchoolNameMapper()[teacher[3]], teacher[0]))
+        return teachers
 
 if __name__ == "__main__":
     kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
