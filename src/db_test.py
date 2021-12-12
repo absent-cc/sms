@@ -16,7 +16,7 @@ if __name__ == "__main__":
     JANE = Teacher("JANE", "SMITH", SchoolName.NEWTON_SOUTH)
     JEFF = Teacher("JEFF", "SMITH", SchoolName.NEWTON_SOUTH)
     JERRY = Teacher("JERRY", "SMITH", SchoolName.NEWTON_SOUTH)
-
+    NONE = None
     schedule = Schedule(PAL, PAL, BECKER, KOZUCH, CROSBY, RUGG)
 
     db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
@@ -32,5 +32,5 @@ if __name__ == "__main__":
     print(db.addStudent(kevin, schedule))
     print(db.student_id)
     print(db.queryStudentsByAbsentTeacher(NORM, SchoolBlock.A))
-    print(db.changeClass(kevin, SchoolBlock.A, JOE))
+    print(db.changeClass(kevin, SchoolBlock.A, NONE))
     # print(db.removeStudentFromUserDirectory(kevin))
