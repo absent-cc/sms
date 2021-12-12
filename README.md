@@ -20,8 +20,8 @@ Every school day, abSENT retrives the day's teacher absences and then queries th
 Refreshing Schoology 20 times every morning is somewhat draining.
 
 ## Contributors
-- [Kevin Yang](https://github.com/bykevinyang) - (primarily) DB management, UI/UX, & marketing
-- [Roshan Karim](https://github.com/karimroshan) - (primarily) SMS code, threading, & UI/UX
+- [Kevin Yang](https://github.com/bykevinyang)
+- [Roshan Karim](https://github.com/karimroshan)
 
 ## Disclaimer:
 abSENT as a project is not affiliated with any of the entities who's students it serves. We are students and have written this project just for fun, as a minor QOL improvement in the morning.
