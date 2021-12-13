@@ -59,6 +59,10 @@ class SchoolBlock(Enum):
     def __str__(self) -> str:
         mapper = BlockMapper()
         return mapper[self]
+        
+    def __repr__(self) -> str:
+        mapper = BlockMapper()
+        return mapper[self]
 
 @dataclass
 class Student:
