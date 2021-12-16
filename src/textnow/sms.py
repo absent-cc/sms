@@ -7,7 +7,7 @@ class sms:
 
     # "Logs" into API. In reality, each API request is simply using auth header. There is no concept of a session.
     def __init__(self, creds: TextNowCreds):
-        self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid,)
+        self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid, csrf_cookie=creds.csrf)
 
     # Sends a message.
     def send(self, number: str, message: str):

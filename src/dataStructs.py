@@ -170,3 +170,10 @@ class Message:
 class TextNowCreds:
     username: str
     sid: str
+    csrf: str
+
+@dataclass
+class NotificationInformation:
+    teacher: AbsentTeacher
+    students: list
+    block: SchoolBlock

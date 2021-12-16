@@ -4,6 +4,7 @@ from textnow.ui import ui
 from schoology.absence import *
 from datetime import datetime, timedelta
 from dataStructs import *
+from driver.logic import LogicDriver
 
 # Open secrets file.
 with open('secrets.yml', 'r') as f:
@@ -12,9 +13,10 @@ with open('secrets.yml', 'r') as f:
 # Define API variables.
 sid = cfg['textnow']['sid']
 username = cfg['textnow']['username']
+csrf = cfg['textnow']['csrf']
 sckeys = [cfg['north']['key'], cfg['south']['key']]
 scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
-creds = TextNowCreds(username, sid)
+creds = TextNowCreds(username, sid, csrf)
 
 # Make threads regenerate on fault.
 def threadwrapper(func):
@@ -36,6 +38,8 @@ def sms_listener():
     activethreads = {
     }
 
+    textnow.send('+16175059626', 'abSENT listener started!')
+
     while True:
 
         # Create thread for each new initial contact.
@@ -45,7 +49,7 @@ def sms_listener():
                 textnow.markAsRead(msg)
                 activethreads.update({number: ui(creds, msg)})
                 activethreads[number].start()
-                print(f"Thread created: {str(number)}.")
+                print(f"Thread created: {str(number)} with initial message '{msg.content}'.")
 
         # Thread cleaner.
         dead = []
@@ -84,4 +88,9 @@ threads = {
 }
 
 threads['sms'].start()
-threads['sc'].start()
+#threads['sc'].start()
+
+driver = LogicDriver(creds, sckeys, scsecrets)
+date = datetime.now() - timedelta(hours=5)
+
+driver.run(date)

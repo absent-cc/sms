@@ -3,7 +3,7 @@ import schoolopy
 import yaml
 from datetime import datetime, timedelta
 
-class absence:
+class Absence:
 
     # Sets up the two API objects as entries within a list 'api' . 
 
