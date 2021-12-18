@@ -3,6 +3,7 @@ from textnow.sms import sms
 from database.databaseHandler import *
 from schoology.absence import Absence
 from datetime import date
+
 class LogicDriver:
     
     # Configures a dict of DB objects and a dict of blocks keyed by day as returned by datetime.
@@ -45,29 +46,38 @@ class LogicDriver:
             return None
         return absenceList
 
+    # Returns students in each class that a teacher is absent in.
     def getStudentsToNotify(self, absences: list, school: SchoolName):
         notificationList = []
         for teacher in absences:
             for block in self.blockDict[self.date.weekday()]:
+                # To-Do: Implement casting between AbsentTeacher and Teacher classes
                 queryStudents = self.db[school].queryStudentsByAbsentTeacher(Teacher(teacher.first, teacher.last, school), block)
                 if queryStudents != []:
+                    # Send notification to each student if there are students to sent to.
                     notificationList.append(NotificationInformation(teacher, queryStudents, block)) 
-
         return notificationList
 
+    # Generates a dict of messages to send to each student.
+    ## Each absent class for a student is smushed into one message to save TextNow API calls.
     def genMessages(self, notificationList: list):
         messageDict = {}
-        messageStart = "You are recieving a notification because you have (an) absent teacher(s)."
+        messageStart = "You are recieving a notification because you have absent teachers:"
         for notification in notificationList:
             for student in notification.students:
                 number = Number(student.number)
-                messageContent = f" {notification.teacher.first} {notification.teacher.last} is absent. They leave the following note: {notification.teacher.note}."        
+                messageContent = f"| {notification.teacher.first} {notification.teacher.last} is absent. Note: {notification.teacher.note}."     
+                # Map a number its update message. 
+                ## Meant to prevent duplicate messages (Dict entries are unique)
                 if messageDict.get(number) == None:
+                    # Create number entry if it doesn't exist.
                     messageDict[number] = messageStart + messageContent
                 else:
+                    # Append to existing message.
                     messageDict.update({number: messageDict[number] + messageContent})
         return messageDict
 
+    # Send messages to each student.
     def sendMessages(self, messageDict: dict):
         if len(messageDict) == 0:
             print("No users to notify.")
