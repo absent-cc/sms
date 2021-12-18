@@ -46,8 +46,9 @@ class ui(Thread):
         responsesDict = {
             'cancel': self.cancel,
             'edit': self.edit,
-            'status': self.status,
-            'about': self.about
+            'schedule': self.printSchedule,
+            'about': self.about,
+            'help': self.help
         }
 
         # Check if response in responsesDict, if so run response function.
@@ -116,6 +117,11 @@ class ui(Thread):
 
         return True
 
+    def help(self):
+        helpMessage = "Enter 'SUBSCRIBE' to subscribe to abSENT. Enter 'CANCEL' to cancel the service. Enter 'EDIT' to edit your schedule. Enter 'SCHEDULE' to view your schedule. Enter 'ABOUT' to learn more about abSENT."
+        self.sms.send(str(self.number), helpMessage)
+        return True
+    
     # Upon a cancel message.
     def cancel(self, db: DatabaseHandler, resStudent: Student):
         
@@ -182,8 +188,8 @@ class ui(Thread):
 
         return True
 
-    # Upon a status request.
-    def status(self, db: DatabaseHandler, student: Student):
+    # Upon a printSchedule request.
+    def printSchedule(self, db: DatabaseHandler, student: Student):
         
         # Get the schedule.
         schedule = db.getScheduleByStudent(student)
@@ -303,7 +309,7 @@ class ui(Thread):
             else:
                 self.sms.send(str(self.number), invalidMessage)
         return year
-
+    
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName):
 
