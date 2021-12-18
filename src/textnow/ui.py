@@ -7,10 +7,10 @@ from .sms import sms
 
 class ui(Thread):
 
-    def __init__(self, creds: TextNowCreds, msg: Message):
+    def __init__(self, textnowCreds: TextNowCreds, msg: Message):
         Thread.__init__(self)
         self.db = None
-        self.sms = sms(creds)
+        self.sms = sms(textnowCreds)
         self.msg = msg
         self.number = Number(msg.number)
 

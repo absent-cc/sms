@@ -174,3 +174,17 @@ class Message:
 class TextNowCreds:
     username: str
     sid: str
+    csrf: str
+
+@dataclass
+class SchoologyCreds:
+    northkey: str
+    northsecret: str
+    southkey: str
+    southsecret: str
+
+@dataclass
+class NotificationInformation:
+    teacher: AbsentTeacher
+    students: list
+    block: SchoolBlock

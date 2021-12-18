@@ -6,8 +6,6 @@ class DatabaseHandler():
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
         self.db_path = f"data/{school.name}_{db_path}"
 
-        self.reset()
-
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         create_student_directory = """
