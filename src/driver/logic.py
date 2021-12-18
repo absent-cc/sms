@@ -2,54 +2,53 @@ from dataStructs import *
 from textnow.sms import sms
 from database.databaseHandler import *
 from schoology.absence import Absence
-
+from datetime import date
 class LogicDriver:
     
-    def __init__(self, creds: TextNowCreds, sckeys: list, scsecrets: list):
-        self.sms = sms(creds)
+    # Configures a dict of DB objects and a dict of blocks keyed by day as returned by datetime.
+    def __init__(self, textnowCreds: TextNowCreds, scCreds: SchoologyCreds):
+        self.sms = sms(textnowCreds)
         self.db = {
             SchoolName.NEWTON_NORTH: DatabaseHandler(SchoolName.NEWTON_NORTH), 
             SchoolName.NEWTON_SOUTH: DatabaseHandler(SchoolName.NEWTON_SOUTH)
         }
         self.blockDict = {
-            0: None,
-            1: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.C, SchoolBlock.D, SchoolBlock.E),
-            2: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.F, SchoolBlock.G),
-            3: (SchoolBlock.C, SchoolBlock.D, SchoolBlock.E, SchoolBlock.F),
-            4: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.G, SchoolBlock.E),
-            5: (SchoolBlock.C, SchoolBlock.D, SchoolBlock.F, SchoolBlock.G),
+            0: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.C, SchoolBlock.D, SchoolBlock.E),
+            1: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.F, SchoolBlock.G),
+            2: (SchoolBlock.C, SchoolBlock.D, SchoolBlock.E, SchoolBlock.F),
+            3: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.G, SchoolBlock.E),
+            4: (SchoolBlock.C, SchoolBlock.D, SchoolBlock.F, SchoolBlock.G),
+            5: None,
             6: None
         }
-        self.sc = Absence(sckeys, scsecrets)
+        self.sc = Absence(scCreds)
 
-    def run(self, date):
-        #NNHS Runtime
-        northAbsences = self.getAbsenceList(date, SchoolName.NEWTON_NORTH)
-        notificationList = self.getStudentsToNotify(date, northAbsences, SchoolName.NEWTON_NORTH) 
+    # Runtime code, calls the various functions within the class and sends the appropriate messages to people with absent teachers.
+    def run(self, date, school: SchoolName):
+        self.date = date
+        absences = self.getAbsenceList(school)
+        if absences == None:
+            print("NO DATA AVAILABLE.")
+            return False
+        notificationList = self.getStudentsToNotify(absences, school) 
         messages = self.genMessages(notificationList)
-        print("NNHS:")
-        self.sendMessages(messages)
-        #NSHS Runtime
-        southAbsences = self.getAbsenceList(date, SchoolName.NEWTON_SOUTH)
-        notificationList = self.getStudentsToNotify(date, northAbsences, SchoolName.NEWTON_SOUTH) 
-        messages = self.genMessages(notificationList)
-        print("NSHS:")
-        self.sendMessages(messages)
+        attemptSend = self.sendMessages(messages)
         return True
 
-    def getAbsenceList(self, date, school):
+    # Fetchs absent
+    def getAbsenceList(self, school: SchoolName):
         if school == SchoolName.NEWTON_NORTH:
-            absenceList = self.sc.filterAbsencesNorth(date)
+            absenceList = self.sc.filterAbsencesNorth(self.date)
         elif school == SchoolName.NEWTON_SOUTH:
-            absenceList = self.sc.filterAbsencesSouth(date)
+            absenceList = self.sc.filterAbsencesSouth(self.date)
         else:
             return None
         return absenceList
 
-    def getStudentsToNotify(self, date, absences: list, school: SchoolName):
+    def getStudentsToNotify(self, absences: list, school: SchoolName):
         notificationList = []
         for teacher in absences:
-            for block in self.blockDict[int(date.strftime('%w'))]:
+            for block in self.blockDict[self.date.weekday()]:
                 queryStudents = self.db[school].queryStudentsByAbsentTeacher(Teacher(teacher.first, teacher.last, school), block)
                 if queryStudents != []:
                     notificationList.append(NotificationInformation(teacher, queryStudents, block)) 
@@ -72,6 +71,8 @@ class LogicDriver:
     def sendMessages(self, messageDict: dict):
         if len(messageDict) == 0:
             print("No users to notify.")
+            return False
         for number in messageDict:
             self.sms.send(str(number), messageDict[number])
             print(f"Notification sent to {str(number)}.")
+        return True
