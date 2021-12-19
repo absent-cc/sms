@@ -4,17 +4,33 @@ from textnow.ui import ui
 from schoology.absence import *
 from datetime import datetime, timedelta
 from dataStructs import *
+from driver.logic import LogicDriver
 
-# Open secrets file.
-with open('secrets.yml', 'r') as f:
+# Open files.
+with open('secrets.yml') as f:
     cfg = yaml.safe_load(f)
+with open('state.yml') as f:
+    state = yaml.safe_load(f)
 
 # Define API variables.
-sid = cfg['textnow']['sid']
-username = cfg['textnow']['username']
-sckeys = [cfg['north']['key'], cfg['south']['key']]
-scsecrets = [cfg['north']['secret'], cfg['south']['secret']]
-creds = TextNowCreds(username, sid)
+scCreds = SchoologyCreds(cfg['north']['key'], cfg['north']['secret'], cfg['south']['key'], cfg['south']['secret'])
+textnowCreds = TextNowCreds(cfg['textnow']['username'], cfg['textnow']['sid'], cfg['textnow']['csrf'])
+
+# Function for writing state.
+def writeState(school: SchoolName, date, statePath = 'state.yml'):
+    # Read state yaml file.
+    with open(statePath, 'r') as f:
+        state = yaml.load(f)
+    
+    state[str(school)] = date.strftime('%m/%-d/%Y')
+    if school == SchoolName.NEWTON_NORTH:
+        state[str(SchoolName.NEWTON_SOUTH)] = state[str(SchoolName.NEWTON_SOUTH)]
+    else:
+        state[str(SchoolName.NEWTON_NORTH)] = state[str(SchoolName.NEWTON_NORTH)]
+
+    # Write new state to state file
+    with open('state.yml', 'w') as f:
+        yaml.safe_dump(state, f)
 
 # Make threads regenerate on fault.
 def threadwrapper(func):
@@ -32,20 +48,22 @@ def threadwrapper(func):
 def sms_listener():
     
     # Define initial vars.
-    textnow = sms(creds) 
-    activethreads = {
+    textnow = sms(textnowCreds) # Create textnow API instance
+    activethreads = { # stateionary of active threads.
     }
 
-    while True:
+    textnow.send('+16176868207', 'abSENT listener started!')
 
+    while True:
         # Create thread for each new initial contact.
         for msg in textnow.listen():
+            # Create number object
             number = Number(msg.number)
             if number not in activethreads:
-                textnow.markAsRead(msg)
-                activethreads.update({number: ui(creds, msg)})
-                activethreads[number].start()
-                print(f"Thread created: {str(number)}.")
+                textnow.markAsRead(msg) # Mark msg as read
+                activethreads.update({number: ui(textnowCreds, msg)}) # Add new thread to active threads.
+                activethreads[number].start() # Start the thread.
+                print(f"Thread created: {str(number)} with initial message '{msg.content}'.")
 
         # Thread cleaner.
         dead = []
@@ -62,20 +80,39 @@ def sms_listener():
 # Listen for Schoology updates.
 def sc_listener():
     
-    # Define initial var.
-    absent = absence(sckeys, scsecrets)
+    restTime = timedelta(seconds=10) # Time between each check.
+    lastCheckTime = datetime.now() - restTime # Last time a check was made.
+
+    # Define initial vars.
+    logic = LogicDriver(textnowCreds, scCreds)
+    north = SchoolName.NEWTON_NORTH
+    south = SchoolName.NEWTON_SOUTH
+
+    TodayNotifed = False
 
     # Print Schoology.
-    while True:
-        # Grab current date, run functions using current date + print.
-        date = datetime.now() - timedelta(hours=5)
-        print(absent.filterAbsencesNorth(date))
-        print("\n\n")
-        print(absent.filterAbsencesSouth(date))
-        print("\n\n\n\n")
-
-        # Wait for a bit.
-        time.sleep(100)
+    while TodayNotifed == False:
+        currentTime = datetime.now()
+        if lastCheckTime + restTime < currentTime: # Sleep without delay
+            # Grab current date, run functions using current date.
+            date = datetime.now() - timedelta(hours=12)
+            
+            if state[str(north)] != date.strftime('%m/%-d/%Y'):
+                # NNHS Runtime.
+                update = logic.run(date, north)
+                if update:
+                    writeState(north, date)
+            else:
+                print("Users already notified!")
+            if state[str(south)] != date.strftime('%m/%-d/%Y'):
+                # NSHS Runtime.
+                update = logic.run(date, north)
+                if update:
+                    writeState(south, date)
+            else:
+                print("Users already notified!")
+            print("Looped once!")
+            lastCheckTime = currentTime
 
 # Configure and start threads.
 threads = {
