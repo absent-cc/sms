@@ -103,15 +103,27 @@ class ui(Thread):
         db.addStudent(student, schedule)
 
         # Confirmation message.
-        successMessageOne = "Great! You've signed up sucessfully. Here is your schedule:"
+        successMessageOne = f"Welcome to abSENT, {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
-        successMessageThree = "Make any edits by entering 'EDIT'."
-        successMessageFour = f"Welcome to abSENT, {name[0]} {name[1]}!"
-
-        self.sms.send(str(self.number), successMessageOne)
-        self.sms.send(str(self.number), successMessageTwo)
-        self.sms.send(str(self.number), successMessageThree)
-        self.sms.send(str(self.number), successMessageFour)
+        successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
+        successMessageFour = "Remember that abSENT will text you whenever your teachers are absent. There will not be any messages sent when you do not have an absent teacher."
+        successMessageFive = "Periodically, we will send out announcements regarding new features and school wide updates."
+        successMessageSix = "If you ever have any questions, or a bug to report, text 'CONTACT' to directly reach us."
+        successMessageSeven = "We hope you enjoy abSENT!"
+        
+        self.sms.send(str(self.number), successMessageOne) # Welcome
+        time.sleep(3.75)
+        self.sms.send(str(self.number), successMessageTwo) # Schedule
+        time.sleep(5)
+        self.sms.send(str(self.number), successMessageThree) # Edit
+        time.sleep(4)
+        self.sms.send(str(self.number), successMessageFour) # Text when absent, won't text otherwise
+        time.sleep(5.5)
+        self.sms.send(str(self.number), successMessageFive) # Announcements
+        time.sleep(5)
+        self.sms.send(str(self.number), successMessageSix) # Contact if questions
+        time.sleep(4)
+        self.sms.send(str(self.number), successMessageSeven) # Enjoy!
         return True
 
     def help(self, db: DatabaseHandler, resStudent: Student):
@@ -227,8 +239,8 @@ class ui(Thread):
         # Initial variables including messages and blank names.
         last = None
         first = None
-        initialMessage = "Please text your first and last name, seperated by spaces. (e.g: John Doe)"
-        invalidMessage = "That's not a valid name. Enter your first and last name seperated by spaces."
+        initialMessage = "Please text your first and last name, separated by spaces. (e.g: John Doe)"
+        invalidMessage = "That's not a valid name. Enter your first and last name separated by spaces."
 
         # Send initial message.
         self.sms.send(str(self.number), initialMessage)
