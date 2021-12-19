@@ -15,8 +15,7 @@ class ui(Thread):
         self.number = Number(msg.number)
 
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
-    def run(self):
-        
+    def run(self): 
         # Creates temporary DBs.
         dbNorth = DatabaseHandler(SchoolNameMapper()['NNHS'])
         dbSouth = DatabaseHandler(SchoolNameMapper()['NSHS'])
@@ -30,9 +29,9 @@ class ui(Thread):
         db = None
 
         # Creates messages
-        alreadySubscribedMessage = "You are already subscribed. Enter 'CANCEL' to cancel the service, 'EDIT' to edit your schedule, or 'STATUS' to view your schedule. To learn more about how we made it happen, enter 'ABOUT'."
+        alreadySubscribedMessage = "You are already subscribed. Type in 'HELP' to see a list of commands."
         timeoutMessage = "You timed out! Start the process again by entering 'SUBSCRIBE'."
-        askForSubscription = "You have texting the phone number of abSENT, a monitoring system for the NPS absent lists. To subscribe, please enter 'SUBSCRIBE'."
+        askForSubscription = "Hi! You've texted abSENT, an SMS based monitoring system for the NPS absent lists. To subscribe, please enter 'SUBSCRIBE'."
 
         # Sets the correct DB for the student if they exist.
         if resNorth != None:
@@ -69,7 +68,6 @@ class ui(Thread):
 
     # For new users, upon sending a subscribe message.
     def welcome(self, msg: Message):
-
         # Sends welcome.
         welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
 
@@ -114,17 +112,15 @@ class ui(Thread):
         self.sms.send(str(self.number), successMessageTwo)
         self.sms.send(str(self.number), successMessageThree)
         self.sms.send(str(self.number), successMessageFour)
-
         return True
 
-    def help(self):
-        helpMessage = "Enter 'SUBSCRIBE' to subscribe to abSENT. Enter 'CANCEL' to cancel the service. Enter 'EDIT' to edit your schedule. Enter 'SCHEDULE' to view your schedule. Enter 'ABOUT' to learn more about abSENT."
+    def help(self, db: DatabaseHandler, resStudent: Student):
+        helpMessage = "Enter 'SUBSCRIBE' to subscribe to abSENT. Enter 'CANCEL' to cancel the service. Enter 'EDIT' to edit your schedule. Enter 'SCHEDULE' to view your schedule. Enter 'ABOUT' to learn more about abSENT. Enter 'HELP' to view this help message."
         self.sms.send(str(self.number), helpMessage)
         return True
     
     # Upon a cancel message.
-    def cancel(self, db: DatabaseHandler, resStudent: Student):
-        
+    def cancel(self, db: DatabaseHandler, resStudent: Student): 
         # Cancels and sends message.
         db.removeStudentFromStudentDirectory(resStudent)
         cancelledMessage = "Service cancelled. Sorry to see you go!"
@@ -134,21 +130,19 @@ class ui(Thread):
 
     # Upon an about request.
     def about(self, x, y):
-
         # Sets message and sends.
-        aboutMessage = "Visit https://github.com/bykevinyang/abSENT to learn more about abSENT. abSENT is developed by Roshan Karim and Kevin Yang, students at North and South respectively."
+        aboutMessage = "abSENT was created by Kevin Yang (NSHS '24) and Roshan Karim (NNHS '24). It was born out of our sickness of checking schoology in the morning. If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for more info: https://instagram.com/nps_absent."
         self.sms.send(str(self.number), aboutMessage)
 
         return True
 
     # Upon an edit request.
-    def edit(self, db: DatabaseHandler, resStudent: Student):
-        
+    def edit(self, db: DatabaseHandler, resStudent: Student) -> bool:
         # A bunch of messages.
         initialMessageOne = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name."
         initialMessageTwo = "For example: D John Doe. Alternatively, for a free block: D Free Block"
         invalidMessageTeacher = "You have provided an invalid teacher. Please restart the edit process."
-        invaldMessageBlock = "You have entered an invalid block. Please restart the edit process."
+        invalidMessageBlock = "You have entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
 
         self.sms.send(str(self.number), initialMessageOne)
@@ -159,7 +153,11 @@ class ui(Thread):
         # Check timeout.
         if rawInput == None:
             return False
-
+        
+        # SQL injection protection.
+        if self.sqlInjectionCheck(rawInput):
+            return False
+        
         # Format input.
         teacherAttributes = rawInput.content.upper().split(" ", 2)
 
@@ -170,7 +168,7 @@ class ui(Thread):
     
         # Check if block is good.
         if teacherAttributes[0] not in ReverseBlockMapper():
-            sms.send(str(self.number), invalidMessageBlock)
+            self.sms.send(str(self.number), invalidMessageBlock)
             return False
         
         school = resStudent.school
@@ -185,7 +183,7 @@ class ui(Thread):
 
         db.changeClass(resStudent, enumBlock, teacher)
         self.sms.send(str(self.number), successMessage)
-
+        self.printSchedule(db, resStudent)
         return True
 
     # Upon a printSchedule request.
@@ -207,24 +205,29 @@ class ui(Thread):
         return True
     
     # For use when parsing user input: checks if the names provided users are containing characters needed for SQL injection attacks.
+    ## Returns true if invalid input
+    ## Return false if valid input
     def sqlInjectionCheck(self, msg: Message):
         
         # Message.  
         sqlInjectionMessage = "You are a filthy SQL injector. Please leave immediately."
+        singleQuoteMessage = "You inputted an invalid single quote ('). Please try again."
 
         # Check for the invalid symbols, and send message if invalid symbol is used.
-        if '\'' in msg.content or ';' in msg.content:
+        if ';' in msg.content:
             self.sms.send(str(self.number), sqlInjectionMessage)
             return True
-        else:
-            return False
+        elif '\'' in msg.content:
+            self.sms.send(str(self.number), singleQuoteMessage)
+            return True
+        return False
 
     def getName(self):
 
         # Initial variables including messages and blank names.
         last = None
         first = None
-        initialMessage = "Please text your first and last name, seperated by spaces."
+        initialMessage = "Please text your first and last name, seperated by spaces. (e.g: John Doe)"
         invalidMessage = "That's not a valid name. Enter your first and last name seperated by spaces."
 
         # Send initial message.
@@ -314,7 +317,7 @@ class ui(Thread):
     def getSchedule(self, school: SchoolName):
 
         # A bunch of messages.
-        initialMessageOne = "Please enter each of your teachers in a new message, in this format:"
+        initialMessageOne = "Please enter each of your teachers in a new message in the below format. When finished entering, text 'DONE'."
         initialMessageTwo = "A John Doe"
         initialMessageThree = "B Joe Mama"
         invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
