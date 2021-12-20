@@ -4,19 +4,19 @@ from threading import Thread
 from dataStructs import *
 from database.databaseHandler import DatabaseHandler
 from textnow.controlPanel import ControlConsole
-from .sms import sms
+from .sms import SMS
 
 class UI(Thread):
 
     def __init__(self, textnowCreds: TextNowCreds, msg: Message):
         Thread.__init__(self)
         self.db = None
-        self.sms = sms(textnowCreds)
+        self.sms = SMS(textnowCreds)
         self.msg = msg
         self.number = Number(msg.number)
 
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
-    def run(self): 
+    def run(self) -> bool: 
         # Creates temporary DBs.
         dbNorth = DatabaseHandler(SchoolNameMapper()['NNHS'])
         dbSouth = DatabaseHandler(SchoolNameMapper()['NSHS'])
@@ -46,7 +46,7 @@ class UI(Thread):
         responsesDict = {
             'cancel': self.cancel,
             'edit': self.edit,
-            'schedule': self.printSchedule,
+            'schedule': self.returnSchedule,
             'about': self.about,
             'help': self.help,
         }
@@ -55,22 +55,30 @@ class UI(Thread):
         if db != None:
             content = self.msg.content.lower()
             if content in responsesDict:
-                responsesDict[content](db, resStudent)
+                response = responsesDict[content](db, resStudent)
+                if not response:
+                    self.sms.send(str(self.number), timoutMessage)
+                    return False
             elif content == 'admin':
                 ControlPanel = ControlConsole(self.sms, self.msg)
+                return True
             else:
                 self.sms.send(str(self.number), alreadySubscribedMessage)
+                return True
             
         # If they aren't subscribed and would like to be, run the welcome function.
         elif self.msg.content.lower() == "subscribe":
             welcome = self.welcome(self.msg)
             if not welcome:
                 self.sms.send(str(self.number), timeoutMessage)
+                return False
         else:
             self.sms.send(str(self.number), askForSubscription)
 
+        return True
+
     # For new users, upon sending a subscribe message.
-    def welcome(self, msg: Message):
+    def welcome(self, msg: Message) -> bool:
         # Sends welcome.
         welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
 
@@ -109,46 +117,35 @@ class UI(Thread):
         successMessageOne = f"Welcome to abSENT, {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "Remember that abSENT will text you whenever your teachers are absent. There will not be any messages sent when you do not have an absent teacher."
-        successMessageFive = "Periodically, we will send out announcements regarding new features and school wide updates."
-        successMessageSix = "If you ever have any questions, or a bug to report, text 'CONTACT' to directly reach us."
-        successMessageSeven = "We hope you enjoy abSENT!"
+        successMessageFour = "To help us keep this service running, please send us bug reports on our GitHub issue tracker (text 'ABOUT' for a link), and donate if you can, at 'absent.igneus.org'."
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
         time.sleep(3.75)
         self.sms.send(str(self.number), successMessageTwo) # Schedule
         time.sleep(5)
         self.sms.send(str(self.number), successMessageThree) # Edit
-        time.sleep(4)
-        self.sms.send(str(self.number), successMessageFour) # Text when absent, won't text otherwise
-        time.sleep(5.5)
-        self.sms.send(str(self.number), successMessageFive) # Announcements
-        time.sleep(5)
-        self.sms.send(str(self.number), successMessageSix) # Contact if questions
-        time.sleep(4)
-        self.sms.send(str(self.number), successMessageSeven) # Enjoy!
+        time.sleep(3)
+        self.sms.send(str(self.number), successMessageFour) # Edit
         return True
 
-    def help(self, db: DatabaseHandler, resStudent: Student):
+    def help(self, db: DatabaseHandler, resStudent: Student) -> bool:
         helpMessage = "Enter 'SUBSCRIBE' to subscribe to abSENT. Enter 'CANCEL' to cancel the service. Enter 'EDIT' to edit your schedule. Enter 'SCHEDULE' to view your schedule. Enter 'ABOUT' to learn more about abSENT. Enter 'HELP' to view this help message."
         self.sms.send(str(self.number), helpMessage)
         return True
     
     # Upon a cancel message.
-    def cancel(self, db: DatabaseHandler, resStudent: Student): 
+    def cancel(self, db: DatabaseHandler, resStudent: Student) -> bool: 
         # Cancels and sends message.
-        db.removeStudentFromStudentDirectory(resStudent)
+        db.removeStudent(resStudent)
         cancelledMessage = "Service cancelled. Sorry to see you go!"
         self.sms.send(str(self.number), cancelledMessage)
-
         return True
 
     # Upon an about request.
-    def about(self, x, y):
+    def about(self, x, y) -> bool:
         # Sets message and sends.
-        aboutMessage = "abSENT was created by Kevin Yang (NSHS '24) and Roshan Karim (NNHS '24). It was born out of our sickness of checking schoology in the morning. If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for more info: https://instagram.com/nps_absent."
+        aboutMessage = "abSENT was created by Roshan Karim (NNHS '24) and Kevin Yang (NSHS '24).  If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for other information: https://instagram.com/nps_absent."
         self.sms.send(str(self.number), aboutMessage)
-
         return True
 
     # Upon an edit request.
@@ -178,7 +175,7 @@ class UI(Thread):
 
         # Check if teacher is good.
         if len(teacherAttributes) != 3:
-            sms.send(str(self.number), invalidMessageTeacher)
+            self.sms.send(str(self.number), invalidMessageTeacher)
             return False
     
         # Check if block is good.
@@ -196,13 +193,13 @@ class UI(Thread):
         if teacher.first == "FREE" and teacher.last == "BLOCK":
             teacher = None
 
-        db.changeClass(resStudent, enumBlock, teacher)
+        print(db.changeClass(resStudent, enumBlock, teacher))
         self.sms.send(str(self.number), successMessage)
-        self.printSchedule(db, resStudent)
+        self.returnSchedule(db, resStudent)
         return True
 
     # Upon a printSchedule request.
-    def printSchedule(self, db: DatabaseHandler, student: Student):
+    def returnSchedule(self, db: DatabaseHandler, student: Student) -> bool:
         
         # Get the schedule.
         schedule = db.getScheduleByStudent(student)
@@ -222,7 +219,7 @@ class UI(Thread):
     # For use when parsing user input: checks if the names provided users are containing characters needed for SQL injection attacks.
     ## Returns true if invalid input
     ## Return false if valid input
-    def sqlInjectionCheck(self, msg: Message):
+    def sqlInjectionCheck(self, msg: Message) -> bool:
         
         # Message.  
         sqlInjectionMessage = "You are a filthy SQL injector. Please leave immediately."
@@ -237,7 +234,7 @@ class UI(Thread):
             return True
         return False
 
-    def getName(self):
+    def getName(self) -> tuple[str, str] or None:
 
         # Initial variables including messages and blank names.
         last = None
@@ -270,7 +267,7 @@ class UI(Thread):
         return (first, last)
     
     # Get the school name of the user.
-    def getSchool(self, name: tuple):
+    def getSchool(self, name: tuple[str, str]) -> SchoolName or None:
         
         # Initial vars, messages + blank school value.
         school = None
@@ -297,7 +294,7 @@ class UI(Thread):
         return school
     
     # Get the grade of the user.
-    def getYear(self):
+    def getYear(self) -> int or None:
 
         # Initial vars, including blank year value.
         year = None
@@ -329,7 +326,7 @@ class UI(Thread):
         return year
     
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
-    def getSchedule(self, school: SchoolName):
+    def getSchedule(self, school: SchoolName) -> Schedule or None:
 
         # A bunch of messages.
         initialMessageOne = "Please enter each of your teachers in a new message in the below format. When finished entering, text 'DONE'."
@@ -346,6 +343,9 @@ class UI(Thread):
         # Creates schedue object, get's initial raw user input, creates a new var for it formatted.
         schedule = Schedule()
         rawInput = self.sms.awaitResponse(self.number)
+        # Check for timeout.
+        if rawInput == None:
+            return None
         content = rawInput.content.upper()
 
         # Main thread.
@@ -361,6 +361,9 @@ class UI(Thread):
             if len(teacherAttributes) != 3:
                 self.sms.send(str(self.number), invalidMessageTeacher)
                 rawInput = self.sms.awaitResponse(self.number)
+                # Check for timeout.
+                if rawInput == None:
+                    return None
                 content = rawInput.content.upper()
                 continue
 
@@ -368,6 +371,9 @@ class UI(Thread):
             if teacherAttributes[0] not in ReverseBlockMapper():
                 self.sms.send(str(self.number), invalidMessageBlock)
                 rawInput = self.sms.awaitResponse(self.number)
+                # Check for timeout.
+                if rawInput == None:
+                    return None
                 content = rawInput.content.upper()
                 continue
             
@@ -381,6 +387,9 @@ class UI(Thread):
 
             # Adds the teacher object to the scheduule object.
             rawInput = self.sms.awaitResponse(self.number)
+            # Check for timeout.
+            if rawInput == None:
+                return None
             content = rawInput.content.upper()
         return schedule
         
