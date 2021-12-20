@@ -38,9 +38,11 @@ class Absence:
                     current_table = update
                 elif str(self.date.strftime('%B %-d')) in text[0]:
                     current_table = update
-                # This is what I'd like to refer to as the Susan Spiritizo clause.
+                # This is what I'd like to refer to as the Susan Spiritio clause.
                 elif str(self.date.strftime('%m/%-d/%Y')) in text[0]:
-                    current_table= update
+                    current_table = update
+                elif str(self.date.strftime('%m/%-d/%y')) in text[0]:
+                    current_table = update
         return current_table
 
     # Takes the raw North attendance table from the prior function and parses it, using the AbsentTeacher dataclass. Returns an array of entries utilizing this class. 

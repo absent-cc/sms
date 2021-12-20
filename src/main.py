@@ -1,6 +1,6 @@
 import threading, time, yaml
-from textnow.sms import sms
-from textnow.UI import UI
+from textnow.sms import SMS
+from textnow.ui import UI
 from schoology.absence import *
 from datetime import datetime, timedelta
 from dataStructs import *
@@ -9,8 +9,6 @@ from driver.logic import LogicDriver
 # Open files.
 with open('secrets.yml') as f:
     cfg = yaml.safe_load(f)
-with open('state.yml') as f:
-    state = yaml.safe_load(f)
 
 # Define API variables.
 scCreds = SchoologyCreds(cfg['north']['key'], cfg['north']['secret'], cfg['south']['key'], cfg['south']['secret'])
@@ -20,7 +18,7 @@ textnowCreds = TextNowCreds(cfg['textnow']['username'], cfg['textnow']['sid'], c
 def writeState(school: SchoolName, date, statePath = 'state.yml'):
     # Read state yaml file.
     with open(statePath, 'r') as f:
-        state = yaml.load(f)
+        state = yaml.safe_load(f)
     
     state[str(school)] = date.strftime('%m/%-d/%Y')
     if school == SchoolName.NEWTON_NORTH:
@@ -31,6 +29,21 @@ def writeState(school: SchoolName, date, statePath = 'state.yml'):
     # Write new state to state file
     with open('state.yml', 'w') as f:
         yaml.safe_dump(state, f)
+    return state
+
+def fetchStates(date, statePath = 'state.yml'):
+    stateDict = {
+        SchoolName.NEWTON_NORTH: False,
+        SchoolName.NEWTON_SOUTH: False
+    }
+    # Read state yaml file.
+    with open(statePath, 'r') as f:
+        state = yaml.safe_load(f)
+    if state[str(SchoolName.NEWTON_NORTH)] == date.strftime('%m/%-d/%Y'):
+        stateDict[SchoolName.NEWTON_NORTH] = True
+    if state[str(SchoolName.NEWTON_SOUTH)] == date.strftime('%m/%-d/%Y'):
+        stateDict[SchoolName.NEWTON_SOUTH] = True
+    return stateDict
 
 # Make threads regenerate on fault.
 def threadwrapper(func):
@@ -48,7 +61,7 @@ def threadwrapper(func):
 def sms_listener():
     
     # Define initial vars.
-    textnow = sms(textnowCreds) # Create textnow API instance
+    textnow = SMS(textnowCreds) # Create textnow API instance
     activethreads = { # stateionary of active threads.
     }
 
@@ -88,31 +101,24 @@ def sc_listener():
     north = SchoolName.NEWTON_NORTH
     south = SchoolName.NEWTON_SOUTH
 
-    TodayNotifed = False
-
-    # Print Schoology.
-    while TodayNotifed == False:
-        currentTime = datetime.now()
-        if lastCheckTime + restTime < currentTime: # Sleep without delay
-            # Grab current date, run functions using current date.
-            date = datetime.now() - timedelta(hours=12)
-            
-            if state[str(north)] != date.strftime('%m/%-d/%Y'):
+    while True:
+        date = datetime.now() - timedelta(hours=5)
+        states = fetchStates(date)
+        while not states[north] or not states[south]:
+            currentTime = datetime.now()
+            if lastCheckTime + restTime < currentTime: # Sleep without delay   
+                if not states[north]:
                 # NNHS Runtime.
-                update = logic.run(date, north)
-                if update:
-                    writeState(north, date)
-            else:
-                print("Users already notified!")
-            if state[str(south)] != date.strftime('%m/%-d/%Y'):
-                # NSHS Runtime.
-                update = logic.run(date, north)
-                if update:
-                    writeState(south, date)
-            else:
-                print("Users already notified!")
-            print("Looped once!")
-            lastCheckTime = currentTime
+                    update = logic.run(date, north)
+                    if update:
+                        writeState(north, date)
+                if not states[south]:
+                    # NSHS Runtime
+                    update = logic.run(date, south)
+                    if update:
+                        writeState(south, date)
+                states = fetchStates(date)
+                lastCheckTime = currentTime
 
 # Configure and start threads.
 threads = {

@@ -1,5 +1,5 @@
 from dataStructs import *
-from textnow.sms import sms
+from textnow.sms import SMS
 from database.databaseHandler import *
 from schoology.absence import Absence
 from datetime import date
@@ -8,7 +8,7 @@ class LogicDriver:
     
     # Configures a dict of DB objects and a dict of blocks keyed by day as returned by datetime.
     def __init__(self, textnowCreds: TextNowCreds, scCreds: SchoologyCreds):
-        self.sms = sms(textnowCreds)
+        self.sms = SMS(textnowCreds)
         self.db = {
             SchoolName.NEWTON_NORTH: DatabaseHandler(SchoolName.NEWTON_NORTH), 
             SchoolName.NEWTON_SOUTH: DatabaseHandler(SchoolName.NEWTON_SOUTH)
@@ -28,6 +28,7 @@ class LogicDriver:
     def run(self, date, school: SchoolName):
         self.date = date
         absences = self.getAbsenceList(school)
+        print(absences)
         if absences == None:
             print("NO DATA AVAILABLE.")
             return False

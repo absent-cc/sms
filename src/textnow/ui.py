@@ -4,14 +4,14 @@ from threading import Thread
 from dataStructs import *
 from database.databaseHandler import DatabaseHandler
 from textnow.controlPanel import ControlConsole
-from .sms import sms
+from .sms import SMS
 
 class UI(Thread):
 
     def __init__(self, textnowCreds: TextNowCreds, msg: Message):
         Thread.__init__(self)
         self.db = None
-        self.sms = sms(textnowCreds)
+        self.sms = SMS(textnowCreds)
         self.msg = msg
         self.number = Number(msg.number)
 
@@ -146,7 +146,7 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y):
         # Sets message and sends.
-        aboutMessage = "abSENT was created by Kevin Yang (NSHS '24) and Roshan Karim (NNHS '24). It was born out of our sickness of checking schoology in the morning. If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for more info: https://instagram.com/nps_absent."
+        aboutMessage = "abSENT was created by Roshan Karim (NNHS '24) and Kevin Yang (NSHS '24).  If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for other information: https://instagram.com/nps_absent."
         self.sms.send(str(self.number), aboutMessage)
 
         return True

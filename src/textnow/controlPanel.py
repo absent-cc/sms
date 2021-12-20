@@ -2,13 +2,13 @@ import time
 from threading import Thread
 from dataStructs import *
 from database.databaseHandler import DatabaseHandler
-from .sms import sms
+from .sms import SMS
 import yaml
 
 # Control Panel for admin
 class ControlConsole(Thread):
 
-    def __init__(self, sms: sms, msg: Message, secretPath: str = 'secrets.yml'):
+    def __init__(self, sms: SMS, msg: Message, secretPath: str = 'secrets.yml'):
         Thread.__init__(self)
         self.db = None
         self.sms = sms

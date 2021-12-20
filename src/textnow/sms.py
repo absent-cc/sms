@@ -4,7 +4,7 @@ import time
 from dataStructs import *
 from datetime import datetime, timedelta
 
-class sms:
+class SMS:
 
     # "Logs" into API. In reality, each API request is simply using auth header. There is no concept of a session.
     def __init__(self, creds: TextNowCreds):
