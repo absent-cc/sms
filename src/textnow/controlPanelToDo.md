@@ -1,0 +1,19 @@
+# Control Panel Feature List:
+- Validate admin:
+    - Check if its specific number
+    - Password Check
+- Information Check:
+    - User count:
+        - By school
+        - By teacher, block
+        - By grade
+    - Check if user is in database
+- Announcement:
+    - Send to all users
+    - Send to all users in a school
+    - Send to all users in a grade
+    - Send to all users in a class (teacher, blocK)
+- User:
+    - Add user
+    - Remove user
+    - Change user
