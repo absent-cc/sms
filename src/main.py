@@ -1,6 +1,6 @@
 import threading, time, yaml
 from textnow.sms import sms
-from textnow.ui import ui
+from textnow.UI import UI
 from schoology.absence import *
 from datetime import datetime, timedelta
 from dataStructs import *
@@ -61,7 +61,7 @@ def sms_listener():
             number = Number(msg.number)
             if number not in activethreads:
                 textnow.markAsRead(msg) # Mark msg as read
-                activethreads.update({number: ui(textnowCreds, msg)}) # Add new thread to active threads.
+                activethreads.update({number: UI(textnowCreds, msg)}) # Add new thread to active threads.
                 activethreads[number].start() # Start the thread.
                 print(f"Thread created: {str(number)} with initial message '{msg.content}'.")
 

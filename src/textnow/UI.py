@@ -3,9 +3,10 @@ import threading
 from threading import Thread
 from dataStructs import *
 from database.databaseHandler import DatabaseHandler
+from textnow.controlPanel import ControlConsole
 from .sms import sms
 
-class ui(Thread):
+class UI(Thread):
 
     def __init__(self, textnowCreds: TextNowCreds, msg: Message):
         Thread.__init__(self)
@@ -47,7 +48,7 @@ class ui(Thread):
             'edit': self.edit,
             'schedule': self.printSchedule,
             'about': self.about,
-            'help': self.help
+            'help': self.help,
         }
 
         # Check if response in responsesDict, if so run response function.
@@ -55,6 +56,8 @@ class ui(Thread):
             content = self.msg.content.lower()
             if content in responsesDict:
                 responsesDict[content](db, resStudent)
+            elif content == 'admin':
+                ControlPanel = ControlConsole(self.sms, self.msg)
             else:
                 self.sms.send(str(self.number), alreadySubscribedMessage)
             
@@ -380,6 +383,4 @@ class ui(Thread):
             rawInput = self.sms.awaitResponse(self.number)
             content = rawInput.content.upper()
         return schedule
-
-
-
+        
