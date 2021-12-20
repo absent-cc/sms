@@ -1,4 +1,5 @@
-# abSENT
+# abSENT    [![CodeQL](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml)
+
  ![abSENT Github Banner](marketing/banner.png)
 
 ## What is it?
