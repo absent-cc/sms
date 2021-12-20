@@ -34,8 +34,6 @@ class DatabaseHandler():
                 student_id INTEGER,
                 FOREIGN KEY(student_id) 
                     REFERENCES student_directory(student_id)
-                    ON DELETE CASCADE
-                    ON UPDATE CASCADE
                 FOREIGN KEY(teacher_id) 
                     REFERENCES teacher_directory(teacher_id)
             )
@@ -181,6 +179,24 @@ class DatabaseHandler():
             # If student object already has an id, return id
             return student.id
 
+    def getStudentsByGrade(self, grade: int) -> list:
+        query = f"SELECT * FROM student_directory WHERE grade = '{grade}'"
+        res = self.cursor.execute(query).fetchall()
+        studentArray = []
+        for student in res:
+            entry = Student(student[1], student[2], student[3], student[4], student[5], student[0])
+            studentArray.append(entry)
+        return studentArray
+
+    def getStudents(self) -> list:
+        query = f"SELECT * FROM student_directory"
+        res = self.cursor.execute(query).fetchall()
+        studentArray = []
+        for student in res:
+            entry = Student(student[1], student[2], student[3], student[4], student[5], student[0])
+            studentArray.append(entry)
+        return studentArray
+
     # Add student to student directory
     ## Does not check whether or not student is already in DB, assumes not
     def addStudentToStudentDirectory(self, student: Student):
@@ -202,7 +218,17 @@ class DatabaseHandler():
         self.connection.commit()
         # Return the newly generated id for student object manipulation
         return new_id
-    
+
+    def removeStudent(self, student: Student) -> bool:
+        if student.id == None:
+            return False
+        # Delete a student's classes.
+        query = f"DELETE FROM classes WHERE student_id = '{student.id}'"
+        self.cursor.execute(query)
+        self.connection.commit
+        self.removeStudentFromStudentDirectory(student)
+        return True
+
     # Remove student from student directory
     def removeStudentFromStudentDirectory(self, student: Student) -> bool:
         # You can only remove student if there is a student id 
@@ -348,8 +374,9 @@ class DatabaseHandler():
             WHERE teacher_id = '{teacher.id}' AND student_id = '{student.id}'
             """
             res = self.cursor.execute(query).fetchall()
-            enum_block = ReverseBlockMapper()[res[0][0]]
-            schedule[enum_block] = teacher
+            for block in res:
+                block = ReverseBlockMapper()[block[0]]
+                schedule[block] = teacher
         return schedule
     
     def getTeachersFromStudent(self, student: Student):

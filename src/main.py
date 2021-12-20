@@ -1,10 +1,9 @@
 import threading, time, yaml
 from textnow.sms import SMS
 from textnow.ui import UI
-from schoology.absence import *
-from datetime import datetime, timedelta
 from dataStructs import *
-from driver.logic import LogicDriver
+from driver.schoologyListener import *
+from database.databaseHandler import *
 
 # Open files.
 with open('secrets.yml') as f:
@@ -13,37 +12,6 @@ with open('secrets.yml') as f:
 # Define API variables.
 scCreds = SchoologyCreds(cfg['north']['key'], cfg['north']['secret'], cfg['south']['key'], cfg['south']['secret'])
 textnowCreds = TextNowCreds(cfg['textnow']['username'], cfg['textnow']['sid'], cfg['textnow']['csrf'])
-
-# Function for writing state.
-def writeState(school: SchoolName, date, statePath = 'state.yml'):
-    # Read state yaml file.
-    with open(statePath, 'r') as f:
-        state = yaml.safe_load(f)
-    
-    state[str(school)] = date.strftime('%m/%-d/%Y')
-    if school == SchoolName.NEWTON_NORTH:
-        state[str(SchoolName.NEWTON_SOUTH)] = state[str(SchoolName.NEWTON_SOUTH)]
-    else:
-        state[str(SchoolName.NEWTON_NORTH)] = state[str(SchoolName.NEWTON_NORTH)]
-
-    # Write new state to state file
-    with open('state.yml', 'w') as f:
-        yaml.safe_dump(state, f)
-    return state
-
-def fetchStates(date, statePath = 'state.yml'):
-    stateDict = {
-        SchoolName.NEWTON_NORTH: False,
-        SchoolName.NEWTON_SOUTH: False
-    }
-    # Read state yaml file.
-    with open(statePath, 'r') as f:
-        state = yaml.safe_load(f)
-    if state[str(SchoolName.NEWTON_NORTH)] == date.strftime('%m/%-d/%Y'):
-        stateDict[SchoolName.NEWTON_NORTH] = True
-    if state[str(SchoolName.NEWTON_SOUTH)] == date.strftime('%m/%-d/%Y'):
-        stateDict[SchoolName.NEWTON_SOUTH] = True
-    return stateDict
 
 # Make threads regenerate on fault.
 def threadwrapper(func):
@@ -62,10 +30,10 @@ def sms_listener():
     
     # Define initial vars.
     textnow = SMS(textnowCreds) # Create textnow API instance
-    activethreads = { # stateionary of active threads.
+    activethreads = { # dictionary of active threads.
     }
 
-    textnow.send('+16176868207', 'abSENT listener started!')
+    textnow.send('+16175059626', 'abSENT listener started!')
 
     while True:
         # Create thread for each new initial contact.
@@ -92,33 +60,8 @@ def sms_listener():
 
 # Listen for Schoology updates.
 def sc_listener():
-    
-    restTime = timedelta(seconds=10) # Time between each check.
-    lastCheckTime = datetime.now() - restTime # Last time a check was made.
-
-    # Define initial vars.
-    logic = LogicDriver(textnowCreds, scCreds)
-    north = SchoolName.NEWTON_NORTH
-    south = SchoolName.NEWTON_SOUTH
-
-    while True:
-        date = datetime.now() - timedelta(hours=5)
-        states = fetchStates(date)
-        while not states[north] or not states[south]:
-            currentTime = datetime.now()
-            if lastCheckTime + restTime < currentTime: # Sleep without delay   
-                if not states[north]:
-                # NNHS Runtime.
-                    update = logic.run(date, north)
-                    if update:
-                        writeState(north, date)
-                if not states[south]:
-                    # NSHS Runtime
-                    update = logic.run(date, south)
-                    if update:
-                        writeState(south, date)
-                states = fetchStates(date)
-                lastCheckTime = currentTime
+    sc = SchoologyListener(textnowCreds, scCreds)
+    sc.run()
 
 # Configure and start threads.
 threads = {
@@ -128,3 +71,6 @@ threads = {
 
 threads['sms'].start()
 threads['sc'].start()
+
+db = DatabaseHandler(SchoolName.NEWTON_NORTH)
+db.getStudentsByGrade(10)

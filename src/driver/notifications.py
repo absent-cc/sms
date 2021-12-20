@@ -4,7 +4,7 @@ from database.databaseHandler import *
 from schoology.absence import Absence
 from datetime import date
 
-class LogicDriver:
+class NotificationDriver:
     
     # Configures a dict of DB objects and a dict of blocks keyed by day as returned by datetime.
     def __init__(self, textnowCreds: TextNowCreds, scCreds: SchoologyCreds):

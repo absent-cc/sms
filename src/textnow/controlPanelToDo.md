@@ -12,7 +12,6 @@
     - Send to all users
     - Send to all users in a school
     - Send to all users in a grade
-    - Send to all users in a class (teacher, blocK)
 - User:
     - Add user
     - Remove user
