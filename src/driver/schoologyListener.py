@@ -17,28 +17,31 @@ class SchoologyListener:
         sentSouth = False
 
         while sentNorth == False or sentSouth == False:
-            date = datetime.now() - timedelta(hours=48)
+            date = datetime.now() - timedelta(hours=5) # Convert from UTC --> EST
             states = self.fetchStates(date)
-            while not states[self.north] or not states[self.south]:
+            # Reads from state file to determine whether notifications have been sent today.
+            if not states[self.north] or not states[self.south]: 
                 currentTime = datetime.now()
                 if lastCheckTime + self.restTime < currentTime: # Sleep without delay   
                     # NNHS Runtime.
                     if not states[self.north]:
-                        update = self.notifications.run(date, self.north)
+                        update = self.notifications.run(date, self.north) # Sends notifications, checks sucess.
                         if update:
-                            self.writeState(self.north, date)
+                            self.writeState(self.north, date) # Update statefile and var.
                             sentNorth = True
                     # NSHS Runtime
                     if not states[self.south]:
-                        update = self.notifications.run(date, self.south)
+                        update = self.notifications.run(date, self.south) # Sends notifications, check sucess.
                         if update:
-                            self.writeState(self.south, date)
+                            self.writeState(self.south, date) # Update statefile and var.
                             sentSouth = True
                     states = self.fetchStates(date)
                     lastCheckTime = currentTime
-            sentNorth = True
-            sentSouth = True
-        return True
+            else:
+                sentNorth = True
+                sentSouth = True
+        return True 
+        
 
     # Function for fetching an up to date state file content.
     def fetchStates(self, date, statePath = 'state.yml'):

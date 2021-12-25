@@ -77,6 +77,7 @@ def sc_listener():
         currentTime = datetime.now() - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = 3
+        
         if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
             print("NO SCHOOL TODAY!")
         else:
@@ -84,16 +85,16 @@ def sc_listener():
             belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
 
             if aboveStartTime and belowEndTime and not schoologySuccessCheck:
-                print("Checking Schoology")
+                print("CHECKING SCHOOLOGY.")
                 sc = SchoologyListener(textnowCreds, scCreds)
                 schoologySuccessCheck = sc.run()
-                print("Schoology check complete")
+                print("CHECK COMPLETE.")
         
         if currentTime.hour == resetTime[0] and currentTime.minute == resetTime[1]:
             # Reset schoologySuccessCheck to false @ midnight
             # Only change value when it is latched (true)
             if schoologySuccessCheck == True:
-                print("Restarting check daemon.")
+                print("RESTART")
                 schoologySuccessCheck = False
             
 # Configure and start threads.
@@ -102,5 +103,7 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
-threads['sc'].start()
-threads['sms'].start()
+#threads['sc'].start()
+#threads['sms'].start()
+
+sc_listener()

@@ -11,10 +11,12 @@ class NotificationDriver:
     # Configures a dict of DB objects and a dict of blocks keyed by day as returned by datetime.
     def __init__(self, textnowCreds: TextNowCreds, scCreds: SchoologyCreds):
         self.sms = SMS(textnowCreds)
+        # Dict of both DB objects.
         self.db = {
             SchoolName.NEWTON_NORTH: DatabaseHandler(SchoolName.NEWTON_NORTH), 
             SchoolName.NEWTON_SOUTH: DatabaseHandler(SchoolName.NEWTON_SOUTH)
         }
+        # Dict of blocks occuring on a given day.
         self.blockDict = {
             0: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.C, SchoolBlock.D, SchoolBlock.E),
             1: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.F, SchoolBlock.G),
@@ -24,22 +26,23 @@ class NotificationDriver:
             5: None,
             6: None
         }
+        # Schoology API hookup.
         self.sc = Absence(scCreds)
 
     # Runtime code, calls the various functions within the class and sends the appropriate messages to people with absent teachers.
     def run(self, date, school: SchoolName):
         self.date = date
         absences = self.getAbsenceList(school)
-        print(absences)
+        print(school)
         if absences == None:
             print("NO DATA AVAILABLE.")
             return False
         notificationList = self.getStudentsToNotify(absences, school) 
         messages = self.genMessages(notificationList)
-        attemptSend = self.sendMessages(messages)
-        return True
+        attemptSend = self.sendMessages(messages) # returns sucess of message send.
+        return attemptSend
 
-    # Fetchs absent
+    # Fetches absent teachers.
     def getAbsenceList(self, school: SchoolName):
         if school == SchoolName.NEWTON_NORTH:
             absenceList = self.sc.filterAbsencesNorth(self.date)
@@ -68,26 +71,25 @@ class NotificationDriver:
         messageStart = "Hey there! You have absent teachers: "
         for notification in notificationList:
             for student in notification.students:
-                number = Number(student.number)
                 messageContent = f"{notification.teacher.first} {notification.teacher.last} Note: {notification.teacher.note}. "     
-                # Map a number its update message. 
+                # Map a student its update message. 
                 ## Meant to prevent duplicate messages (Dict entries are unique)
-                if messageDict.get(number) == None:
+                if messageDict.get(student) == None:
                     # Create number entry if it doesn't exist.
-                    messageDict[number] = messageStart + messageContent
+                    messageDict[student] = messageStart + messageContent
                 else:
                     # Append to existing message.
-                    messageDict.update({number: messageDict[number] + messageContent})
+                    messageDict.update({student: messageDict[student] + messageContent})
         return messageDict
 
     # Send messages to each student.
     def sendMessages(self, messageDict: dict):
         if len(messageDict) == 0:
-            print("No users to notify.")
-            return False
-        for number in messageDict:
-            self.sms.send(str(number), messageDict[number])
-            delay = random.uniform(0.25, 1.0)
+            print("NO USERS TO NOTIFY.")
+            return True
+        for student in messageDict:
+            self.sms.send(str(student.number), messageDict[student])
+            delay = random.uniform(0.25, 1.0) # Random delay so no get banned from API.
             time.sleep(delay)
-            print(f"Notification sent to {str(number)}.")
+            print(f"NOTIFICATION SENT: {str(student.number)}.")
         return True
