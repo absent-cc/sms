@@ -4,6 +4,7 @@ from textnow.ui import UI
 from dataStructs import *
 from driver.schoologyListener import *
 from database.databaseHandler import *
+from datetime import timedelta, datetime
 
 # Open files.
 with open('secrets.yml') as f:
@@ -65,24 +66,22 @@ def sc_listener():
     sunday = 6
     holidays = []
 
-    dailyCheckTimeStart = (7, 0) # (hour, minute)
-    dailyCheckTimeEnd = (10, 0) # (hour, minute)
+    dailyCheckTimeStart = 14 # hour
+    dailyCheckTimeEnd = 18 # hour
     
-    resetTime = (0, 0) # (midnight)
+    resetTime = (0, 0) # midnight
 
     schoologySuccessCheck = False
 
     while True:
-        currentTime = datetime.now()
+        currentTime = datetime.now() - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = 3
-
-        if dayOfTheWeek == saturday and dayOfTheWeek == sunday and currentDate in holidays:
-            print("Today is my off day")
+        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
+            print("NO SCHOOL TODAY!")
         else:
-            aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart[0] and currentTime.minute >= dailyCheckTimeStart[1]
-
-            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd[0] and currentTime.minute <= dailyCheckTimeEnd[1]
+            aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
+            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
 
             if aboveStartTime and belowEndTime and not schoologySuccessCheck:
                 print("Checking Schoology")
@@ -94,7 +93,7 @@ def sc_listener():
             # Reset schoologySuccessCheck to false @ midnight
             # Only change value when it is latched (true)
             if schoologySuccessCheck == True:
-                print("Resetting schoologySuccessCheck")
+                print("Restarting check daemon.")
                 schoologySuccessCheck = False
             
 # Configure and start threads.
@@ -103,9 +102,5 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
+threads['sc'].start()
 threads['sms'].start()
-# threads['sc'].start()
-sc_listener()
-
-db = DatabaseHandler(SchoolName.NEWTON_NORTH)
-db.getStudentsByGrade(10)

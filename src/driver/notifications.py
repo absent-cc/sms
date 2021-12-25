@@ -3,6 +3,8 @@ from textnow.sms import SMS
 from database.databaseHandler import *
 from schoology.absence import Absence
 from datetime import date
+import time
+import random
 
 class NotificationDriver:
     
@@ -63,11 +65,11 @@ class NotificationDriver:
     ## Each absent class for a student is smushed into one message to save TextNow API calls.
     def genMessages(self, notificationList: list):
         messageDict = {}
-        messageStart = "Hey there! You have absent teachers!"
+        messageStart = "Hey there! You have absent teachers: "
         for notification in notificationList:
             for student in notification.students:
                 number = Number(student.number)
-                messageContent = f"   | {notification.teacher.first} {notification.teacher.last} Note: {notification.teacher.note}. |"     
+                messageContent = f"{notification.teacher.first} {notification.teacher.last} Note: {notification.teacher.note}. "     
                 # Map a number its update message. 
                 ## Meant to prevent duplicate messages (Dict entries are unique)
                 if messageDict.get(number) == None:
@@ -85,5 +87,7 @@ class NotificationDriver:
             return False
         for number in messageDict:
             self.sms.send(str(number), messageDict[number])
+            delay = random.uniform(0.25, 1.0)
+            time.sleep(delay)
             print(f"Notification sent to {str(number)}.")
         return True
