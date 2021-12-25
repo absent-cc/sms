@@ -75,6 +75,9 @@ class Student:
 
     def __str__(self) -> str:
         return f"{self.first} {self.last}"
+    
+    def __hash__(self):
+        return hash(str(self.number))
 
 @dataclass
 class Teacher:

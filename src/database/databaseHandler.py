@@ -5,7 +5,6 @@ from typing import Tuple, List
 class DatabaseHandler():
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
         self.db_path = f"data/{school.name}_{db_path}"
-
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         create_student_directory = """
@@ -178,16 +177,19 @@ class DatabaseHandler():
         else:
             # If student object already has an id, return id
             return student.id
-
+    
+    # Get student objects of a given grade, return as list.
     def getStudentsByGrade(self, grade: int) -> list:
         query = f"SELECT * FROM student_directory WHERE grade = '{grade}'"
         res = self.cursor.execute(query).fetchall()
         studentArray = []
         for student in res:
+            # Mapping attributes from student DB to a student dataclass.
             entry = Student(student[1], student[2], student[3], student[4], student[5], student[0])
             studentArray.append(entry)
         return studentArray
 
+    # Just grabs all students, returns list.
     def getStudents(self) -> list:
         query = f"SELECT * FROM student_directory"
         res = self.cursor.execute(query).fetchall()
@@ -219,6 +221,7 @@ class DatabaseHandler():
         # Return the newly generated id for student object manipulation
         return new_id
 
+    # Removes student from DB.
     def removeStudent(self, student: Student) -> bool:
         if student.id == None:
             return False
@@ -343,6 +346,7 @@ class DatabaseHandler():
                 self.addClassToClasses(teacher_id, block, student_id)
         return True
 
+    # Gets a list of students by absent teacher.
     def queryStudentsByAbsentTeacher(self, teacher: Teacher, block: SchoolBlock) -> List[Student]:
         teacher_id = self.getTeacherID(teacher)
         if teacher_id == None:
@@ -363,6 +367,7 @@ class DatabaseHandler():
             students.append(Student(col[1], col[2], col[3], col[4], col[5], col[0]))
         return students
 
+    # Gets schedule, builds schedule object for a given student.
     def getScheduleByStudent(self, student: Student):
         schedule = Schedule()
         teachers = self.getTeachersFromStudent(student)
@@ -398,30 +403,3 @@ class DatabaseHandler():
         for teacher in res:
             teachers.append(Teacher(teacher[1], teacher[2], SchoolNameMapper()[teacher[3]], teacher[0]))
         return teachers
-
-if __name__ == "__main__":
-    kevin = Student("6176868207", "Kevin", "Yang", SchoolName.NEWTON_SOUTH, 10)
-    roshan = Student("6175525098", "Roshan", "Karim", SchoolName.NEWTON_NORTH, 10)
-    
-    NORM = Teacher("RYAN", "NORMANDIN", SchoolName.NEWTON_SOUTH)
-    PAL = Teacher("ALEX", "PALILUNAS", SchoolName.NEWTON_SOUTH)
-    BECKER = Teacher("RACHEL", "BECKER", SchoolName.NEWTON_SOUTH)
-    KOZUCH = Teacher("MICAEL", "KOZUCH", SchoolName.NEWTON_SOUTH)
-    CROSBY = Teacher("ALAN", "CROSBY", SchoolName.NEWTON_SOUTH)
-    RUGG = Teacher("ILANA", "RUGG", SchoolName.NEWTON_SOUTH)
-
-    schedule = Schedule(NORM, PAL, BECKER, KOZUCH, CROSBY, RUGG)
-
-    db = DatabaseHandler(SchoolName.NEWTON_SOUTH)
-    db.addStudentToUserDirectory(kevin)
-    db.addTeacherToTeacherDirectory(NORM)
-    db.addTeacherToTeacherDirectory(BECKER)
-    # print(db.addClassToClasses(db.getTeacherID(NORM), SchoolBlock.A, db.getStudentID(kevin)))
-    # db.addStudentToUserDirectory(roshan) 
-    db.addTeacherToTeacherDirectory(PAL)
-    print(db.getStudent(kevin))
-    print(db.getStudent(roshan))
-    print(db.getTeacher(NORM))
-    print(db.addStudent(kevin, schedule))
-    # print(db.changeClass(kevin, SchoolBlock.A, PAL))
-    # print(db.removeStudentFromUserDirectory(kevin))
