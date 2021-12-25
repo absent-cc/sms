@@ -34,6 +34,25 @@ class Logger():
     def removedTeacher(self, teacher: Teacher):
         self.log(f"TEACHER REMOVED \t| {teacher.first} {teacher.last}")
 
+    def editSchedule(self, user: Student):
+        self.log(f"USER SCHEDULE EDITED \t| {user.id}")
+
+    def schoolgyGrabAbsences(self, school: SchoolName):
+        self.log(f"PULLED ABSENCES \t | {school}")
+    
+    def sentAbsencesNotifcation(self, user: Student):
+        if user == None:
+            self.log(f"SEMT ABSENCES NOTIFCATION \t| NONE")
+        else:
+            self.log(f"SENT ABSENCES NOTIFICATION \t| {user.id}")
+
+    def resetSchoologyCheck(self):
+        self.log(f"SCHOOLGY CHECK RESET")
+    
+    def schoologyOffDay(self, day: str):
+        self.log(f"SCHOOLGY OFF DAY \t| {day}")
+    
+
     # Method to reset log file
     def resetLog(self):
         with open(self.path, 'w') as f:
