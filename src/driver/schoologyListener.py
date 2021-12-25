@@ -9,12 +9,15 @@ class SchoologyListener:
         self.south = SchoolName.NEWTON_SOUTH
         self.notifications = NotificationDriver(textnowCreds, scCreds)
         self.restTime = timedelta(seconds=10)
-
+    
     # Run function, for listening and calling notifications code.
-    def run(self):
+    def run(self) -> bool:
         lastCheckTime = datetime.now() - self.restTime # Last time a check was made.
-        while True:
-            date = datetime.now() - timedelta(hours=5)
+        sentNorth = False
+        sentSouth = False
+
+        while sentNorth == False or sentSouth == False:
+            date = datetime.now() - timedelta(hours=48)
             states = self.fetchStates(date)
             while not states[self.north] or not states[self.south]:
                 currentTime = datetime.now()
@@ -24,14 +27,19 @@ class SchoologyListener:
                         update = self.notifications.run(date, self.north)
                         if update:
                             self.writeState(self.north, date)
+                            sentNorth = True
                     # NSHS Runtime
                     if not states[self.south]:
                         update = self.notifications.run(date, self.south)
                         if update:
                             self.writeState(self.south, date)
+                            sentSouth = True
                     states = self.fetchStates(date)
                     lastCheckTime = currentTime
-    
+            sentNorth = True
+            sentSouth = True
+        return True
+
     # Function for fetching an up to date state file content.
     def fetchStates(self, date, statePath = 'state.yml'):
         stateDict = {

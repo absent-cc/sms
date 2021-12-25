@@ -57,7 +57,7 @@ class UI(Thread):
             if content in responsesDict:
                 response = responsesDict[content](db, resStudent)
                 if not response:
-                    self.sms.send(str(self.number), timoutMessage)
+                    self.sms.send(str(self.number), timeoutMessage)
                     return False
             elif content == 'admin':
                 ControlPanel = ControlConsole(self.sms, self.msg)

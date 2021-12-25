@@ -33,7 +33,8 @@ def sms_listener():
     activethreads = { # dictionary of active threads.
     }
 
-    textnow.send('+16175059626', 'abSENT listener started!')
+    # textnow.send('+16175059626', 'abSENT listener started!')
+    textnow.send('+16176868207', 'abSENT listener started!')
 
     while True:
         # Create thread for each new initial contact.
@@ -60,9 +61,42 @@ def sms_listener():
 
 # Listen for Schoology updates.
 def sc_listener():
-    sc = SchoologyListener(textnowCreds, scCreds)
-    sc.run()
+    saturday = 5
+    sunday = 6
+    holidays = []
 
+    dailyCheckTimeStart = (10, 0) # (hour, minute, second)) 
+    dailyCheckTimeEnd = (10, 30) # (hour, minute)
+    
+    resetTime = (0, 0) # (midnight)
+
+    schoologySuccessCheck = False
+
+    while True:
+        currentTime = datetime.now()
+        currentDate = currentTime.strftime('%d/%m/%Y')
+        dayOfTheWeek = 3
+
+        if dayOfTheWeek == saturday and dayOfTheWeek == sunday and currentDate in holidays:
+            print("Today is my off day")
+        else:
+            aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart[0] and currentTime.minute >= dailyCheckTimeStart[1]
+
+            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd[0] and currentTime.minute <= dailyCheckTimeEnd[1]
+
+            if aboveStartTime and belowEndTime and not schoologySuccessCheck:
+                print("Checking Schoology")
+                sc = SchoologyListener(textnowCreds, scCreds)
+                schoologySuccessCheck = sc.run()
+                print("Schoology check complete")
+        
+        if currentTime.hour == resetTime[0] and currentTime.minute == resetTime[1]:
+            # Reset schoologySuccessCheck to false @ midnight
+            # Only change value when it is latched (true)
+            if schoologySuccessCheck == True:
+                print("Resetting schoologySuccessCheck")
+                schoologySuccessCheck = False
+            
 # Configure and start threads.
 threads = {
         'sc': threading.Thread(target=threadwrapper(sc_listener), name='sc listener'),
@@ -70,7 +104,8 @@ threads = {
 }
 
 threads['sms'].start()
-threads['sc'].start()
+# threads['sc'].start()
+sc_listener()
 
 db = DatabaseHandler(SchoolName.NEWTON_NORTH)
 db.getStudentsByGrade(10)
