@@ -50,9 +50,8 @@ class Logger():
         self.log(f"SCHOOLGY CHECK RESET")
     
     def schoologyOffDay(self, day: str):
-        self.log(f"SCHOOLGY OFF DAY \t| {day}")
+        self.log(f"abSENT OFF DAY \t| {day}")
     
-
     # Method to reset log file
     def resetLog(self):
         with open(self.path, 'w') as f:
