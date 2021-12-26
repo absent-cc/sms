@@ -39,7 +39,7 @@ def sms_listener():
     activethreads = { # dictionary of active threads.
     }
 
-    # textnow.send('+16175059626', 'abSENT listener started!')
+    textnow.send('+16175059626', 'abSENT listener started!')
     textnow.send('+16176868207', 'abSENT listener started!')
 
     while True:
@@ -71,21 +71,22 @@ def sc_listener():
     sunday = 6
     holidays = []
 
-    dailyCheckTimeStart = 10 # hour
-    dailyCheckTimeEnd = 14 # hour
+    dailyCheckTimeStart = 7 # hour
+    dailyCheckTimeEnd = 10 # hour
     
     resetTime = (0, 0) # midnight
 
     schoologySuccessCheck = False
-
+    dayoffLatch = False
     while True:
         currentTime = datetime.now() - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
-        dayOfTheWeek = 3
+        dayOfTheWeek = currentTime.weekday()
         
-        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
-            print("NO SCHOOL TODAY!")
+        if (dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays) and dayoffLatch == False:
             logger.schoologyOffDay(currentDate)
+            print("abSENT Day Off")
+            dayoffLatch = True
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
             belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
@@ -102,6 +103,7 @@ def sc_listener():
             if schoologySuccessCheck == True:
                 print("RESTART")
                 logger.resetSchoologySuccessCheck()
+                dayoffLatch = False
                 schoologySuccessCheck = False
             
 # Configure and start threads.
@@ -112,5 +114,3 @@ threads = {
 
 threads['sc'].start()
 threads['sms'].start()
-
-# sc_listener()
