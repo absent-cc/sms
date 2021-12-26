@@ -1,10 +1,10 @@
 from os import wait3
-from database.logger import messageLogger
+from database.logger import MessageLogger
 import pytextnow
 import time
 from dataStructs import *
 from datetime import datetime, timedelta
-from database.logger import messageLogger
+from database.logger import MessageLogger
 
 class SMS:
 
@@ -12,8 +12,8 @@ class SMS:
     def __init__(self, creds: TextNowCreds):
         self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid, csrf_cookie=creds.csrf)
         
-        # Message logger.
-        self.messageLog = messageLogger()
+        # Message logger 
+        self.messageLog = MessageLogger()
     # Sends a message.
     def send(self, number: str, message: str) -> bool:
         self.client.send_sms(number, message)

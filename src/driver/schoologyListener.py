@@ -21,7 +21,7 @@ class SchoologyListener:
         sentSouth = False
 
         while sentNorth == False or sentSouth == False:
-            date = datetime.now() - timedelta(hours=52) # Convert from UTC --> EST
+            date = datetime.now() - timedelta(hours=5) # Convert from UTC --> EST
             states = self.fetchStates(date)
             # Reads from state file to determine whether notifications have been sent today.
             if not states[self.north] or not states[self.south]: 

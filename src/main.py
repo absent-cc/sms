@@ -8,7 +8,6 @@ from datetime import timedelta, datetime
 from database.logger import Logger
 
 logger = Logger()
-
 logger.systemStartup()
 
 # Open files.

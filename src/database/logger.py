@@ -90,7 +90,7 @@ class Logger():
         with open(self.path, 'w') as f:
             f.write("TIME | ACTION | DETAILS\n")
 
-class messageLogger():
+class MessageLogger():
     def __init__(self, path: str = "data/messageLog.txt"):
         self.path = path
 
