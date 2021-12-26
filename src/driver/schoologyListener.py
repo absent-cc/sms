@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import yaml
 from dataStructs import *
 from driver.notifications import *
@@ -16,38 +16,33 @@ class SchoologyListener:
 
     # Run function, for listening and calling notifications code.
     def run(self) -> bool:
-        lastCheckTime = datetime.now() - self.restTime # Last time a check was made.
         sentNorth = False
         sentSouth = False
 
-        while sentNorth == False or sentSouth == False:
-            date = datetime.now() - timedelta(hours=5) # Convert from UTC --> EST
+        if sentNorth == False or sentSouth == False:
+            date = datetime.now(timezone.utc) - timedelta(hours=5) # Convert from UTC --> EST
             states = self.fetchStates(date)
             # Reads from state file to determine whether notifications have been sent today.
             if not states[self.north] or not states[self.south]: 
-                currentTime = datetime.now()
-                if lastCheckTime + self.restTime < currentTime: # Sleep without delay   
-                    # NNHS Runtime.
-                    if not states[self.north]:
-                        update = self.notifications.run(date, self.north) # Sends notifications, checks sucess.
-                        if update:
-                            self.writeState(self.north, date) # Update statefile and var.
-                            sentNorth = True
-                            self.logger.sentAbsencesSuccess(SchoolName.NEWTON_NORTH)
-                    # NSHS Runtime
-                    if not states[self.south]:
-                        update = self.notifications.run(date, self.south) # Sends notifications, check sucess.
-                        if update:
-                            self.writeState(self.south, date) # Update statefile and var.
-                            sentSouth = True
-                            self.logger.sentAbsencesSuccess(SchoolName.NEWTON_SOUTH)
-                    states = self.fetchStates(date)
-                    lastCheckTime = currentTime
+                # NNHS Runtime.
+                if not states[self.north]:
+                    update = self.notifications.run(date, self.north) # Sends notifications, checks sucess.
+                    if update:
+                        self.writeState(self.north, date) # Update statefile and var.
+                        sentNorth = True
+                        self.logger.sentAbsencesSuccess(SchoolName.NEWTON_NORTH)
+                # NSHS Runtime
+                if not states[self.south]:
+                    update = self.notifications.run(date, self.south) # Sends notifications, check sucess.
+                    if update:
+                        self.writeState(self.south, date) # Update statefile and var.
+                        sentSouth = True
+                        self.logger.sentAbsencesSuccess(SchoolName.NEWTON_SOUTH)
+                states = self.fetchStates(date)
             else:
-                sentNorth = True
-                sentSouth = True
-        return True 
-        
+                print("USERS ALREADY NOTIFIED.")
+                return True
+        return sentNorth and sentSouth
 
     # Function for fetching an up to date state file content.
     def fetchStates(self, date, statePath = 'state.yml'):

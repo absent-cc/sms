@@ -4,7 +4,7 @@ from textnow.ui import UI
 from dataStructs import *
 from driver.schoologyListener import *
 from database.databaseHandler import *
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from database.logger import Logger
 
 logger = Logger()
@@ -78,19 +78,18 @@ def sc_listener():
     schoologySuccessCheck = False
     dayoffLatch = False
     while True:
-        currentTime = datetime.now() - timedelta(hours=5)
+        currentTime = datetime.now(timezone.utc) - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = currentTime.weekday()
         
-        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays: 
+        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
             if dayoffLatch == False:
                 logger.schoologyOffDay(currentDate)
                 print("abSENT Day Off")
                 dayoffLatch = True
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
-            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
-
+            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnde
             if aboveStartTime and belowEndTime and not schoologySuccessCheck:
                 print("CHECKING SCHOOLOGY.")
                 sc = SchoologyListener(textnowCreds, scCreds)
