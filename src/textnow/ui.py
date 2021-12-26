@@ -5,6 +5,7 @@ from dataStructs import *
 from database.databaseHandler import DatabaseHandler
 from textnow.controlPanel import ControlConsole
 from .sms import SMS
+from database.logger import Logger
 
 class UI(Thread):
 
@@ -14,6 +15,9 @@ class UI(Thread):
         self.sms = SMS(textnowCreds)
         self.msg = msg
         self.number = Number(msg.number)
+
+        # Logginng:
+        self.logger = Logger()
 
     # Main function for SMS UI. Decides what other functions to call within the UI class based off of what the initial contact message is.
     def run(self) -> bool: 
@@ -112,6 +116,7 @@ class UI(Thread):
 
         # Add student to DB.
         db.addStudent(student, schedule)
+        self.logger.addedStudent(student)
 
         # Confirmation message.
         successMessageOne = f"Welcome to abSENT, {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
@@ -139,6 +144,7 @@ class UI(Thread):
         db.removeStudent(resStudent)
         cancelledMessage = "Service cancelled. Sorry to see you go!"
         self.sms.send(str(self.number), cancelledMessage)
+        self.logger.canceledService(resStudent)
         return True
 
     # Upon an about request.
@@ -193,7 +199,9 @@ class UI(Thread):
         if teacher.first == "FREE" and teacher.last == "BLOCK":
             teacher = None
 
-        print(db.changeClass(resStudent, enumBlock, teacher))
+        db.changeClass(resStudent, enumBlock, teacher)
+        self.logger.editedStudent(resStudent, enumBlock, teacher)
+
         self.sms.send(str(self.number), successMessage)
         self.returnSchedule(db, resStudent)
         return True
@@ -228,9 +236,11 @@ class UI(Thread):
         # Check for the invalid symbols, and send message if invalid symbol is used.
         if ';' in msg.content:
             self.sms.send(str(self.number), sqlInjectionMessage)
+            self.logger.sqlInjectionAttempted(self.number)
             return True
         elif '\'' in msg.content:
             self.sms.send(str(self.number), singleQuoteMessage)
+            self.logger.sqlInjectionAttempted(self.number)
             return True
         return False
 

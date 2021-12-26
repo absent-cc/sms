@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import yaml
 from dataStructs import *
 from driver.notifications import *
+from database.logger import Logger
 
 class SchoologyListener:
     def __init__(self, textnowCreds, scCreds):
@@ -9,7 +10,10 @@ class SchoologyListener:
         self.south = SchoolName.NEWTON_SOUTH
         self.notifications = NotificationDriver(textnowCreds, scCreds)
         self.restTime = timedelta(seconds=10)
-    
+        
+        # Logging:
+        self.logger = Logger()
+
     # Run function, for listening and calling notifications code.
     def run(self) -> bool:
         lastCheckTime = datetime.now() - self.restTime # Last time a check was made.
@@ -17,7 +21,7 @@ class SchoologyListener:
         sentSouth = False
 
         while sentNorth == False or sentSouth == False:
-            date = datetime.now() - timedelta(hours=5) # Convert from UTC --> EST
+            date = datetime.now() - timedelta(hours=52) # Convert from UTC --> EST
             states = self.fetchStates(date)
             # Reads from state file to determine whether notifications have been sent today.
             if not states[self.north] or not states[self.south]: 
@@ -29,12 +33,14 @@ class SchoologyListener:
                         if update:
                             self.writeState(self.north, date) # Update statefile and var.
                             sentNorth = True
+                            self.logger.sentAbsencesSuccess(SchoolName.NEWTON_NORTH)
                     # NSHS Runtime
                     if not states[self.south]:
                         update = self.notifications.run(date, self.south) # Sends notifications, check sucess.
                         if update:
                             self.writeState(self.south, date) # Update statefile and var.
                             sentSouth = True
+                            self.logger.sentAbsencesSuccess(SchoolName.NEWTON_SOUTH)
                     states = self.fetchStates(date)
                     lastCheckTime = currentTime
             else:

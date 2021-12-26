@@ -4,6 +4,7 @@ from dataStructs import *
 from database.databaseHandler import DatabaseHandler
 from .sms import SMS
 import yaml
+from database.logger import Logger
 
 # Control Panel for admin
 class ControlConsole(Thread):
@@ -22,7 +23,11 @@ class ControlConsole(Thread):
 
         if self.checkIsAdmin():
             self.run()
-        
+
+        # Logging:
+        self.logger = Logger()
+
+     
     def checkIsAdmin(self):
         # Wait for password:
         rawInput = self.sms.awaitResponse(str(self.number))
@@ -37,6 +42,7 @@ class ControlConsole(Thread):
         successMessage = "Admin access granted. Text 'QUIT' to exit."
 
         self.sms.send(str(self.number), successMessage)
+        self.logger.adminLogin(str(self.number))
 
         # Creates temporary DBs.
         dbNorth = DatabaseHandler(SchoolNameMapper()['NNHS'])
@@ -105,8 +111,9 @@ class ControlConsole(Thread):
             return False
 
         numbers = self.getNumbers(school, grade)
-        self.sms.send(str(number), onSuccess)
+        self.sms.send(str(self.number), onSuccess)
         self.massSend(announcement, numbers)
+        self.logger.adminAnnounce(self.number, announcement, school, grade)
     
     def getSchool(self):
         initialMessage = "Enter the target school, or * for all."
@@ -183,9 +190,15 @@ class ControlConsole(Thread):
         }
         northUsers = len(db[SchoolName.NEWTON_NORTH].getStudents())
         southUsers = len(db[SchoolName.NEWTON_SOUTH].getStudents())
-        totalUsers = northUsers + southUsers
 
-        message = f"TOTAL USERS: {totalUsers}, NORTH USERS: {northUsers}, SOUTH USERS: {southUsers}"
+        southGrades = [] 
+        northGrades = []
+
+        for grade in range(9, 13):
+            southGrades.append(len(db[SchoolName.NEWTON_SOUTH].getStudentsByGrade(grade)))
+            northGrades.append(len(db[SchoolName.NEWTON_NORTH].getStudentsByGrade(grade)))
+
+        message = f"North: {northUsers} total users. Grade 9: {northGrades[0]}, 10: {northGrades[1]}, 11: {northGrades[2]}, 12: {northGrades[3]} | South: {southUsers} total users. Grade 9: {southGrades[0]}, 10: {southGrades[1]}, 11: {southGrades[2]}, 12: {southGrades[3]} | Total Users: {northUsers + southUsers}"
 
         self.sms.send(str(self.number), message)
         return True
