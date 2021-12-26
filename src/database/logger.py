@@ -38,7 +38,7 @@ class Logger():
         self.log(f"TEACHER REMOVED \t| {teacher.first}; {teacher.last}")
 
     def editSchedule(self, user: Student, enumBlock: SchoolBlock, teacher: Teacher):
-        self.log(f"USER SCHEDULE EDITED \t| {user.id}; {enumBlock}; {teacher.id}")
+        self.log(f"USER SCHEDULE EDITED \t| {user.id}; {enumBlock}; {str(teacher)}")
 
     def schoolgyGrabAbsences(self, school: SchoolName):
         self.log(f"PULLED ABSENCES \t | {school}")
@@ -74,7 +74,13 @@ class Logger():
         self.log(f"SQL INJECTION ATTEMPTED \t| {number}")
     
     def canceledService(self, user: Student):
-        self.log(f"SERVICE CANCELED \t| {user.id}")
+        self.log(f"SERVICE CANCELED \t| {user.id}; {user.first}; {user.last}; {user.number}")
+    
+    def accountSetupStarted(self, number: str):
+        self.log(f"ACCOUNT SETUP STARTED \t| {number}")
+
+    def accountSetupFinished(self, number: str):
+        self.log(f"ACCOUNT SETUP FINISHED \t| {number}")
     
     # Method to reset log file
     def resetLog(self):

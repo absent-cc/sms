@@ -87,6 +87,7 @@ class UI(Thread):
         welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
 
         self.sms.send(str(self.number), welcomeMessage)
+        self.logger.accountSetupStarted(str(self.number))
 
         # Gets names.
         name = self.getName()
@@ -119,10 +120,11 @@ class UI(Thread):
         self.logger.addedStudent(student)
 
         # Confirmation message.
-        successMessageOne = f"Welcome to abSENT, {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
+        successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "To help us keep this service running, please send us bug reports on our GitHub issue tracker (text 'ABOUT' for a link), and donate if you can, at 'absent.igneus.org'."
+        successMessageFour = "If you encounter a bug, contact us (text 'ABOUT' for more info). Consider also donating to continue keeping abSENT a free service: https://beacons.ai/absent"
+        successMessageFive = "Welcome to abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
         time.sleep(3.75)
@@ -131,6 +133,9 @@ class UI(Thread):
         self.sms.send(str(self.number), successMessageThree) # Edit
         time.sleep(3)
         self.sms.send(str(self.number), successMessageFour) # Edit
+        self.sms.send(str(self.number), successMessageFive) # Welcome
+
+        self.logger.accountSetupFinished(str(self.number))
         return True
 
     def help(self, db: DatabaseHandler, resStudent: Student) -> bool:
@@ -200,7 +205,7 @@ class UI(Thread):
             teacher = None
 
         db.changeClass(resStudent, enumBlock, teacher)
-        self.logger.editedStudent(resStudent, enumBlock, teacher)
+        self.logger.editSchedule(resStudent, enumBlock, teacher)
 
         self.sms.send(str(self.number), successMessage)
         self.returnSchedule(db, resStudent)
