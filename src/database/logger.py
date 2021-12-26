@@ -102,7 +102,7 @@ class messageLogger():
     def log(self, sender_number: str, receiver_number: str, message: str):
         current_time = datetime.now()
         with open(self.path, 'a') as f:
-            f.write(f"{current_time} | {sender_number} \t| {receiver_number} \t| {message}\n")
+            f.write(f"{current_time.strftime('%d/%m/%Y %H:%M:%S')} | {sender_number} \t| {receiver_number} \t| {message}\n")
 
     # Method to reset log file
     def resetLog(self):
