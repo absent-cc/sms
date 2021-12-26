@@ -70,7 +70,7 @@ class Logger():
     def adminAnnounce(self, number: str, message: str, school: SchoolName, grade: int):
         self.log(f"ADMIN ANNOUNCE \t| {number}; {message}; {str(school)}; {grade}")
 
-    def adminTimeOut(self, number: str):
+    def adminTimeout(self, number: str):
         self.log(f"ADMIN TIME OUT \t| {number}")
     
     def sqlInjectionAttempted(self, number: str):
