@@ -36,7 +36,7 @@ class UI(Thread):
 
         # Creates messages
         alreadySubscribedMessage = "You are already subscribed. Type in 'HELP' to see a list of commands."
-        timeoutMessage = "You timed out! Start the process again by entering 'SUBSCRIBE'."
+        timeoutMessage = "You timed out! Please start your task again."
         askForSubscription = "Hi! You've texted abSENT, an SMS based monitoring system for the NPS absent lists. To subscribe, please enter 'SUBSCRIBE'."
 
         # Sets the correct DB for the student if they exist.
@@ -123,7 +123,7 @@ class UI(Thread):
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "Check out our additional information section for abSENT related user info: https://beacons.ai/absent/info. Consider also donating to continue keeping abSENT free for all: https://beacons.ai/absent/donate"
+        successMessageFour = "Check out our site at beacons[.]ai/absent for more information."
         successMessageFive = "Welcome to abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
@@ -156,8 +156,10 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y) -> bool:
         # Sets message and sends.
-        aboutMessage = "abSENT was created by Kevin Yang (NSHS '24) and Roshan Karim (NNHS '24).  Follow our instagram for product updates: instagram.com/nps_absent. Checkout our site for general information: https://beacons.ai/absent. Vist our github for nerdy stuff: github.com/bykevinyang/abSENT."
+        print("test")
+        aboutMessage = "Visit us at beacons[.]ai/absent for more information."
         self.sms.send(str(self.number), aboutMessage)
+        print("test")
         return True
 
     # Upon an edit request.
@@ -408,4 +410,3 @@ class UI(Thread):
                 return None
             content = rawInput.content.upper()
         return schedule
-        
