@@ -88,4 +88,24 @@ class Logger():
     # Method to reset log file
     def resetLog(self):
         with open(self.path, 'w') as f:
-            f.write("TIME | ACTION | DETAILS\n")      
+            f.write("TIME | ACTION | DETAILS\n")
+
+class messageLogger():
+    def __init__(self, path: str = "data/messageLog.txt"):
+        self.path = path
+
+        if not os.path.exists(self.path):
+            with open(self.path, 'w') as f:
+                f.write("TIME \t| SENDER \t| RECEIVER \t| MESSAGE\n")
+    
+    # Default method for logging
+    def log(self, sender_number: str, receiver_number: str, message: str):
+        current_time = datetime.now()
+        with open(self.path, 'a') as f:
+            f.write(f"{current_time} | {sender_number} \t| {receiver_number} \t| {message}\n")
+
+    # Method to reset log file
+    def resetLog(self):
+        with open(self.path, 'w') as f:
+            f.write("TIME | SENDER | RECEIVER | MESSAGE\n")
+
