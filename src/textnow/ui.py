@@ -123,7 +123,7 @@ class UI(Thread):
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "If you encounter a bug, contact us (text 'ABOUT' for more info). Consider also donating to continue keeping abSENT a free service: https://beacons.ai/absent"
+        successMessageFour = "If you encounter a bug, contact us (text 'ABOUT' for more info). Consider also donating to continue keeping abSENT a free service: https://beacons.ai/absent."
         successMessageFive = "Welcome to abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
@@ -165,8 +165,8 @@ class UI(Thread):
         # A bunch of messages.
         initialMessageOne = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name."
         initialMessageTwo = "For example: D John Doe. Alternatively, for a free block: D Free Block"
-        invalidMessageTeacher = "You have provided an invalid teacher. Please restart the edit process."
-        invalidMessageBlock = "You have entered an invalid block. Please restart the edit process."
+        invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
+        invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
 
         self.sms.send(str(self.number), initialMessageOne)
@@ -288,7 +288,7 @@ class UI(Thread):
         # Initial vars, messages + blank school value.
         school = None
         initialMessage = f"Hello {name[0]} {name[1]}! Please enter the school you go to, (N)orth or (S)outh."
-        invalidMessage = "You have sent an invalid school name. Please reply with (N)orth or (S)outh."
+        invalidMessage = "You've sent an invalid school name. Please reply with (N)orth or (S)outh."
         self.sms.send(str(self.number), initialMessage)
         
         # Main thread.
