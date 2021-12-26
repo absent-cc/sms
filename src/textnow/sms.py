@@ -1,18 +1,23 @@
 from os import wait3
+from database.logger import messageLogger
 import pytextnow
 import time
 from dataStructs import *
 from datetime import datetime, timedelta
+from database.logger import messageLogger
 
 class SMS:
 
     # "Logs" into API. In reality, each API request is simply using auth header. There is no concept of a session.
     def __init__(self, creds: TextNowCreds):
         self.client = pytextnow.Client(creds.username, sid_cookie=creds.sid, csrf_cookie=creds.csrf)
-
+        
+        # Message logger.
+        self.messageLog = messageLogger()
     # Sends a message.
     def send(self, number: str, message: str) -> bool:
         self.client.send_sms(number, message)
+        self.messageLog.log("abSENT", number, message) # Log message.
         return True
 
     # Gets all unreads and marks them as read.
@@ -50,7 +55,8 @@ class SMS:
                 if str(msg.number) == str(number):
                     self.markAsRead(msg)
                     unreads.append(Message(Number(number), msg.content))
-            
+                    self.messageLog.log(number, "abSENT", msg.content) # Log message.
+
             if len(unreads) == 0:
                 time.sleep(0.2)
                 continue

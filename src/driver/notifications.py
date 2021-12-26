@@ -1,6 +1,7 @@
 from dataStructs import *
 from textnow.sms import SMS
 from database.databaseHandler import *
+from database.logger import Logger
 from schoology.absence import Absence
 from datetime import date
 import time
@@ -28,6 +29,9 @@ class NotificationDriver:
         }
         # Schoology API hookup.
         self.sc = Absence(scCreds)
+        
+        # Logging:
+        self.logger = Logger()
 
     # Runtime code, calls the various functions within the class and sends the appropriate messages to people with absent teachers.
     def run(self, date, school: SchoolName):
@@ -36,6 +40,7 @@ class NotificationDriver:
         print(school)
         if absences == None:
             print("NO DATA AVAILABLE.")
+            self.logger.noDataAvailable()
             return False
         notificationList = self.getStudentsToNotify(absences, school) 
         messages = self.genMessages(notificationList)
@@ -46,8 +51,10 @@ class NotificationDriver:
     def getAbsenceList(self, school: SchoolName):
         if school == SchoolName.NEWTON_NORTH:
             absenceList = self.sc.filterAbsencesNorth(self.date)
+            self.logger.schoolgyGrabAbsences(SchoolName.NEWTON_NORTH)
         elif school == SchoolName.NEWTON_SOUTH:
             absenceList = self.sc.filterAbsencesSouth(self.date)
+            self.logger.schoolgyGrabAbsences(SchoolName.NEWTON_SOUTH)
         else:
             return None
         return absenceList
@@ -86,9 +93,11 @@ class NotificationDriver:
     def sendMessages(self, messageDict: dict):
         if len(messageDict) == 0:
             print("NO USERS TO NOTIFY.")
+            self.logger.noUsersToNotify()
             return True
         for student in messageDict:
             self.sms.send(str(student.number), messageDict[student])
+            self.logger.sentAbsencesNotification(student)
             delay = random.uniform(0.25, 1.0) # Random delay so no get banned from API.
             time.sleep(delay)
             print(f"NOTIFICATION SENT: {str(student.number)}.")

@@ -5,6 +5,11 @@ from dataStructs import *
 from driver.schoologyListener import *
 from database.databaseHandler import *
 from datetime import timedelta, datetime
+from database.logger import Logger
+
+logger = Logger()
+
+logger.systemStartup()
 
 # Open files.
 with open('secrets.yml') as f:
@@ -66,8 +71,8 @@ def sc_listener():
     sunday = 6
     holidays = []
 
-    dailyCheckTimeStart = 14 # hour
-    dailyCheckTimeEnd = 18 # hour
+    dailyCheckTimeStart = 10 # hour
+    dailyCheckTimeEnd = 14 # hour
     
     resetTime = (0, 0) # midnight
 
@@ -80,6 +85,7 @@ def sc_listener():
         
         if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
             print("NO SCHOOL TODAY!")
+            logger.schoologyOffDay(currentDate)
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
             belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
@@ -95,6 +101,7 @@ def sc_listener():
             # Only change value when it is latched (true)
             if schoologySuccessCheck == True:
                 print("RESTART")
+                logger.resetSchoologySuccessCheck()
                 schoologySuccessCheck = False
             
 # Configure and start threads.
@@ -103,7 +110,7 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
-#threads['sc'].start()
-#threads['sms'].start()
+threads['sc'].start()
+threads['sms'].start()
 
-sc_listener()
+# sc_listener()

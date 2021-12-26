@@ -4,6 +4,7 @@ from dataStructs import *
 from database.databaseHandler import DatabaseHandler
 from .sms import SMS
 import yaml
+from database.logger import Logger
 
 # Control Panel for admin
 class ControlConsole(Thread):
@@ -14,6 +15,9 @@ class ControlConsole(Thread):
         self.sms = sms
         self.msg = msg
         self.number = Number(msg.number)
+        
+        # Logging:
+        self.logger = Logger()
 
         with open(secretPath) as f:
             cfg = yaml.safe_load(f)
@@ -22,7 +26,8 @@ class ControlConsole(Thread):
 
         if self.checkIsAdmin():
             self.run()
-        
+
+     
     def checkIsAdmin(self):
         # Wait for password:
         rawInput = self.sms.awaitResponse(str(self.number))
@@ -34,9 +39,10 @@ class ControlConsole(Thread):
     
     def run(self):
         adminConsoleExit = "Exited admin mode."
-        successMessage = "Admin access granted. Text 'QUIT' to exit."
+        successMessage = "Admin access granted. Text 'QUIT' to exit. Text 'HELP' for help."
 
         self.sms.send(str(self.number), successMessage)
+        self.logger.adminLogin(str(self.number))
 
         # Creates temporary DBs.
         dbNorth = DatabaseHandler(SchoolNameMapper()['NNHS'])
@@ -53,10 +59,16 @@ class ControlConsole(Thread):
         if contentRaw == None:
             return False
         content = contentRaw.content.upper()
-        while content != 'QUIT':
+
+        while content != 'QUIT': # Admin console toggled until quit.
             if content in responsesDict:
                 responsesDict[content]()
-            content = self.sms.awaitResponse(str(self.number)).content.upper()
+            response = self.sms.awaitResponse(str(self.number))
+            if response == None: # Meant to avoid timeout none issue
+                self.sms.send(str(self.number), f"Timeout: {adminConsoleExit}") # Timeout
+                self.logger.adminTimeout(str(self.number))
+            else:
+                content = response.content.upper() # Update content
         
         # Quitting admin mode.
         self.sms.send(str(self.number), adminConsoleExit)
@@ -105,11 +117,12 @@ class ControlConsole(Thread):
             return False
 
         numbers = self.getNumbers(school, grade)
-        self.sms.send(str(number), onSuccess)
+        self.sms.send(str(self.number), onSuccess)
         self.massSend(announcement, numbers)
+        self.logger.adminAnnounce(self.number, announcement, school, grade)
     
     def getSchool(self):
-        initialMessage = "Enter the target school, or * for all."
+        initialMessage = "Enter the target school (NNHS, NSHS), or * for all."
         invalidMessage = "That's not a valid school. Try again."
         self.sms.send(str(self.number), initialMessage)
         school = None
@@ -183,9 +196,15 @@ class ControlConsole(Thread):
         }
         northUsers = len(db[SchoolName.NEWTON_NORTH].getStudents())
         southUsers = len(db[SchoolName.NEWTON_SOUTH].getStudents())
-        totalUsers = northUsers + southUsers
 
-        message = f"TOTAL USERS: {totalUsers}, NORTH USERS: {northUsers}, SOUTH USERS: {southUsers}"
+        southGrades = [] 
+        northGrades = []
+
+        for grade in range(9, 13):
+            southGrades.append(len(db[SchoolName.NEWTON_SOUTH].getStudentsByGrade(grade)))
+            northGrades.append(len(db[SchoolName.NEWTON_NORTH].getStudentsByGrade(grade)))
+
+        message = f"North: {northUsers} users. Grade 9: {northGrades[0]}, 10: {northGrades[1]}, 11: {northGrades[2]}, 12: {northGrades[3]} | South: {southUsers} users. Grade 9: {southGrades[0]}, 10: {southGrades[1]}, 11: {southGrades[2]}, 12: {southGrades[3]} | Total abSENT Users: {northUsers + southUsers}"
 
         self.sms.send(str(self.number), message)
         return True
