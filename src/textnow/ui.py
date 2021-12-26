@@ -156,10 +156,8 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y) -> bool:
         # Sets message and sends.
-        print("test")
         aboutMessage = "Visit us at beacons[.]ai/absent for more information."
         self.sms.send(str(self.number), aboutMessage)
-        print("test")
         return True
 
     # Upon an edit request.
