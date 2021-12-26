@@ -56,7 +56,7 @@ class Logger():
         self.log(f"SENT ABSENCES SUCCESS \t| {school}")
 
     def noUsersToNotify(self):
-        self.log("SENT ABSENCES NOTIFCATIONS \t| NO USERS TO NOTIFY")
+        self.log("SENT ABSENCES NOTIFICATIONS \t| NO USERS TO NOTIFY")
     
     def resetSchoologyCheck(self):
         self.log(f"SCHOOLGY CHECK RESET")

@@ -150,7 +150,7 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y) -> bool:
         # Sets message and sends.
-        aboutMessage = "abSENT was created by Roshan Karim (NNHS '24) and Kevin Yang (NSHS '24).  If you're interested in how abSENT works technically, visit https://github.com/bykevinyang/abSENT. Checkout our instagram for other information: https://instagram.com/nps_absent."
+        aboutMessage = "abSENT was created by Kevin Yang (NSHS '24) and Roshan Karim (NNHS '24).  Follow our instagram for product updates: instagram.com/nps_absent. Checkout our site for general information: https://beacons.ai/absent. Vist our github for nerdy stuff: github.com/bykevinyang/abSENT."
         self.sms.send(str(self.number), aboutMessage)
         return True
 
