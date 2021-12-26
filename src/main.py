@@ -82,10 +82,11 @@ def sc_listener():
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = currentTime.weekday()
         
-        if (dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays) and dayoffLatch == False:
-            logger.schoologyOffDay(currentDate)
-            print("abSENT Day Off")
-            dayoffLatch = True
+        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays: 
+            if dayoffLatch == False:
+                logger.schoologyOffDay(currentDate)
+                print("abSENT Day Off")
+                dayoffLatch = True
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
             belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
