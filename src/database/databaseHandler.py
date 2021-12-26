@@ -1,6 +1,7 @@
 from dataStructs import *
 import sqlite3
 from typing import Tuple, List
+from database.logger import Logger
 
 class DatabaseHandler():
     def __init__(self, school: SchoolName, db_path = "abSENT.db"):
@@ -43,6 +44,9 @@ class DatabaseHandler():
         self.cursor.execute(create_classes)
 
         self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+
+        # Logging:
+        self.logger = Logger()
     
     def loadMaxIDs(self) -> Tuple[int, int, int]:
 
@@ -218,6 +222,8 @@ class DatabaseHandler():
         # Conduct query
         self.cursor.execute(query)
         self.connection.commit()
+
+        self.logger.addedStudent(student)
         # Return the newly generated id for student object manipulation
         return new_id
 
@@ -259,6 +265,7 @@ class DatabaseHandler():
         """
         self.cursor.execute(query)
         self.connection.commit()
+        self.logger.addedTeacher(teacher)
         return new_id
     
     # Create a class entry for data table classes

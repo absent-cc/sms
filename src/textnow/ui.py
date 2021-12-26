@@ -6,6 +6,7 @@ from database.databaseHandler import DatabaseHandler
 from textnow.controlPanel import ControlConsole
 from .sms import SMS
 from database.logger import Logger
+from typing import Tuple
 
 class UI(Thread):
 
@@ -117,7 +118,6 @@ class UI(Thread):
 
         # Add student to DB.
         db.addStudent(student, schedule)
-        self.logger.addedStudent(student)
 
         # Confirmation message.
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
@@ -147,6 +147,7 @@ class UI(Thread):
     def cancel(self, db: DatabaseHandler, resStudent: Student) -> bool: 
         # Cancels and sends message.
         db.removeStudent(resStudent)
+        self.logger.removedStudent(resStudent)
         cancelledMessage = "Service cancelled. Sorry to see you go!"
         self.sms.send(str(self.number), cancelledMessage)
         self.logger.canceledService(resStudent)
@@ -249,7 +250,7 @@ class UI(Thread):
             return True
         return False
 
-    def getName(self) -> tuple[str, str] or None:
+    def getName(self) -> Tuple[str, str] or None:
 
         # Initial variables including messages and blank names.
         last = None
@@ -282,7 +283,7 @@ class UI(Thread):
         return (first, last)
     
     # Get the school name of the user.
-    def getSchool(self, name: tuple[str, str]) -> SchoolName or None:
+    def getSchool(self, name: Tuple[str, str]) -> SchoolName or None:
         
         # Initial vars, messages + blank school value.
         school = None

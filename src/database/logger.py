@@ -68,8 +68,11 @@ class Logger():
         self.log(f"ADMIN LOGIN \t| {number}")
     
     def adminAnnounce(self, number: str, message: str, school: SchoolName, grade: int):
-        self.log(f"ADMIN ANNOUNCE \t| {number}; {message}; {school}; {grade}")
+        self.log(f"ADMIN ANNOUNCE \t| {number}; {message}; {str(school)}; {grade}")
 
+    def adminTimeOut(self, number: str):
+        self.log(f"ADMIN TIME OUT \t| {number}")
+    
     def sqlInjectionAttempted(self, number: str):
         self.log(f"SQL INJECTION ATTEMPTED \t| {number}")
     
