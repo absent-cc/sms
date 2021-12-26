@@ -123,7 +123,7 @@ class UI(Thread):
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "If you encounter a bug, contact us (text 'ABOUT' for more info). Consider also donating to continue keeping abSENT a free service: https://beacons.ai/absent."
+        successMessageFour = "Check out our additional information section for abSENT related user info: https://beacons.ai/absent/info. Consider also donating to continue keeping abSENT free for all: https://beacons.ai/absent/donate"
         successMessageFive = "Welcome to abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
