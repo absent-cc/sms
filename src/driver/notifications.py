@@ -75,10 +75,10 @@ class NotificationDriver:
     ## Each absent class for a student is smushed into one message to save TextNow API calls.
     def genMessages(self, notificationList: list):
         messageDict = {}
-        messageStart = "Hey there! You have absent teachers: "
+        messageStart = "Hey there! You have absent teachers:\\n"
         for notification in notificationList:
             for student in notification.students:
-                messageContent = f"{notification.teacher.first} {notification.teacher.last} Note: {notification.teacher.note}. "     
+                messageContent = f"{notification.teacher.first} {notification.teacher.last}\\n    Note: {notification.teacher.note}.\\n"     
                 # Map a student its update message. 
                 ## Meant to prevent duplicate messages (Dict entries are unique)
                 if messageDict.get(student) == None:

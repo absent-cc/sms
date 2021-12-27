@@ -80,7 +80,7 @@ def sc_listener():
     while True:
         currentTime = datetime.now(timezone.utc) - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
-        dayOfTheWeek = currentTime.weekday()
+        dayOfTheWeek = currentTime.weekday() 
         
         if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
             if dayoffLatch == False:
@@ -89,7 +89,7 @@ def sc_listener():
                 dayoffLatch = True
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
-            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnde
+            belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
             if aboveStartTime and belowEndTime and not schoologySuccessCheck:
                 print("CHECKING SCHOOLOGY.")
                 sc = SchoologyListener(textnowCreds, scCreds)
