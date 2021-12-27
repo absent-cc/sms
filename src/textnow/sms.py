@@ -47,7 +47,8 @@ class SMS:
         start_time = time.time()
         while True:
             # Timeout functionality.
-            if start_time + 60 < time.time():
+            ## Timeout after 5 minutes.
+            if start_time + 300 < time.time():
                 return None
 
             unreads = []
