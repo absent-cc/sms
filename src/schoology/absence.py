@@ -55,7 +55,6 @@ class Absence:
         absences = []
         self.date = date
         raw = self.getAbsenceTable(SchoolName.NEWTON_NORTH)
-        print(raw)
         if raw is None:
             return None
         else:
@@ -74,9 +73,7 @@ class Absence:
                 else:
                     note = raw[i*8+3]
                 entry = AbsentTeacher(raw[i*8+2],raw[i*8+1],raw[i*8+4],str(date.strftime("%m/%-d/%Y")),note)
-                absences.append(entry)
-
-        print(absences)        
+                absences.append(entry)   
         return absences
     
     # Same as the above, but the parsing is handled slightly differently due to the South absence table being differenct in formatting.
