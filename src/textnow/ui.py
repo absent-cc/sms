@@ -37,7 +37,7 @@ class UI(Thread):
         # Creates messages
         alreadySubscribedMessage = "You are already subscribed. Type in 'HELP' to see a list of commands."
         timeoutMessage = "You timed out! Please start your task again."
-        askForSubscription = "Hi! You've texted abSENT, an SMS based monitoring system for the NPS absent lists. To subscribe, please enter 'SUBSCRIBE'."
+        askForSubscription = "Hi! You've texted abSENT, an SMS based monitoring system for the NPS absent lists.\\nTo subscribe, please enter 'SUBSCRIBE'."
 
         # Sets the correct DB for the student if they exist.
         if resNorth != None:
@@ -121,7 +121,7 @@ class UI(Thread):
 
         # Confirmation message.
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
-        successMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
+        successMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
         successMessageFour = "Check out our site at beacons[.]ai/absent for more information."
         successMessageFive = "Welcome to abSENT!"
@@ -139,7 +139,7 @@ class UI(Thread):
         return True
 
     def help(self, db: DatabaseHandler, resStudent: Student) -> bool:
-        helpMessage = "Enter 'SUBSCRIBE' to subscribe to abSENT. Enter 'CANCEL' to cancel the service. Enter 'EDIT' to edit your schedule. Enter 'SCHEDULE' to view your schedule. Enter 'ABOUT' to learn more about abSENT. Enter 'HELP' to view this help message."
+        helpMessage = "COMMANDS:\\n'SUBSCRIBE' to subscribe to abSENT.\\n'CANCEL' to cancel the service.\\n'EDIT' to edit your schedule.\\n'SCHEDULE' to view your schedule.\\n'ABOUT' to learn more about abSENT.\\n'HELP' to view this help message."
         self.sms.send(str(self.number), helpMessage)
         return True
     
@@ -163,14 +163,12 @@ class UI(Thread):
     # Upon an edit request.
     def edit(self, db: DatabaseHandler, resStudent: Student) -> bool:
         # A bunch of messages.
-        initialMessageOne = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name."
-        initialMessageTwo = "For example: D John Doe. Alternatively, for a free block: D Free Block"
+        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
 
-        self.sms.send(str(self.number), initialMessageOne)
-        self.sms.send(str(self.number), initialMessageTwo)
+        self.sms.send(str(self.number), initialMessage)
 
         rawInput = self.sms.awaitResponse(str(self.number))
 
@@ -222,7 +220,7 @@ class UI(Thread):
 
         # Messages.
         statusMessageOne = f"Your schedule is as follows:"
-        statusMessageTwo = f"A: {schedule[SchoolBlock.A]}, B: {schedule[SchoolBlock.B]}, C: {schedule[SchoolBlock.C]}, D: {schedule[SchoolBlock.D]}, E: {schedule[SchoolBlock.E]}, F: {schedule[SchoolBlock.F]}, G: {schedule[SchoolBlock.G]}"
+        statusMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         
         # Send messages.
         self.sms.send(str(self.number), statusMessageOne)
@@ -255,7 +253,7 @@ class UI(Thread):
         # Initial variables including messages and blank names.
         last = None
         first = None
-        initialMessage = "Please text your first and last name, separated by spaces. (e.g: John Doe)"
+        initialMessage = "Please text your first and last name, separated by spaces.\\n(e.g: John Doe)"
         invalidMessage = "That's not a valid name. Enter your first and last name separated by spaces."
 
         # Send initial message.
@@ -287,7 +285,7 @@ class UI(Thread):
         
         # Initial vars, messages + blank school value.
         school = None
-        initialMessage = f"Hello {name[0]} {name[1]}! Please enter the school you go to, (N)orth or (S)outh."
+        initialMessage = f"Hello {name[0]} {name[1]}! Please enter the school you go to,\\n(N)orth or (S)outh."
         invalidMessage = "You've sent an invalid school name. Please reply with (N)orth or (S)outh."
         self.sms.send(str(self.number), initialMessage)
         
@@ -345,7 +343,7 @@ class UI(Thread):
     def getSchedule(self, school: SchoolName) -> Schedule or None:
 
         # A bunch of messages.
-        initialMessageOne = "Please enter each of your teachers in a new message in the below format. When finished entering, text 'DONE'."
+        initialMessageOne = "Please enter each of your teachers in a new message in the below format.\\nFor free blocks, don't send a message. When done, text 'DONE'."
         initialMessageTwo = "A John Doe"
         initialMessageThree = "B Joe Mama"
         invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."

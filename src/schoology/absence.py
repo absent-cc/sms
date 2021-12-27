@@ -34,15 +34,20 @@ class Absence:
             if len(text) > 4:
                 if str(self.date.strftime("%m/%-d/%Y")) in text[3]:
                     current_table = update
+                    self.susanSpirito = False
                 elif str(self.date.strftime('%b. %-d')) in text[0]:
                     current_table = update
+                    self.susanSpirito = False
                 elif str(self.date.strftime('%B %-d')) in text[0]:
                     current_table = update
+                    self.susanSpirito = False
                 # This is what I'd like to refer to as the Susan Spiritio clause.
                 elif str(self.date.strftime('%m/%-d/%Y')) in text[0]:
                     current_table = update
+                    self.susanSpirito = True
                 elif str(self.date.strftime('%m/%-d/%y')) in text[0]:
                     current_table = update
+                    self.susanSpirito = True
         return current_table
 
     # Takes the raw North attendance table from the prior function and parses it, using the AbsentTeacher dataclass. Returns an array of entries utilizing this class. 
@@ -61,12 +66,14 @@ class Absence:
                 raw.pop(0)
 
             for i in range(int(len(raw)/8)):
-                if raw[i*8+3] == '':
+                if raw[i*8+3] == '' or (self.susanSpirito and raw[i*8+5] == ''):
                     note = None
+                elif self.susanSpirito:
+                    note = raw[i*8+5]
                 else:
                     note = raw[i*8+3]
                 entry = AbsentTeacher(raw[i*8+2],raw[i*8+1],raw[i*8+4],str(date.strftime("%m/%-d/%Y")),note)
-                absences.append(entry)        
+                absences.append(entry)   
         return absences
     
     # Same as the above, but the parsing is handled slightly differently due to the South absence table being differenct in formatting.
