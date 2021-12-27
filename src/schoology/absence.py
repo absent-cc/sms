@@ -34,6 +34,7 @@ class Absence:
             if len(text) > 4:
                 if str(self.date.strftime("%m/%-d/%Y")) in text[3]:
                     current_table = update
+                    self.susanSpirito = False
                 elif str(self.date.strftime('%b. %-d')) in text[0]:
                     current_table = update
                     self.susanSpirito = False
