@@ -93,6 +93,9 @@ class DatabaseHandler():
     # Generate new ids for user, teacher, and class
     ## Generate new user id
     def newStudentID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+    
         # user_id universal for instance
         # Used to generate new user id's for table entries
         self.student_id += 1
@@ -100,6 +103,9 @@ class DatabaseHandler():
     
     ## Generate new teacher id
     def newTeacherID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+
         # teacher_id universal for instance
         # Used to generate new teacher ids for table entries
         self.teacher_id += 1
@@ -107,6 +113,9 @@ class DatabaseHandler():
 
     ## Generate new class id
     def newClassID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+        
         # classes_id universal for instance
         # Used to generate new user id's for table entries
         self.classes_id += 1
