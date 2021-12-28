@@ -25,19 +25,22 @@ class BlockMapper(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.update({
+            SchoolBlock.ADV: "ADVISORY",
             SchoolBlock.A: "A",
             SchoolBlock.B: "B",
             SchoolBlock.C: "C",
             SchoolBlock.D: "D",
             SchoolBlock.E: "E",
             SchoolBlock.F: "F",
-            SchoolBlock.G: "G",
+            SchoolBlock.G: "G"
         })
     
 class ReverseBlockMapper(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.update({
+            "ADV": SchoolBlock.ADV,
+            "ADVISORY": SchoolBlock.ADV,
             "A": SchoolBlock.A,
             "B": SchoolBlock.B,
             "C": SchoolBlock.C,
@@ -48,6 +51,7 @@ class ReverseBlockMapper(dict):
         })
 
 class SchoolBlock(Enum):
+    ADV = "ADVISORY"
     A = "A"
     B = "B"
     C = "C"
@@ -91,7 +95,9 @@ class Teacher:
 
 @dataclass
 class Schedule(dict):
-    def __init__(self,  A: Teacher = None, 
+    def __init__(self,  
+                        ADV: Teacher = None,
+                        A: Teacher = None, 
                         B: Teacher = None,
                         C: Teacher = None, 
                         D: Teacher = None, 
@@ -99,17 +105,19 @@ class Schedule(dict):
                         F: Teacher = None, 
                         G: Teacher = None):
         self.schedule = {
+            SchoolBlock.ADV: ADV,
             SchoolBlock.A: A,
             SchoolBlock.B: B,
             SchoolBlock.C: C,
             SchoolBlock.D: D,
             SchoolBlock.E: E,
             SchoolBlock.F: F,
-            SchoolBlock.G: G,
+            SchoolBlock.G: G
         }
     
     def __str__(self):
-        return f"""A: {self.schedule[SchoolBlock.A]},
+        return f"""ADVISORY: {self.schedule[SchoolBlock.ADV]}
+                    A: {self.schedule[SchoolBlock.A]},
                     B: {self.schedule[SchoolBlock.B]},
                     C: {self.schedule[SchoolBlock.C]},
                     D: {self.schedule[SchoolBlock.D]},

@@ -19,7 +19,7 @@ class NotificationDriver:
         }
         # Dict of blocks occuring on a given day.
         self.blockDict = {
-            0: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.C, SchoolBlock.D, SchoolBlock.E),
+            0: (SchoolBlock.A, SchoolBlock.ADV, SchoolBlock.B, SchoolBlock.C, SchoolBlock.D, SchoolBlock.E),
             1: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.F, SchoolBlock.G),
             2: (SchoolBlock.C, SchoolBlock.D, SchoolBlock.E, SchoolBlock.F),
             3: (SchoolBlock.A, SchoolBlock.B, SchoolBlock.G, SchoolBlock.E),
