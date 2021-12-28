@@ -54,6 +54,7 @@ class UI(Thread):
             'schedule': self.returnSchedule,
             'about': self.about,
             'help': self.help,
+            'tos': self.returnTOS
         }
 
         # Check if response in responsesDict, if so run response function.
@@ -88,6 +89,7 @@ class UI(Thread):
         welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
 
         self.sms.send(str(self.number), welcomeMessage)
+        self.returnTOS(None, None)
         self.logger.accountSetupStarted(str(self.number))
 
         # Gets names.
@@ -121,7 +123,7 @@ class UI(Thread):
 
         # Confirmation message.
         successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
-        successMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
+        successMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
         successMessageFour = "Check out our site at beacons[.]ai/absent for more information."
         successMessageFive = "Welcome to abSENT!"
@@ -139,7 +141,7 @@ class UI(Thread):
         return True
 
     def help(self, db: DatabaseHandler, resStudent: Student) -> bool:
-        helpMessage = "COMMANDS:\\n'SUBSCRIBE' to subscribe to abSENT.\\n'CANCEL' to cancel the service.\\n'EDIT' to edit your schedule.\\n'SCHEDULE' to view your schedule.\\n'ABOUT' to learn more about abSENT.\\n'HELP' to view this help message."
+        helpMessage = "COMMANDS:\\n'SUBSCRIBE' to subscribe to abSENT.\\n'CANCEL' to cancel the service.\\n'EDIT' to edit your schedule.\\n'SCHEDULE' to view your schedule.\\n'ABOUT' to learn more about abSENT.\\n'TOS' to view our terms of service.\\n'HELP' to view this help message."
         self.sms.send(str(self.number), helpMessage)
         return True
     
@@ -220,7 +222,7 @@ class UI(Thread):
 
         # Messages.
         statusMessageOne = f"Your schedule is as follows:"
-        statusMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
+        statusMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         
         # Send messages.
         self.sms.send(str(self.number), statusMessageOne)
@@ -285,7 +287,7 @@ class UI(Thread):
         
         # Initial vars, messages + blank school value.
         school = None
-        initialMessage = f"Hello {name[0]} {name[1]}! Please enter the school you go to,\\n(N)orth or (S)outh."
+        initialMessage = f"Hello {name[0]}! Please enter the school you go to,\\n(N)orth or (S)outh."
         invalidMessage = "You've sent an invalid school name. Please reply with (N)orth or (S)outh."
         self.sms.send(str(self.number), initialMessage)
         
@@ -343,16 +345,23 @@ class UI(Thread):
     def getSchedule(self, school: SchoolName) -> Schedule or None:
 
         # A bunch of messages.
-        initialMessageOne = "Please enter each of your teachers in a new message in the below format.\\nFor free blocks, don't send a message. When done, text 'DONE'."
-        initialMessageTwo = "A John Doe"
-        initialMessageThree = "B Joe Mama"
+        initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
+        initialMessageTwo = "A First Last"
+        initialMessageThree = "ADV John Doe"
+        initialMessageFour = "B Joe Mama"
+        initialMessageFive = "When done, text 'DONE'. For free blocks, don't send a message at all."
+        initialMessageSix = "For help with this process, check out our getting started post on our Instagram, @nps_absent."
         invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
         invalidMessageBlock = "Please correct your block formatting. It is invalid."
+        invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
 
         # Send initial messages.
         self.sms.send(str(self.number), initialMessageOne)
         self.sms.send(str(self.number), initialMessageTwo)
         self.sms.send(str(self.number), initialMessageThree)
+        self.sms.send(str(self.number), initialMessageFour)
+        self.sms.send(str(self.number), initialMessageFive)
+        self.sms.send(str(self.number), initialMessageSix)
 
         # Creates schedue object, get's initial raw user input, creates a new var for it formatted.
         schedule = Schedule()
@@ -367,6 +376,16 @@ class UI(Thread):
             # Obligatory SQL injection.
             if self.sqlInjectionCheck(rawInput):
                 return None
+            
+            # No newlines.
+            if "\n" in content:
+                self.sms.send(str(self.number), invalidMessageNewline)
+                rawInput = self.sms.awaitResponse(self.number)
+                # Check for timeout.
+                if rawInput == None:
+                    return None
+                content = rawInput.content.upper()
+                continue
 
             # Split up the content got from the user.
             teacherAttributes = content.split(" ", 2)
@@ -406,3 +425,10 @@ class UI(Thread):
                 return None
             content = rawInput.content.upper()
         return schedule
+
+    def returnTOS(self, x, y) -> bool:
+        # Vars.
+        message = "By signing up for and continuing to use our service, you implicity agree to the terms outlined at the following link:\\nabsent[.]igneus[.]org/terms"
+        # Send links to TOS.
+        self.sms.send(str(self.number), message)
+        return True
