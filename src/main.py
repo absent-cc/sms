@@ -38,7 +38,7 @@ def sms_listener():
     activethreads = { # dictionary of active threads.
     }
 
-    textnow.send('+16175059626', 'abSENT listener started!')
+    # textnow.send('+16175059626', 'abSENT listener started!')
     textnow.send('+16176868207', 'abSENT listener started!')
 
     while True:
