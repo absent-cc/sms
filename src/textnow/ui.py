@@ -122,10 +122,10 @@ class UI(Thread):
         db.addStudent(student, schedule)
 
         # Confirmation message.
-        successMessageOne = f"Hi {name[0]} {name[1]}! You've sucessfully signed up! Here is your schedule:"
+        successMessageOne = f"Hi {name[0]}! You've sucessfully signed up! Here is your schedule:"
         successMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "Check out our site at beacons[.]ai/absent for more information."
+        successMessageFour = "Check out our site at beacons[.]ai/absent for more information or follow us on Instagram @nps_absent."
         successMessageFive = "Welcome to abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
@@ -158,14 +158,14 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y) -> bool:
         # Sets message and sends.
-        aboutMessage = "Visit us at beacons[.]ai/absent for more information."
+        aboutMessage = "Visit us at beacons[.]ai/absent for more information or follow us on Instagram @nps_absent."
         self.sms.send(str(self.number), aboutMessage)
         return True
 
     # Upon an edit request.
     def edit(self, db: DatabaseHandler, resStudent: Student) -> bool:
         # A bunch of messages.
-        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit, a single letter from A to G, followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
+        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
@@ -226,6 +226,7 @@ class UI(Thread):
         
         # Send messages.
         self.sms.send(str(self.number), statusMessageOne)
+        time.sleep(.05)
         self.sms.send(str(self.number), statusMessageTwo)
 
         return True
@@ -350,7 +351,7 @@ class UI(Thread):
         initialMessageThree = "ADV John Doe"
         initialMessageFour = "B Joe Mama"
         initialMessageFive = "When done, text 'DONE'. For free blocks, don't send a message at all."
-        initialMessageSix = "For help with this process, check out our getting started post on our Instagram, @nps_absent."
+        initialMessageSix = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
         invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
         invalidMessageBlock = "Please correct your block formatting. It is invalid."
         invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
@@ -379,7 +380,7 @@ class UI(Thread):
             
             # No newlines.
             if "\n" in content:
-                self.sms.send(str(self.number), invalidMessageNewline)
+                self.sms.send(str(self.number), invalidMessageNewline) # Tell user they have more than one teacher.
                 rawInput = self.sms.awaitResponse(self.number)
                 # Check for timeout.
                 if rawInput == None:
