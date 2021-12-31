@@ -362,8 +362,12 @@ class UI(Thread):
         initialMessageTwo = "A First Last"
         initialMessageThree = "ADV John Doe"
         initialMessageFour = "B Joe Mama"
-        initialMessageFive = "When done, text 'DONE'. For free blocks, don't send a message at all."
-        initialMessageSix = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
+        initialMessageFive = "If you have two teachers, send in that block twice:"
+        initialMessageSix = "ADV Billy Gruff"
+        initialMessageSeven = "ADV James Bond"
+
+        initialMessageEight = "When done, text 'DONE'. For free blocks, don't send a message at all."
+        initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
         invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
         invalidMessageBlock = "Please correct your block formatting. It is invalid."
         invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
@@ -375,6 +379,9 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageFour)
         self.sms.send(str(self.number), initialMessageFive)
         self.sms.send(str(self.number), initialMessageSix)
+        self.sms.send(str(self.number), initialMessageSeven)
+        self.sms.send(str(self.number), initialMessageEight)
+        self.sms.send(str(self.number), initialMessageNine)
 
         # Get sms.
         rawInput = self.sms.awaitResponse(self.number)
