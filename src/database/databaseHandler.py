@@ -304,12 +304,14 @@ class DatabaseHandler():
         else:
             student_id = res_student.id
         for block in schedule:
-            teacher = schedule[block]
-            if teacher != None: # Check if teacher is already in db
-                teacher_id = self.getTeacherID(teacher)
-                if teacher_id == None:
-                    teacher_id = self.addTeacherToTeacherDirectory(teacher)
-                self.addClassToClasses(teacher_id, block, student_id)
+            teachers = schedule[block]
+            if teachers != None:
+                for teacher in teachers:
+                    # Check if teacher is already in db
+                    teacher_id = self.getTeacherID(teacher)
+                    if teacher_id == None:
+                        teacher_id = self.addTeacherToTeacherDirectory(teacher)
+                    self.addClassToClasses(teacher_id, block, student_id)
         return True
 
     # Gets a list of students by absent teacher.
@@ -347,7 +349,12 @@ class DatabaseHandler():
             res = self.cursor.execute(query).fetchall()
             for block in res:
                 block = ReverseBlockMapper()[block[0]]
-                schedule[block] = teacher
+                if schedule[block] != None:
+                    schedule[block].add(teacher)
+                else:
+                    schedule[block] = ClassTeachers()
+                    schedule[block].add(teacher)
+
         return schedule
     
     def getTeachersFromStudent(self, student: Student):

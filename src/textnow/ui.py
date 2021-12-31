@@ -211,7 +211,7 @@ class UI(Thread):
         self.sms.send(str(self.number), successMessage)
         self.returnSchedule(db, resStudent)
         return True
-
+    
     # Upon a printSchedule request.
     def returnSchedule(self, db: DatabaseHandler, student: Student) -> bool:
         
@@ -222,7 +222,7 @@ class UI(Thread):
 
         # Messages.
         statusMessageOne = f"Your schedule is as follows:"
-        statusMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
+        statusMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nADV: {schedule[SchoolBlock.ADV]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         
         # Send messages.
         self.sms.send(str(self.number), statusMessageOne)
@@ -345,6 +345,18 @@ class UI(Thread):
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName) -> Schedule or None:
 
+        # Temporary schedule dictionary.
+        schedule = {
+            SchoolBlock.A: set(),
+            SchoolBlock.ADV: set(),
+            SchoolBlock.B: set(),
+            SchoolBlock.C: set(),
+            SchoolBlock.D: set(),
+            SchoolBlock.E: set(),
+            SchoolBlock.F: set(),
+            SchoolBlock.G: set()
+        }
+
         # A bunch of messages.
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
         initialMessageTwo = "A First Last"
@@ -364,8 +376,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageFive)
         self.sms.send(str(self.number), initialMessageSix)
 
-        # Creates schedue object, get's initial raw user input, creates a new var for it formatted.
-        schedule = Schedule()
+        # Get sms.
         rawInput = self.sms.awaitResponse(self.number)
         # Check for timeout.
         if rawInput == None:
@@ -417,15 +428,23 @@ class UI(Thread):
             last = teacherAttributes[2]
             teacher = Teacher(first, last, school)
             enumBlock = ReverseBlockMapper()[block]
-            schedule[enumBlock] = teacher
 
-            # Adds the teacher object to the scheduule object.
+            # Adds the teacher object to dict of block: set(teacher)
+            schedule[enumBlock].add(teacher)
+            
             rawInput = self.sms.awaitResponse(self.number)
             # Check for timeout.
             if rawInput == None:
                 return None
             content = rawInput.content.upper()
-        return schedule
+        
+        scheduleClass = Schedule()
+
+        for block in schedule:
+            if schedule[block] != set():
+                scheduleClass[block] = schedule[block]
+
+        return scheduleClass
 
     def returnTOS(self, x, y) -> bool:
         # Vars.
