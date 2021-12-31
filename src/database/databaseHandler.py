@@ -352,7 +352,9 @@ class DatabaseHandler():
                 if schedule[block] != None:
                     schedule[block].add(teacher)
                 else:
-                    schedule[block] = {teacher}
+                    schedule[block] = ClassTeachers()
+                    schedule[block].add(teacher)
+
         return schedule
     
     def getTeachersFromStudent(self, student: Student):

@@ -95,18 +95,28 @@ class Teacher:
     def __hash__(self):
         primaryKey = self.first + self.last + str(self.school)
         return hash(primaryKey)
+    def __repr__(self) -> str:
+        return f"{self.first} {self.last}"
+
+class ClassTeachers(set[Teacher]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    def __str__(self) -> str:
+        return ", ".join(str(t) for t in self)
+    def __repr__(self) -> str:
+        return ", ".join(str(t) for t in self)
 
 @dataclass
 class Schedule(dict):
     def __init__(self,  
-                        A: set[Teacher] = None, 
-                        ADV: set[Teacher] = None,
-                        B: set[Teacher] = None,
-                        C: set[Teacher] = None, 
-                        D: set[Teacher] = None, 
-                        E: set[Teacher] = None, 
-                        F: set[Teacher] = None, 
-                        G: set[Teacher] = None):
+                        A: ClassTeachers = None, 
+                        ADV: ClassTeachers = None,
+                        B: ClassTeachers = None,
+                        C: ClassTeachers = None, 
+                        D: ClassTeachers = None, 
+                        E: ClassTeachers = None, 
+                        F: ClassTeachers = None, 
+                        G: ClassTeachers = None):
         self.schedule = {
             SchoolBlock.A: A,
             SchoolBlock.ADV: ADV,
@@ -148,7 +158,7 @@ class Schedule(dict):
     
     def __contains__(self, item):
         return item in self.schedule.keys()
-    
+
 @dataclass
 class AbsentTeacher:
     first: str

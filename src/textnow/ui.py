@@ -211,28 +211,18 @@ class UI(Thread):
         self.sms.send(str(self.number), successMessage)
         self.returnSchedule(db, resStudent)
         return True
-
+    
     # Upon a printSchedule request.
     def returnSchedule(self, db: DatabaseHandler, student: Student) -> bool:
         
         # Get the schedule.
-        rawSchedule = db.getScheduleByStudent(student)
-        if rawSchedule == None:
+        schedule = db.getScheduleByStudent(student)
+        if schedule == None:
             return False
-
-        schedule = {}
-
-        for block in rawSchedule:
-            print(schedule[block])
-            #if enumBlock != None:
-            #    formatted = ' and '.join(str(t) for t in schedule[enumBlock])
-            #    schedule[enumBlock] = formatted
-            #else:
-            #   schedule[enumBlock] = None
 
         # Messages.
         statusMessageOne = f"Your schedule is as follows:"
-        statusMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
+        statusMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nADV: {schedule[SchoolBlock.ADV]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         
         # Send messages.
         self.sms.send(str(self.number), statusMessageOne)
