@@ -374,18 +374,6 @@ class UI(Thread):
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName) -> Schedule or None:
 
-        # Temporary schedule dictionary.
-        schedule = {
-            SchoolBlock.A: ClassTeachers(),
-            SchoolBlock.ADV: ClassTeachers(),
-            SchoolBlock.B: ClassTeachers(),
-            SchoolBlock.C: ClassTeachers(),
-            SchoolBlock.D: ClassTeachers(),
-            SchoolBlock.E: ClassTeachers(),
-            SchoolBlock.F: ClassTeachers(),
-            SchoolBlock.G: ClassTeachers()
-        }
-
         # A bunch of messages.
         initialMessageOne = "Please send a new text message for each newTeacher that you have in the following format:"
         initialMessageTwo = "A First Last"
@@ -418,6 +406,8 @@ class UI(Thread):
         if rawInput == None:
             return None
         content = rawInput.content.upper()
+
+        schedule = Schedule()
 
         # Main thread.
         while content != "DONE":
@@ -466,19 +456,17 @@ class UI(Thread):
             enumBlock = ReverseBlockMapper()[block]
 
             # Adds the newTeacher object to dict of block: set(newTeacher)
-            schedule[enumBlock].add(newTeacher)
+            if schedule[enumBlock] != None:
+                schedule[enumBlock].add(newTeacher)
+            else:
+                schedule[enumBlock] = ClassTeachers()
+                schedule[enumBlock].add(newTeacher)
             
             rawInput = self.sms.awaitResponse(self.number)
             # Check for timeout.
             if rawInput == None:
                 return None
             content = rawInput.content.upper()
-        
-        scheduleClass = Schedule()
-
-        for block in schedule:
-            if schedule[block] != ClassTeachers():
-                scheduleClass[block] = schedule[block]
 
         return scheduleClass
 

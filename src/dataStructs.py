@@ -106,16 +106,6 @@ class ClassTeachers(set[Teacher]):
     def __repr__(self) -> str:
         return ", ".join(str(t) for t in self)
 
-class multiblockToTeachers(dict[str : Teacher]):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __str__(self) -> str:
-        return "\n".join(f"{str(t)}: {str(self[t])}" for t in self)
-
-    def __str__(self) -> str:
-        return "\n".join(f"{str(t)}: {str(self[t])}" for t in self)
-
 @dataclass
 class Schedule(dict):
     def __init__(self,  
