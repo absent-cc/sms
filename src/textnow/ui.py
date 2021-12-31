@@ -126,7 +126,7 @@ class UI(Thread):
         successMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
         successMessageFour = "Check out our site at beacons[.]ai/absent for more information or follow us on Instagram @nps_absent."
-        successMessageFive = "Welcome to abSENT!"
+        successMessageFive = "We hope you enjoy abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
         time.sleep(3.75)
@@ -163,14 +163,40 @@ class UI(Thread):
         return True
 
     # Upon an edit request.
-    def edit(self, db: DatabaseHandler, resStudent: Student) -> bool:
+    def edit(self, db: DatabaseHandler, student: Student) -> bool:
         # A bunch of messages.
-        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
-        invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
+        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new newTeacher's name.\\nFor example: D1 John Doe. Alternatively, for a free block: D1 Free Block."
+        invalidMessageTeacher = "You've provided an invalid newTeacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
         successMessage = "Great! Your schedule has been updated."
 
+        # Get the schedule.
+        schedule = db.getScheduleByStudent(student)
+        if schedule == None:
+            return False
+        
+        blockToTeacher = multiblockToTeachers() # Create a mapper of multiblock to teachers dict
+
+        initalSchedule = "Here is your current schedule:"
+        for block in schedule.keys():
+            teachers = schedule[block]
+            
+            if teachers == None:
+                continue
+            if len(teachers) == 1:
+                blockToTeacher.update({block: next(iter(teachers))})
+                initalSchedule += f"\\n{block}: {teachers}"
+            else:
+                teacherCounter = 1
+                for newTeacher in teachers:
+                    blockToTeacher.update({f"{block}{teacherCounter}": newTeacher}) 
+                    initalSchedule += f"\\n{block}{teacherCounter}: {newTeacher}"
+                    teacherCounter += 1
+
+        print(blockToTeacher)
+
         self.sms.send(str(self.number), initialMessage)
+        self.sms.send(str(self.number), initalSchedule)
 
         rawInput = self.sms.awaitResponse(str(self.number))
 
@@ -185,31 +211,34 @@ class UI(Thread):
         # Format input.
         teacherAttributes = rawInput.content.upper().split(" ", 2)
 
-        # Check if teacher is good.
+        # Check if newTeacher is good.
         if len(teacherAttributes) != 3:
             self.sms.send(str(self.number), invalidMessageTeacher)
             return False
     
-        # Check if block is good.
-        if teacherAttributes[0] not in ReverseBlockMapper():
+        multiblock = teacherAttributes[0]
+         # Check if block is good.
+        if multiblock not in blockToTeacher:
             self.sms.send(str(self.number), invalidMessageBlock)
             return False
-        
-        school = resStudent.school
-        block = teacherAttributes[0]
-        first = teacherAttributes[1]
-        last = teacherAttributes[2]
-        teacher = Teacher(first, last, school)
+
+        school = student.school
+        block = teacherAttributes[0] # Get only block from multiblock (e.g. D1 -> D), not including number
+        oldTeacher = blockToTeacher[block] # Grab old teacher from multiblock mapper (e.g. D1 -> John Doe)
+        newTeacherfirst = teacherAttributes[1]
+        newTeacherlast = teacherAttributes[2]
+        newTeacher = Teacher(newTeacherfirst, newTeacherlast, school)
         enumBlock = ReverseBlockMapper()[block]
 
-        if teacher.first == "FREE" and teacher.last == "BLOCK":
-            teacher = None
 
-        db.changeClass(resStudent, enumBlock, teacher)
-        self.logger.editSchedule(resStudent, enumBlock, teacher)
+        if newTeacher.first == "FREE" and newTeacher.last == "BLOCK":
+            newTeacher = None
+
+        db.changeClass(student, oldTeacher, enumBlock, newTeacher)
+        self.logger.editSchedule(student, enumBlock, newTeacher)
 
         self.sms.send(str(self.number), successMessage)
-        self.returnSchedule(db, resStudent)
+        self.returnSchedule(db, student)
         return True
     
     # Upon a printSchedule request.
@@ -347,18 +376,18 @@ class UI(Thread):
 
         # Temporary schedule dictionary.
         schedule = {
-            SchoolBlock.A: set(),
-            SchoolBlock.ADV: set(),
-            SchoolBlock.B: set(),
-            SchoolBlock.C: set(),
-            SchoolBlock.D: set(),
-            SchoolBlock.E: set(),
-            SchoolBlock.F: set(),
-            SchoolBlock.G: set()
+            SchoolBlock.A: ClassTeachers(),
+            SchoolBlock.ADV: ClassTeachers(),
+            SchoolBlock.B: ClassTeachers(),
+            SchoolBlock.C: ClassTeachers(),
+            SchoolBlock.D: ClassTeachers(),
+            SchoolBlock.E: ClassTeachers(),
+            SchoolBlock.F: ClassTeachers(),
+            SchoolBlock.G: ClassTeachers()
         }
 
         # A bunch of messages.
-        initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
+        initialMessageOne = "Please send a new text message for each newTeacher that you have in the following format:"
         initialMessageTwo = "A First Last"
         initialMessageThree = "ADV John Doe"
         initialMessageFour = "B Joe Mama"
@@ -368,9 +397,9 @@ class UI(Thread):
 
         initialMessageEight = "When done, text 'DONE'. For free blocks, don't send a message at all."
         initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
-        invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
+        invalidMessageTeacher = "Please type that newTeacher's name again. You used the wrong formatting."
         invalidMessageBlock = "Please correct your block formatting. It is invalid."
-        invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
+        invalidMessageNewline = "You've put more than one newTeacher in this message. Please send a new text message for each newTeacher."
 
         # Send initial messages.
         self.sms.send(str(self.number), initialMessageOne)
@@ -398,7 +427,7 @@ class UI(Thread):
             
             # No newlines.
             if "\n" in content:
-                self.sms.send(str(self.number), invalidMessageNewline) # Tell user they have more than one teacher.
+                self.sms.send(str(self.number), invalidMessageNewline) # Tell user they have more than one newTeacher.
                 rawInput = self.sms.awaitResponse(self.number)
                 # Check for timeout.
                 if rawInput == None:
@@ -409,7 +438,7 @@ class UI(Thread):
             # Split up the content got from the user.
             teacherAttributes = content.split(" ", 2)
             
-            # Check if teacher is good.
+            # Check if newTeacher is good.
             if len(teacherAttributes) != 3:
                 self.sms.send(str(self.number), invalidMessageTeacher)
                 rawInput = self.sms.awaitResponse(self.number)
@@ -429,15 +458,15 @@ class UI(Thread):
                 content = rawInput.content.upper()
                 continue
             
-            # Creates a teacher object.
+            # Creates a newTeacher object.
             block = teacherAttributes[0]
             first = teacherAttributes[1]
             last = teacherAttributes[2]
-            teacher = Teacher(first, last, school)
+            newTeacher = Teacher(first, last, school)
             enumBlock = ReverseBlockMapper()[block]
 
-            # Adds the teacher object to dict of block: set(teacher)
-            schedule[enumBlock].add(teacher)
+            # Adds the newTeacher object to dict of block: set(newTeacher)
+            schedule[enumBlock].add(newTeacher)
             
             rawInput = self.sms.awaitResponse(self.number)
             # Check for timeout.
@@ -448,7 +477,7 @@ class UI(Thread):
         scheduleClass = Schedule()
 
         for block in schedule:
-            if schedule[block] != set():
+            if schedule[block] != ClassTeachers():
                 scheduleClass[block] = schedule[block]
 
         return scheduleClass

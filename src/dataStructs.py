@@ -26,7 +26,7 @@ class BlockMapper(dict):
         super().__init__(*args, **kwargs)
         self.update({
             SchoolBlock.A: "A",
-            SchoolBlock.ADV: "ADVISORY",
+            SchoolBlock.ADV: "ADV",
             SchoolBlock.B: "B",
             SchoolBlock.C: "C",
             SchoolBlock.D: "D",
@@ -105,6 +105,16 @@ class ClassTeachers(set[Teacher]):
         return ", ".join(str(t) for t in self)
     def __repr__(self) -> str:
         return ", ".join(str(t) for t in self)
+
+class multiblockToTeachers(dict[str : Teacher]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return "\n".join(f"{str(t)}: {str(self[t])}" for t in self)
+
+    def __str__(self) -> str:
+        return "\n".join(f"{str(t)}: {str(self[t])}" for t in self)
 
 @dataclass
 class Schedule(dict):

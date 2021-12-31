@@ -248,7 +248,7 @@ class DatabaseHandler():
         return True, class_id
 
     # Change existing class entry in data table classes
-    def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
+    def changeClass(self, student: Student, old_teacher: Teacher, block: SchoolBlock, new_teacher: Teacher) -> bool:
         # Map enum SchoolBlock to string savable to DB
         str_block = BlockMapper()[block]
         
@@ -258,7 +258,7 @@ class DatabaseHandler():
             if student.id == None:
                 student.id = self.getStudentID(student)
             query = f"""
-            DELETE FROM classes WHERE block = '{str_block}' AND student_id = '{student.id}'
+            DELETE FROM classes WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
             """
             self.cursor.execute(query)
             self.connection.commit()
@@ -277,18 +277,18 @@ class DatabaseHandler():
             query = f"""
             SELECT teacher_id
             FROM classes
-            WHERE student_id = '{student.id}' AND block = '{str_block}'
+            WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
             """
             res = self.cursor.execute(query).fetchone()
-            # If student has a free, we can just add this teacher to the directory.
+            # If student has an empty block, we can just add this teacher to the directory.
             if res == None:
                 self.addClassToClasses(new_teacher_id, block, student.id)
-            # Else, update the class entry that already exists.
+            # Else class slot full, update the class entry that already exists.
             else:
                 query = f"""
                 UPDATE classes 
                 SET teacher_id = '{new_teacher_id}' 
-                WHERE teacher_id = '{res[0]}'
+                WHERE teacher_id = '{res[0]}' AND block = '{str_block}' AND student_id = '{student.id}'
                 """
                 self.cursor.execute(query)
                 self.connection.commit()
