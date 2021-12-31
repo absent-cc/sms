@@ -165,77 +165,78 @@ class UI(Thread):
     # Upon an edit request.
     def edit(self, db: DatabaseHandler, student: Student) -> bool:
         # A bunch of messages.
-        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new newTeacher's name.\\nFor example: D1 John Doe. Alternatively, for a free block: D1 Free Block."
+        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
+        initialMultipleTeachers = "If you have multiple teachers in a block, send them in as seperate messages.\\nFor example: D John Doe\\nD Jane Doe" # Make this example over two messages later
+        initialEditOverwrite = "Remember that this process will completly clear the block you are editing, so if you have multiple teachers in a block you will have to retype them in."
+
         invalidMessageTeacher = "You've provided an invalid newTeacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
+        invalidMessageNewline = "You've put more than one newTeacher in this message. Please send a new text message for each newTeacher."
+
         successMessage = "Great! Your schedule has been updated."
-
-        # Get the schedule.
-        schedule = db.getScheduleByStudent(student)
-        if schedule == None:
-            return False
         
-        blockToTeacher = multiblockToTeachers() # Create a mapper of multiblock to teachers dict
+        # self.sms.send(str(self.number), initialMessage)
+        # self.sms.send(str(self.number), initialMultipleTeachers)
+        # self.sms.send(str(self.number), initialEditOverwrite)
 
-        initalSchedule = "Here is your current schedule:"
-        for block in schedule.keys():
-            teachers = schedule[block]
-            
-            if teachers == None:
-                continue
-            if len(teachers) == 1:
-                blockToTeacher.update({block: next(iter(teachers))})
-                initalSchedule += f"\\n{block}: {teachers}"
+        # Send in schedule
+        self.returnSchedule(db, student)
+
+        # Get their old schedule
+        oldSchedule = db.getScheduleByStudent(student)
+        if oldSchedule == None: 
+            return False # User not in db
+
+        # Get new schedule.
+        newEdits = self.scheduleBuilder(student.school)
+        print(newEdits)
+
+        for block in newEdits:
+            newClass = newEdits[block]
+            newClassIter = iter(newClass)
+            oldClass = oldSchedule[block]
+            oldClassIter = iter(oldClass)
+
+            numChanges = len(newClass)
+            oldTeacherAmount = len(oldClass)
+
+            if newClass == None: continue
+            if newClass.contains(Teacher("Free", "Block")) == True:
+                for _ in range(oldTeacherAmount):
+                    db.removeClass(student, block, next(oldClassIter))
             else:
-                teacherCounter = 1
-                for newTeacher in teachers:
-                    blockToTeacher.update({f"{block}{teacherCounter}": newTeacher}) 
-                    initalSchedule += f"\\n{block}{teacherCounter}: {newTeacher}"
-                    teacherCounter += 1
+                if numChanges > oldTeacherAmount:
+                    print("Num changes greater than old teachers")
+                    # More new teachers than old teachers.
+                    # Must add in new teachers.
+                    for _ in range(oldTeacherAmount): # Replace old teachers
+                        newTeacher = next(newClassIter)
+                        oldTeacher = next(oldClassIter)
+                        db.changeClass(student, oldTeacher, block, newTeacher)
+                    for _ in range(numChanges - oldTeacherAmount): # Add in new teachers
+                        newTeacher = next(newClassIter)
+                        db.addClass(student, block, newTeacher)
+                elif numChanges < oldTeacherAmount:
+                    print("Num changes less than old teachers")
+                    # Number of changes is less than old teacher amount
+                    # Must remove some of the old teachers.
+                    for _ in range(numChanges): # Replace old teachers
+                        newTeacher = next(newClassIter)
+                        oldTeacher = next(oldClassIter)
+                        db.changeClass(student, oldTeacher, block, newTeacher)
+                    for i in range(oldTeacherAmount - numChanges): # Delete remaining old teachers
+                        oldTeacher = next(oldClassIter)
+                        db.removeClass(student, oldTeacher, block)
+                else:
+                    print("Num changes equal to old teachers")
+                    # Number of changes and old teachers is the same
+                    # No changes.
+                    for _ in range(numChanges):
+                        newTeacher = next(newClassIter)
+                        oldTeacher = next(oldClassIter)
+                        db.changeClass(student, oldTeacher, block, newTeacher) # Directly overwrite old teachers
 
-        print(blockToTeacher)
-
-        self.sms.send(str(self.number), initialMessage)
-        self.sms.send(str(self.number), initalSchedule)
-
-        rawInput = self.sms.awaitResponse(str(self.number))
-
-        # Check timeout.
-        if rawInput == None:
-            return False
-        
-        # SQL injection protection.
-        if self.sqlInjectionCheck(rawInput):
-            return False
-        
-        # Format input.
-        teacherAttributes = rawInput.content.upper().split(" ", 2)
-
-        # Check if newTeacher is good.
-        if len(teacherAttributes) != 3:
-            self.sms.send(str(self.number), invalidMessageTeacher)
-            return False
-    
-        multiblock = teacherAttributes[0]
-         # Check if block is good.
-        if multiblock not in blockToTeacher:
-            self.sms.send(str(self.number), invalidMessageBlock)
-            return False
-
-        school = student.school
-        block = teacherAttributes[0] # Get only block from multiblock (e.g. D1 -> D), not including number
-        oldTeacher = blockToTeacher[block] # Grab old teacher from multiblock mapper (e.g. D1 -> John Doe)
-        newTeacherfirst = teacherAttributes[1]
-        newTeacherlast = teacherAttributes[2]
-        newTeacher = Teacher(newTeacherfirst, newTeacherlast, school)
-        enumBlock = ReverseBlockMapper()[block]
-
-
-        if newTeacher.first == "FREE" and newTeacher.last == "BLOCK":
-            newTeacher = None
-
-        db.changeClass(student, oldTeacher, enumBlock, newTeacher)
-        self.logger.editSchedule(student, enumBlock, newTeacher)
+        # Add in logger stuff later
 
         self.sms.send(str(self.number), successMessage)
         self.returnSchedule(db, student)
@@ -385,9 +386,6 @@ class UI(Thread):
 
         initialMessageEight = "When done, text 'DONE'. For free blocks, don't send a message at all."
         initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
-        invalidMessageTeacher = "Please type that newTeacher's name again. You used the wrong formatting."
-        invalidMessageBlock = "Please correct your block formatting. It is invalid."
-        invalidMessageNewline = "You've put more than one newTeacher in this message. Please send a new text message for each newTeacher."
 
         # Send initial messages.
         self.sms.send(str(self.number), initialMessageOne)
@@ -400,6 +398,14 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageEight)
         self.sms.send(str(self.number), initialMessageNine)
 
+        return self.scheduleBuilder(school)
+
+    def scheduleBuilder(self, school) -> Schedule or None:
+
+        invalidMessageTeacher = "Please type that newTeacher's name again. You used the wrong formatting."
+        invalidMessageBlock = "Please correct your block formatting. It is invalid."
+        invalidMessageNewline = "You've put more than one newTeacher in this message. Please send a new text message for each newTeacher."
+
         # Get sms.
         rawInput = self.sms.awaitResponse(self.number)
         # Check for timeout.
@@ -408,7 +414,6 @@ class UI(Thread):
         content = rawInput.content.upper()
 
         schedule = Schedule()
-
         # Main thread.
         while content != "DONE":
             # Obligatory SQL injection.
@@ -468,7 +473,7 @@ class UI(Thread):
                 return None
             content = rawInput.content.upper()
 
-        return scheduleClass
+        return schedule
 
     def returnTOS(self, x, y) -> bool:
         # Vars.

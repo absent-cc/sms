@@ -126,6 +126,27 @@ class DatabaseHandler():
             # If student object already has an id, return id
             return student.id
     
+    def getClassID(self, teacher: Teacher, block: SchoolBlock, student: Student) -> int:
+        # Classes are defined by a teacher, block, and student
+        
+        # Grab teacher id if it isn't given
+        if teacher.id == None:
+            teacher_id = self.getTeacherID(teacher)
+        else:
+            teacher_id = teacher.id
+        
+        # Grab student id if it isn't given
+        if student.id == None:
+            student_id = self.getStudentID(student)
+        else:
+            student_id = student.id
+
+        query = f"SELECT class_id FROM classes WHERE teacher_id = '{teacher_id}' AND block = '{block}' AND student_id = '{student_id}' LIMIT 1"
+        res = self.cursor.execute(query).fetchone()
+        if res != None:
+            return res[0]
+        return None
+        
     # Get student objects of a given grade, return as list.
     def getStudentsByGrade(self, grade: int) -> list:
         query = f"SELECT * FROM student_directory WHERE grade = '{grade}'"
@@ -246,6 +267,21 @@ class DatabaseHandler():
         self.connection.commit()
 
         return True, class_id
+    
+    # Remove class from classes table
+    def removeClass(self, class_id: int, teacher: Teacher = None, block: SchoolBlock = None, student: Student = None) -> bool:
+        if class_id == None:
+            if teacher == None or block == None or student == None:
+                return False
+            searched_class_id = self.getClassID(teacher, block, student)
+        else:
+            searched_class_id = class_id
+        
+        query = f"DELETE FROM classes WHERE class_id = '{searched_class_id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
+        return True
+
 
     # Change existing class entry in data table classes
     def changeClass(self, student: Student, old_teacher: Teacher, block: SchoolBlock, new_teacher: Teacher) -> bool:
