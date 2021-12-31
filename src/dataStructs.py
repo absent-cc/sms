@@ -25,8 +25,8 @@ class BlockMapper(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.update({
-            SchoolBlock.ADV: "ADVISORY",
             SchoolBlock.A: "A",
+            SchoolBlock.ADV: "ADVISORY",
             SchoolBlock.B: "B",
             SchoolBlock.C: "C",
             SchoolBlock.D: "D",
@@ -39,9 +39,9 @@ class ReverseBlockMapper(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.update({
+            "A": SchoolBlock.A,
             "ADV": SchoolBlock.ADV,
             "ADVISORY": SchoolBlock.ADV,
-            "A": SchoolBlock.A,
             "B": SchoolBlock.B,
             "C": SchoolBlock.C,
             "D": SchoolBlock.D,
@@ -51,8 +51,8 @@ class ReverseBlockMapper(dict):
         })
 
 class SchoolBlock(Enum):
-    ADV = "ADVISORY"
     A = "A"
+    ADV = "ADVISORY"
     B = "B"
     C = "C"
     D = "D"
@@ -92,21 +92,24 @@ class Teacher:
 
     def __str__(self) -> str:
         return f"{self.first} {self.last}"
+    def __hash__(self):
+        primaryKey = self.first + self.last + str(self.school)
+        return hash(primaryKey)
 
 @dataclass
 class Schedule(dict):
     def __init__(self,  
-                        ADV: Teacher = None,
-                        A: Teacher = None, 
-                        B: Teacher = None,
-                        C: Teacher = None, 
-                        D: Teacher = None, 
-                        E: Teacher = None, 
-                        F: Teacher = None, 
-                        G: Teacher = None):
+                        A: set[Teacher] = None, 
+                        ADV: set[Teacher] = None,
+                        B: set[Teacher] = None,
+                        C: set[Teacher] = None, 
+                        D: set[Teacher] = None, 
+                        E: set[Teacher] = None, 
+                        F: set[Teacher] = None, 
+                        G: set[Teacher] = None):
         self.schedule = {
-            SchoolBlock.ADV: ADV,
             SchoolBlock.A: A,
+            SchoolBlock.ADV: ADV,
             SchoolBlock.B: B,
             SchoolBlock.C: C,
             SchoolBlock.D: D,
@@ -116,8 +119,8 @@ class Schedule(dict):
         }
     
     def __str__(self):
-        return f"""ADVISORY: {self.schedule[SchoolBlock.ADV]}
-                    A: {self.schedule[SchoolBlock.A]},
+        return f"""A: {self.schedule[SchoolBlock.A]}
+                    ADVISORY: {self.schedule[SchoolBlock.ADV]},
                     B: {self.schedule[SchoolBlock.B]},
                     C: {self.schedule[SchoolBlock.C]},
                     D: {self.schedule[SchoolBlock.D]},
@@ -129,7 +132,6 @@ class Schedule(dict):
         yield from self.schedule.keys()
 
     def __getitem__(self, key):
-        
         return self.schedule[key]
     
     def __setitem__(self, key, value):

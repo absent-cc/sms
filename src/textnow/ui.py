@@ -216,9 +216,19 @@ class UI(Thread):
     def returnSchedule(self, db: DatabaseHandler, student: Student) -> bool:
         
         # Get the schedule.
-        schedule = db.getScheduleByStudent(student)
-        if schedule == None:
+        rawSchedule = db.getScheduleByStudent(student)
+        if rawSchedule == None:
             return False
+
+        schedule = {}
+
+        for block in rawSchedule:
+            print(schedule[block])
+            #if enumBlock != None:
+            #    formatted = ' and '.join(str(t) for t in schedule[enumBlock])
+            #    schedule[enumBlock] = formatted
+            #else:
+            #   schedule[enumBlock] = None
 
         # Messages.
         statusMessageOne = f"Your schedule is as follows:"
@@ -345,6 +355,18 @@ class UI(Thread):
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName) -> Schedule or None:
 
+        # Temporary schedule dictionary.
+        schedule = {
+            SchoolBlock.A: set(),
+            SchoolBlock.ADV: set(),
+            SchoolBlock.B: set(),
+            SchoolBlock.C: set(),
+            SchoolBlock.D: set(),
+            SchoolBlock.E: set(),
+            SchoolBlock.F: set(),
+            SchoolBlock.G: set()
+        }
+
         # A bunch of messages.
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
         initialMessageTwo = "A First Last"
@@ -364,8 +386,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageFive)
         self.sms.send(str(self.number), initialMessageSix)
 
-        # Creates schedue object, get's initial raw user input, creates a new var for it formatted.
-        schedule = Schedule()
+        # Get sms.
         rawInput = self.sms.awaitResponse(self.number)
         # Check for timeout.
         if rawInput == None:
@@ -417,15 +438,23 @@ class UI(Thread):
             last = teacherAttributes[2]
             teacher = Teacher(first, last, school)
             enumBlock = ReverseBlockMapper()[block]
-            schedule[enumBlock] = teacher
 
-            # Adds the teacher object to the scheduule object.
+            # Adds the teacher object to dict of block: set(teacher)
+            schedule[enumBlock].add(teacher)
+            
             rawInput = self.sms.awaitResponse(self.number)
             # Check for timeout.
             if rawInput == None:
                 return None
             content = rawInput.content.upper()
-        return schedule
+        
+        scheduleClass = Schedule()
+
+        for block in schedule:
+            if schedule[block] != set():
+                scheduleClass[block] = schedule[block]
+
+        return scheduleClass
 
     def returnTOS(self, x, y) -> bool:
         # Vars.
