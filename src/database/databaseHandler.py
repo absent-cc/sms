@@ -126,6 +126,27 @@ class DatabaseHandler():
             # If student object already has an id, return id
             return student.id
     
+    def getClassID(self, teacher: Teacher, block: SchoolBlock, student: Student) -> int:
+        # Classes are defined by a teacher, block, and student
+        
+        # Grab teacher id if it isn't given
+        if teacher.id == None:
+            teacher_id = self.getTeacherID(teacher)
+        else:
+            teacher_id = teacher.id
+        
+        # Grab student id if it isn't given
+        if student.id == None:
+            student_id = self.getStudentID(student)
+        else:
+            student_id = student.id
+
+        query = f"SELECT class_id FROM classes WHERE teacher_id = '{teacher_id}' AND block = '{block}' AND student_id = '{student_id}' LIMIT 1"
+        res = self.cursor.execute(query).fetchone()
+        if res != None:
+            return res[0]
+        return None
+        
     # Get student objects of a given grade, return as list.
     def getStudentsByGrade(self, grade: int) -> list:
         query = f"SELECT * FROM student_directory WHERE grade = '{grade}'"
@@ -246,9 +267,41 @@ class DatabaseHandler():
         self.connection.commit()
 
         return True, class_id
+    
+    # Building block function for class
+    ## Should not be used standalone!
+    def removeClassFromClasses(self, class_id: int) -> bool:
+        if class_id == None:
+            return False
+        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
+        return True
+    
+    # Remove class from classes table
+    def removeClass(self, teacher: Teacher, block: SchoolBlock, student: Student) -> bool:
+        if teacher.id == None or block == None or student.id == None:
+            return False
+        class_id = self.getClassID(teacher, block, student)
+        
+        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
+        return True
 
+    def addClass(self, student: Student, block: SchoolBlock, newTeacher: Teacher):
+        # Get teacher id
+        teacher_id = self.getTeacherID(newTeacher)
+        if teacher_id == None:
+            teacher_id = self.addTeacherToTeacherDirectory(newTeacher)
+        # Get student id
+        student_id = self.getStudentID(student)
+        # Add class to classes table
+        print(f"Created new class with id: {self.addClassToClasses(teacher_id, block, student_id)}")
+        return True
+    
     # Change existing class entry in data table classes
-    def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
+    def changeClass(self, student: Student, old_teacher: Teacher, block: SchoolBlock, new_teacher: Teacher) -> bool:
         # Map enum SchoolBlock to string savable to DB
         str_block = BlockMapper()[block]
         
@@ -258,7 +311,7 @@ class DatabaseHandler():
             if student.id == None:
                 student.id = self.getStudentID(student)
             query = f"""
-            DELETE FROM classes WHERE block = '{str_block}' AND student_id = '{student.id}'
+            DELETE FROM classes WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
             """
             self.cursor.execute(query)
             self.connection.commit()
@@ -277,18 +330,18 @@ class DatabaseHandler():
             query = f"""
             SELECT teacher_id
             FROM classes
-            WHERE student_id = '{student.id}' AND block = '{str_block}'
+            WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
             """
             res = self.cursor.execute(query).fetchone()
-            # If student has a free, we can just add this teacher to the directory.
+            # If student has an empty block, we can just add this teacher to the directory.
             if res == None:
                 self.addClassToClasses(new_teacher_id, block, student.id)
-            # Else, update the class entry that already exists.
+            # Else class slot full, update the class entry that already exists.
             else:
                 query = f"""
                 UPDATE classes 
                 SET teacher_id = '{new_teacher_id}' 
-                WHERE teacher_id = '{res[0]}'
+                WHERE teacher_id = '{res[0]}' AND block = '{str_block}' AND student_id = '{student.id}'
                 """
                 self.cursor.execute(query)
                 self.connection.commit()
