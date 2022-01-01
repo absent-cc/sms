@@ -95,8 +95,11 @@ class Teacher:
     def __hash__(self):
         primaryKey = self.first + self.last + str(self.school)
         return hash(primaryKey)
-    def __repr__(self) -> str:
-        return f"{self.first} {self.last}"
+    # def __repr__(self) -> str:
+    #     return f"{self.first} {self.last}"
+    def __eq__ (self, other):
+        if type(other) is not Teacher: return False
+        return self.first == other.first and self.last == other.last and self.school == other.school
 
 class ClassTeachers(set[Teacher]):
     def __init__(self, *args, **kwargs):

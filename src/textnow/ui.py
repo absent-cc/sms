@@ -193,17 +193,26 @@ class UI(Thread):
 
         for block in newEdits:
             newClass = newEdits[block]
+            if newClass == None: continue
             newClassIter = iter(newClass)
             oldClass = oldSchedule[block]
+
+            if oldClass == None: 
+                for teacher in newClass:
+                    db.addClass(student, block, teacher)
+                continue
+
             oldClassIter = iter(oldClass)
 
             numChanges = len(newClass)
             oldTeacherAmount = len(oldClass)
 
-            if newClass == None: continue
-            if newClass.contains(Teacher("Free", "Block")) == True:
+            print(newClass)
+
+            if Teacher("FREE", "BLOCK", student.school) in newClass:
+                print("HERE")
                 for _ in range(oldTeacherAmount):
-                    db.removeClass(student, block, next(oldClassIter))
+                    db.removeClass(next(oldClassIter), block, student)
             else:
                 if numChanges > oldTeacherAmount:
                     print("Num changes greater than old teachers")
@@ -213,9 +222,11 @@ class UI(Thread):
                         newTeacher = next(newClassIter)
                         oldTeacher = next(oldClassIter)
                         db.changeClass(student, oldTeacher, block, newTeacher)
+                        print(f"Replaced old teacher: {oldTeacher} with new teacher: {newTeacher}")
                     for _ in range(numChanges - oldTeacherAmount): # Add in new teachers
                         newTeacher = next(newClassIter)
                         db.addClass(student, block, newTeacher)
+                        print(f"Added new teacher: {newTeacher}")
                 elif numChanges < oldTeacherAmount:
                     print("Num changes less than old teachers")
                     # Number of changes is less than old teacher amount
@@ -224,9 +235,12 @@ class UI(Thread):
                         newTeacher = next(newClassIter)
                         oldTeacher = next(oldClassIter)
                         db.changeClass(student, oldTeacher, block, newTeacher)
-                    for i in range(oldTeacherAmount - numChanges): # Delete remaining old teachers
+                        print(f"Replaced old teacher: {oldTeacher} with new teacher: {newTeacher}")
+                    print(oldTeacherAmount - numChanges)
+                    for _ in range(oldTeacherAmount - numChanges): # Delete remaining old teachers
                         oldTeacher = next(oldClassIter)
-                        db.removeClass(student, oldTeacher, block)
+                        db.removeClass(oldTeacher, block, student)
+                        print(f"Removed old teacher: {oldTeacher}")
                 else:
                     print("Num changes equal to old teachers")
                     # Number of changes and old teachers is the same

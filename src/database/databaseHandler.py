@@ -268,21 +268,38 @@ class DatabaseHandler():
 
         return True, class_id
     
-    # Remove class from classes table
-    def removeClass(self, class_id: int, teacher: Teacher = None, block: SchoolBlock = None, student: Student = None) -> bool:
+    # Building block function for class
+    ## Should not be used standalone!
+    def removeClassFromClasses(self, class_id: int) -> bool:
         if class_id == None:
-            if teacher == None or block == None or student == None:
-                return False
-            searched_class_id = self.getClassID(teacher, block, student)
-        else:
-            searched_class_id = class_id
+            return False
+        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
+        return True
+    
+    # Remove class from classes table
+    def removeClass(self, teacher: Teacher, block: SchoolBlock, student: Student) -> bool:
+        if teacher.id == None or block == None or student.id == None:
+            return False
+        class_id = self.getClassID(teacher, block, student)
         
-        query = f"DELETE FROM classes WHERE class_id = '{searched_class_id}'"
+        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
         self.cursor.execute(query)
         self.connection.commit()
         return True
 
-
+    def addClass(self, student: Student, block: SchoolBlock, newTeacher: Teacher):
+        # Get teacher id
+        teacher_id = self.getTeacherID(newTeacher)
+        if teacher_id == None:
+            teacher_id = self.addTeacherToTeacherDirectory(newTeacher)
+        # Get student id
+        student_id = self.getStudentID(student)
+        # Add class to classes table
+        print(f"Created new class with id: {self.addClassToClasses(teacher_id, block, student_id)}")
+        return True
+    
     # Change existing class entry in data table classes
     def changeClass(self, student: Student, old_teacher: Teacher, block: SchoolBlock, new_teacher: Teacher) -> bool:
         # Map enum SchoolBlock to string savable to DB
