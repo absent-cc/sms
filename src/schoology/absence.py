@@ -1,10 +1,7 @@
 from dataStructs import *
 import schoolopy
-import yaml
-from datetime import datetime, timedelta
 
 class Absence:
-
     # Sets up the two API objects as entries within a list 'api' . 
     def __init__(self, scCreds: SchoologyCreds):
         self.api = {

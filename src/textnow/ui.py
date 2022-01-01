@@ -1,5 +1,4 @@
 import time
-import threading
 from threading import Thread
 from dataStructs import *
 from database.databaseHandler import DatabaseHandler
