@@ -215,3 +215,4 @@ class NotificationInformation:
     teacher: AbsentTeacher
     students: list
     block: SchoolBlock
+    
