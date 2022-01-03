@@ -140,7 +140,7 @@ class UI(Thread):
         return True
 
     def help(self, db: DatabaseHandler, resStudent: Student) -> bool:
-        helpMessage = "COMMANDS:\\n'SUBSCRIBE' to subscribe to abSENT.\\n'CANCEL' to cancel the service.\\n'EDIT' to edit your schedule.\\n'SCHEDULE' to view your schedule.\\n'ABOUT' to learn more about abSENT.\\n'TOS' to view our terms of service.\\n'HELP' to view this help message."
+        helpMessage = "COMMANDS:\\n---\\n'SUBSCRIBE' to subscribe to abSENT.\\n'CANCEL' to cancel the service.\\n'EDIT' to edit your schedule.\\n'SCHEDULE' to view your schedule.\\n'ABOUT' to learn more about abSENT.\\n'TOS' to view our terms of service.\\n'HELP' to view this help message."
         self.sms.send(str(self.number), helpMessage)
         return True
     
@@ -164,11 +164,14 @@ class UI(Thread):
     # Upon an edit request.
     def edit(self, db: DatabaseHandler, student: Student) -> bool:
         # A bunch of messages.
-        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example: D John Doe. Alternatively, for a free block: D Free Block."
+        initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example:"
+        example1 = "D John Doe"
+        freeBlockMsg = "For a free block type in 'FREE BLOCK' as your teacher:"
+        example2 = "D Free Block"
         initialMultipleTeachersOne= "If you want to have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
-        initialMultipleTeachersTwo = "D John Doe"
-        initialMultipleTeachersThree = "D Jane Doe"
-        initialEditOverwrite = "Remember that editing a block will completly clear the block you are editing, so if you have multiple teachers in a block you will have to retype them all in."
+        initialMultipleTeachersTwo = "A Joe Mama"
+        initialMultipleTeachersThree = "A Chris Lee"
+        initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit just one, you will have to retype them all in."
 
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
@@ -178,16 +181,16 @@ class UI(Thread):
         successMessage = "Great! Your schedule has been updated."
         
         self.sms.send(str(self.number), initialMessage)
-        time.sleep(1.5)
+        self.sms.send(str(self.number), example1)
+        self.sms.send(str(self.number), freeBlockMsg)
+        self.sms.send(str(self.number), example2)
         self.sms.send(str(self.number), initialMultipleTeachersOne)
-        time.sleep(1.5)
         self.sms.send(str(self.number), initialMultipleTeachersTwo)
         self.sms.send(str(self.number), initialMultipleTeachersThree)
-        time.sleep(1)
         self.sms.send(str(self.number), initialEditOverwrite)
 
         # Send in schedule
-        self.returnSchedule(db, student)
+        self.returnSchedule(db, student, "Here is your schedule for editing:") # Give special message for this return
 
         # --------------------------------------------------
         ## Demarcation line between init message send and actual edit process
@@ -214,6 +217,7 @@ class UI(Thread):
             if oldClass == None: # If that block wasn't full, add in the new teacher directly.
                 for teacher in newClass:
                     db.addClass(student, block, teacher)
+                    self.logger.editSchedule(student, block, teacher)                    
                 continue # Skip to next block iteration (for loop).
 
             oldClassIter = iter(oldClass)
@@ -228,27 +232,33 @@ class UI(Thread):
                 print("HERE")
                 for _ in range(oldTeacherAmount):
                     db.removeClass(next(oldClassIter), block, student)
+                    self.logger.editSchedule(student, block, None)
+                        
             else:
                 if numChanges > oldTeacherAmount: # If they put in more teachers than they had, add in the new teachers.
                     for _ in range(oldTeacherAmount): # Replace old teachers
                         newTeacher = next(newClassIter)
                         oldTeacher = next(oldClassIter)
                         db.changeClass(student, oldTeacher, block, newTeacher)
+                        self.logger.editSchedule(student, block, newTeacher)
                         print(f"Replaced old teacher: {oldTeacher} with new teacher: {newTeacher}")
                     for _ in range(numChanges - oldTeacherAmount): # Add in new teachers
                         newTeacher = next(newClassIter)
                         db.addClass(student, block, newTeacher)
+                        self.logger.editSchedule(student, block, newTeacher)
                         print(f"Added new teacher: {newTeacher}")
                 elif numChanges < oldTeacherAmount: # If they put in less teachers than they had, remove the extra old teachers.
                     for _ in range(numChanges): # Replace old teachers with the new teachers
                         newTeacher = next(newClassIter)
                         oldTeacher = next(oldClassIter)
                         db.changeClass(student, oldTeacher, block, newTeacher)
+                        self.logger.editSchedule(student, block, newTeacher)
                         print(f"Replaced old teacher: {oldTeacher} with new teacher: {newTeacher}")
                     print(oldTeacherAmount - numChanges)
                     for _ in range(oldTeacherAmount - numChanges): # Delete remaining old teachers
                         oldTeacher = next(oldClassIter)
                         db.removeClass(oldTeacher, block, student)
+                        self.logger.editSchedule(student, block, None)
                         print(f"Removed old teacher: {oldTeacher}")
                 else: # If they put in the same amount of teachers as they had, replace the old teachers with the new teachers.
                     print("Num changes equal to old teachers")
@@ -256,6 +266,7 @@ class UI(Thread):
                         newTeacher = next(newClassIter)
                         oldTeacher = next(oldClassIter)
                         db.changeClass(student, oldTeacher, block, newTeacher) # Directly overwrite old teachers
+                        self.logger.editSchedule(student, block, newTeacher)
 
         # Add in logger stuff later
 
@@ -264,15 +275,19 @@ class UI(Thread):
         return True
     
     # Upon a printSchedule request.
-    def returnSchedule(self, db: DatabaseHandler, student: Student) -> bool:
+    def returnSchedule(self, db: DatabaseHandler, student: Student, statusMessage: str = None) -> bool:
         
         # Get the schedule.
         schedule = db.getScheduleByStudent(student)
         if schedule == None:
             return False
 
+        if statusMessage == None:
+            statusMessageOne = f"Your schedule is as follows:"
+        else:
+            statusMessageOne = statusMessage
+        
         # Messages.
-        statusMessageOne = f"Your schedule is as follows:"
         statusMessageTwo = f"A: {schedule[SchoolBlock.A]}\\nADV: {schedule[SchoolBlock.ADV]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         
         # Send messages.
@@ -399,14 +414,16 @@ class UI(Thread):
         # A bunch of messages.
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
         initialMessageTwo = "A First Last"
-        initialMessageThree = "ADV John Doe"
-        initialMessageFour = "B Joe Mama"
+        initialMessageThree = "ADV Elton John"
+        initialMessageFour = "B Kurt Cobain"
         initialMessageFive = "If you have two teachers, send in that block twice:"
-        initialMessageSix = "ADV Billy Gruff"
-        initialMessageSeven = "ADV James Bond"
+        initialMessageSix = "ADV Paul Simon"
+        initialMessageSeven = "ADV Art Garfunkel"
 
-        initialMessageEight = "When done, text 'DONE'. For free blocks, don't send a message at all."
+        initialMessageEight = "For free blocks, don't send a message at all. When done, text 'DONE'."
         initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
+
+        typePrompt = "Please build your schedule:"
 
         # Send initial messages.
         self.sms.send(str(self.number), initialMessageOne)
@@ -418,6 +435,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageSeven)
         self.sms.send(str(self.number), initialMessageEight)
         self.sms.send(str(self.number), initialMessageNine)
+        self.sms.send(str(self.number), typePrompt)
 
         return self.scheduleBuilder(school)
 
