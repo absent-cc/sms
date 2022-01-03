@@ -96,7 +96,7 @@ class NotificationDriver:
             self.logger.noUsersToNotify()
             return True
         for student in messageDict:
-            self.sms.sendMessage(str(student.number), messageDict[student])
+            self.sms.send(str(student.number), messageDict[student])
             self.logger.sentAbsencesNotification(student)
             delay = random.uniform(0.25, 1.0) # Random delay so no get banned from API.
             time.sleep(delay)
