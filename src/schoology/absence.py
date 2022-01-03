@@ -61,7 +61,7 @@ class Absence:
     # Same as the above, but the parsing is handled slightly differently due to the South absence table being differenct in formatting.
     def filterAbsencesSouth(self, date):
         self.date = date
-        table = self.getAbsenceTable(SchoolName.NEWTON_NORTH)    
+        table = self.getAbsenceTable(SchoolName.NEWTON_SOUTH)    
         absences = ContentParsers(date).parse(table)
 
         print(absences)
