@@ -85,7 +85,7 @@ class UI(Thread):
     # For new users, upon sending a subscribe message.
     def welcome(self, msg: Message) -> bool:
         # Sends welcome.
-        welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
+        welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists. Enter 'CANCEL' at any time to terminate this process."
 
         self.sms.send(str(self.number), welcomeMessage)
         self.returnTOS(None, None)
@@ -340,6 +340,10 @@ class UI(Thread):
             if self.sqlInjectionCheck(msg):
                 return None
 
+            # Cancel at any time.
+            if msg.content.lower() == 'cancel':
+                return None
+
             # Split name and check if valid.
             msg = str(msg.content).split(' ', 1) 
             if len(msg) == 2:
@@ -366,6 +370,10 @@ class UI(Thread):
             if msg == None:
                 return None
             msg = msg.content.lower()
+
+            # Cancel at any time.
+            if msg == 'cancel':
+                return None
 
             # Check if school name is valid.
             if msg == 'north' or msg == 'n':
@@ -401,7 +409,9 @@ class UI(Thread):
             if msg == None:
                 return None
             msg = msg.content
-
+            # Cancel at any time.
+            if msg.lower() == 'cancel':
+                return None
             if validNumbers.get(msg) != None:
                 year = validNumbers.get(msg)
             else:
@@ -451,6 +461,9 @@ class UI(Thread):
         if rawInput == None:
             return None
         content = rawInput.content.upper()
+        # Cancel at any time.
+        if content == 'CANCEL':
+            return None
 
         schedule = Schedule()
         # Main thread.
@@ -467,6 +480,9 @@ class UI(Thread):
                 if rawInput == None:
                     return None
                 content = rawInput.content.upper()
+                # Cancel at any time.
+                if content == 'CANCEL':
+                    return None
                 continue
 
             # Split up the content got from the user.
@@ -480,6 +496,9 @@ class UI(Thread):
                 if rawInput == None:
                     return None
                 content = rawInput.content.upper()
+                # Cancel at any time.
+                if content == 'CANCEL':
+                    return None
                 continue
 
             # Check if block is good.
@@ -490,6 +509,9 @@ class UI(Thread):
                 if rawInput == None:
                     return None
                 content = rawInput.content.upper()
+                # Cancel at any time.
+                if content == 'CANCEL':
+                    return None
                 continue
             
             # Creates a teacher object.
@@ -511,7 +533,9 @@ class UI(Thread):
             if rawInput == None:
                 return None
             content = rawInput.content.upper()
-
+            # Cancel at any time.
+            if content == 'CANCEL':
+                return None
         return schedule
 
     def returnTOS(self, x, y) -> bool:

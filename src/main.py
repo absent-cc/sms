@@ -71,7 +71,7 @@ def sc_listener():
     holidays = []
 
     dailyCheckTimeStart = 7 # hour
-    dailyCheckTimeEnd = 10 # hour
+    dailyCheckTimeEnd = 12 # hour
     
     resetTime = (0, 0) # midnight
 
