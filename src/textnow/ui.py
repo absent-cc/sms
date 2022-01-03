@@ -168,7 +168,7 @@ class UI(Thread):
         example1 = "C John Lennon"
         freeBlockMsg = "For a free block, type in 'FREE BLOCK' as your teacher:"
         example2 = "D Free Block"
-        initialMultipleTeachersOne= "If have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
+        initialMultipleTeachersOne= "If you have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
         initialMultipleTeachersTwo = "B George Harrison"
         initialMultipleTeachersThree = "B Ringo Starr"
         initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit that block, you will have to retype all your teachers."
