@@ -71,7 +71,7 @@ def sc_listener():
     holidays = []
 
     dailyCheckTimeStart = 7 # hour
-    dailyCheckTimeEnd = 10 # hour
+    dailyCheckTimeEnd = 12 # hour
     
     resetTime = (0, 0) # midnight
 
@@ -113,5 +113,6 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
-threads['sc'].start()
-threads['sms'].start()
+#threads['sc'].start()
+#threads['sms'].start()
+sc_listener()
