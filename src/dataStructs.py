@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from typing import Set
 
 class SchoolNameMapper(dict):
     def __init__(self):
@@ -101,7 +102,7 @@ class Teacher:
         if type(other) is not Teacher: return False
         return self.first == other.first and self.last == other.last and self.school == other.school
 
-class ClassTeachers(set[Teacher]):
+class ClassTeachers(Set[Teacher]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     def __str__(self) -> str:
