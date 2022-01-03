@@ -180,12 +180,12 @@ class DatabaseHandler():
             '{student.school}',
             '{student.grade}'
             )
-            RETURNING student_id;
         """
 
         # Conduct insertion
+        self.cursor.execute(query)
+        query = "SELECT last_insert_rowid()"
         return_id = self.cursor.execute(query)
-
         student_id = return_id.fetchone()[0] # Get student id created from autoincrement
         self.connection.commit()
 
@@ -231,9 +231,10 @@ class DatabaseHandler():
                 '{teacher.last}',
                 '{teacher.school}'
             )
-            RETURNING teacher_id
         """
         # Conduct insertion
+        self.cursor.execute(query)
+        query = "SELECT last_insert_rowid()"
         return_id = self.cursor.execute(query)
         teacher_id = return_id.fetchone()[0] # Get teacher id created from autoincrement
 
@@ -257,10 +258,11 @@ class DatabaseHandler():
             '{str_block}',
             '{student_id}'
             ) 
-            RETURNING class_id;
         """
 
         # Conduct insertion
+        self.cursor.execute(query)
+        query = "SELECT last_insert_rowid()"
         return_id = self.cursor.execute(query)
         class_id = return_id.fetchone()[0] # Get class id created from autoincrement
 
