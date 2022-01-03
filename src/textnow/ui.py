@@ -165,13 +165,14 @@ class UI(Thread):
     def edit(self, db: DatabaseHandler, student: Student) -> bool:
         # A bunch of messages.
         initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example:"
-        example1 = "D John Doe"
+        example1 = "C John Lennon"
         freeBlockMsg = "For a free block type in 'FREE BLOCK' as your teacher:"
         example2 = "D Free Block"
         initialMultipleTeachersOne= "If you want to have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
-        initialMultipleTeachersTwo = "A Joe Mama"
-        initialMultipleTeachersThree = "A Chris Lee"
+        initialMultipleTeachersTwo = "B George Harrison"
+        initialMultipleTeachersThree = "B Ringo Starr"
         initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit just one, you will have to retype them all in."
+        doneMessage = "When you're done, text 'DONE'."
 
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
@@ -188,7 +189,8 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMultipleTeachersTwo)
         self.sms.send(str(self.number), initialMultipleTeachersThree)
         self.sms.send(str(self.number), initialEditOverwrite)
-
+        self.sms.send(str(self.number), doneMessage)
+        
         # Send in schedule
         self.returnSchedule(db, student, "Here is your schedule for editing:") # Give special message for this return
 
