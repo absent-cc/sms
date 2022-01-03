@@ -166,13 +166,13 @@ class UI(Thread):
         # A bunch of messages.
         initialMessage = "I see you'd like to edit your teachers. Please type the block you'd like to edit followed by your new teacher's name.\\nFor example:"
         example1 = "C John Lennon"
-        freeBlockMsg = "For a free block type in 'FREE BLOCK' as your teacher:"
+        freeBlockMsg = "For a free block, type in 'FREE BLOCK' as your teacher:"
         example2 = "D Free Block"
-        initialMultipleTeachersOne= "If you want to have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
+        initialMultipleTeachersOne= "If have multiple teachers in a block, send them in as seperate messages.\\nFor example:" # Make this example over two messages later
         initialMultipleTeachersTwo = "B George Harrison"
         initialMultipleTeachersThree = "B Ringo Starr"
-        initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit just one, you will have to retype them all in."
-        doneMessage = "When you're done, text 'DONE'."
+        initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit that block, you will have to retype all your teachers."
+        doneMessage = "As always, when you're done, text 'DONE'"
 
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
@@ -303,7 +303,6 @@ class UI(Thread):
     ## Returns true if invalid input
     ## Return false if valid input
     def sqlInjectionCheck(self, msg: Message) -> bool:
-        
         # Message.  
         sqlInjectionMessage = "You are a filthy SQL injector. Please leave immediately."
         singleQuoteMessage = "You inputted an invalid single quote ('). Please try again."
@@ -431,8 +430,8 @@ class UI(Thread):
         initialMessageSix = "ADV Paul Simon"
         initialMessageSeven = "ADV Art Garfunkel"
 
-        initialMessageEight = "For free blocks, don't send a message at all. When done, text 'DONE'."
-        initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
+        initialMessageEight = "For free blocks, DO NOT send a message at all. When done, text 'DONE'."
+        initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @absent.sms"
 
         typePrompt = "Start building your schedule:"
 
