@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Set
-# ASDAS
+
 class SchoolNameMapper(dict):
     def __init__(self):
         super().__init__()
