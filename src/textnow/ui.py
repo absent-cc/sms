@@ -121,10 +121,10 @@ class UI(Thread):
         db.addStudent(student, schedule)
 
         # Confirmation message.
-        successMessageOne = f"Hi {name[0]}! You've sucessfully signed up! Here is your schedule:"
+        successMessageOne = f"Amazing! You've sucessfully signed up. Here is your schedule:"
         successMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
-        successMessageThree = "If you have errors in your schedule, you can change it by texting 'EDIT'."
-        successMessageFour = "Check out our site at beacons[.]ai/absent for more information or follow us on Instagram @nps_absent."
+        successMessageThree = "If your schedule has errors, you can change it by texting 'EDIT'."
+        successMessageFour = "Check out our site at beacons[.]ai/absent or follow us on Instagram @absent.sms"
         successMessageFive = "We hope you enjoy abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
@@ -157,7 +157,7 @@ class UI(Thread):
     # Upon an about request.
     def about(self, x, y) -> bool:
         # Sets message and sends.
-        aboutMessage = "Visit us at beacons[.]ai/absent for more information or follow us on Instagram @nps_absent."
+        aboutMessage = "Visit us at beacons[.]ai/absent for more information or follow us on Instagram @absent.sms"
         self.sms.send(str(self.number), aboutMessage)
         return True
 
@@ -190,7 +190,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMultipleTeachersThree)
         self.sms.send(str(self.number), initialEditOverwrite)
         self.sms.send(str(self.number), doneMessage)
-        
+
         # Send in schedule
         self.returnSchedule(db, student, "Here is your schedule for editing:") # Give special message for this return
 
@@ -422,12 +422,11 @@ class UI(Thread):
     
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName) -> Schedule or None:
-
-        # A bunch of messages.
+        initialMessageGreeting = "Great! Time to bulid your schedule."
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
         initialMessageTwo = "A First Last"
-        initialMessageThree = "ADV Elton John"
         initialMessageFour = "B Kurt Cobain"
+        initialMessageThree = "C Elton John"
         initialMessageFive = "If you have two teachers, send in that block twice:"
         initialMessageSix = "ADV Paul Simon"
         initialMessageSeven = "ADV Art Garfunkel"
@@ -435,12 +434,14 @@ class UI(Thread):
         initialMessageEight = "For free blocks, don't send a message at all. When done, text 'DONE'."
         initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @nps_absent."
 
-        typePrompt = "Please build your schedule:"
+        typePrompt = "Start building your schedule:"
 
         # Send initial messages.
+        self.sms.send(str(self.number), initialMessageGreeting)
         self.sms.send(str(self.number), initialMessageOne)
         self.sms.send(str(self.number), initialMessageTwo)
         self.sms.send(str(self.number), initialMessageThree)
+        time.sleep(.5)
         self.sms.send(str(self.number), initialMessageFour)
         self.sms.send(str(self.number), initialMessageFive)
         self.sms.send(str(self.number), initialMessageSix)
