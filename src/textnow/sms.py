@@ -20,7 +20,7 @@ class SMS:
 
     def send(self, number: str, message: str) -> bool:
         self.sendMessage(number, message)
-        delay = 0.15*(len(message) / 4.7)
+        delay = 0.22*(len(message) / 4.7)
         time.sleep(delay)
         return True
 
