@@ -113,6 +113,5 @@ threads = {
         'sms': threading.Thread(target=threadwrapper(sms_listener), name='sms listener')
 }
 
-#threads['sc'].start()
-#threads['sms'].start()
-sc_listener()
+threads['sc'].start()
+threads['sms'].start()
