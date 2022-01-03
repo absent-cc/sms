@@ -10,7 +10,7 @@ class DatabaseHandler():
         self.cursor = self.connection.cursor()
         create_student_directory = """
         CREATE TABLE IF NOT EXISTS student_directory (
-                student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER PRIMARY KEY,
                 number TEXT,
                 first_name TEXT,
                 last_name TEXT,
@@ -20,7 +20,7 @@ class DatabaseHandler():
             """
         create_teacher_directory = """
         CREATE TABLE IF NOT EXISTS teacher_directory (
-                teacher_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                teacher_id INTEGER PRIMARY KEY,
                 first_name TEXT,
                 last_name TEXT,
                 school TEXT
@@ -28,7 +28,7 @@ class DatabaseHandler():
             """
         create_classes = """
         CREATE TABLE IF NOT EXISTS classes (
-                class_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_id INTEGER PRIMARY KEY,
                 teacher_id INTEGER,
                 block TEXT,
                 student_id INTEGER,
@@ -38,16 +38,50 @@ class DatabaseHandler():
                     REFERENCES teacher_directory(teacher_id)
             )
             """
-        
-        # Create tables if they don't exist
+
         self.cursor.execute(create_student_directory)
         self.cursor.execute(create_teacher_directory)
         self.cursor.execute(create_classes)
 
-        self.connection.commit()
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
 
         # Logging:
         self.logger = Logger()
+    
+    def loadMaxIDs(self) -> Tuple[int, int, int]:
+
+        grab_max_student_id = """
+        SELECT MAX(student_id) FROM student_directory
+        """
+        grab_max_teacher_id = """
+        SELECT MAX(teacher_id) FROM teacher_directory
+        """
+        grab_max_class_id = """
+        SELECT MAX(class_id) FROM classes
+        """
+        
+        self.cursor.execute(grab_max_student_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            student_id = res
+        else:
+            student_id = 0
+
+        self.cursor.execute(grab_max_teacher_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            teacher_id = res
+        else:
+            teacher_id = 0
+
+        self.cursor.execute(grab_max_class_id)
+        res = self.cursor.fetchone()[0]
+        if res != None:
+            classes_id = res
+        else:
+            classes_id = 0
+        
+        return (student_id, teacher_id, classes_id)
         
     # Reset the database, for development purposes only!
     def reset(self):
@@ -55,6 +89,37 @@ class DatabaseHandler():
         # If the database exists, delete it
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
+
+    # Generate new ids for user, teacher, and class
+    ## Generate new user id
+    def newStudentID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+    
+        # user_id universal for instance
+        # Used to generate new user id's for table entries
+        self.student_id += 1
+        return self.student_id
+    
+    ## Generate new teacher id
+    def newTeacherID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+
+        # teacher_id universal for instance
+        # Used to generate new teacher ids for table entries
+        self.teacher_id += 1
+        return self.teacher_id
+
+    ## Generate new class id
+    def newClassID(self):
+        # Update max id's b/c it can be overwritten by other threads
+        self.student_id, self.teacher_id, self.classes_id = self.loadMaxIDs()
+        
+        # classes_id universal for instance
+        # Used to generate new user id's for table entries
+        self.classes_id += 1
+        return self.classes_id
 
     # Get teacher object from DB based off of inputted teacher
     def getTeacher(self, teacher: Teacher):
@@ -126,27 +191,6 @@ class DatabaseHandler():
             # If student object already has an id, return id
             return student.id
     
-    def getClassID(self, teacher: Teacher, block: SchoolBlock, student: Student) -> int:
-        # Classes are defined by a teacher, block, and student
-        
-        # Grab teacher id if it isn't given
-        if teacher.id == None:
-            teacher_id = self.getTeacherID(teacher)
-        else:
-            teacher_id = teacher.id
-        
-        # Grab student id if it isn't given
-        if student.id == None:
-            student_id = self.getStudentID(student)
-        else:
-            student_id = student.id
-
-        query = f"SELECT class_id FROM classes WHERE teacher_id = '{teacher_id}' AND block = '{block}' AND student_id = '{student_id}' LIMIT 1"
-        res = self.cursor.execute(query).fetchone()
-        if res != None:
-            return res[0]
-        return None
-        
     # Get student objects of a given grade, return as list.
     def getStudentsByGrade(self, grade: int) -> list:
         query = f"SELECT * FROM student_directory WHERE grade = '{grade}'"
@@ -171,29 +215,26 @@ class DatabaseHandler():
     # Add student to student directory
     ## Does not check whether or not student is already in DB, assumes not
     def addStudentToStudentDirectory(self, student: Student):
+        # Generate new student id
+        new_id = self.newStudentID()
         # Insert student into student directory
         query = f"""
-        INSERT INTO student_directory(number, first_name, last_name, school, grade) VALUES (
+        INSERT INTO student_directory VALUES (
+            '{new_id}',
             '{student.number}',
             '{student.first}',
             '{student.last}',
             '{student.school}',
             '{student.grade}'
             )
-            RETURNING student_id;
         """
-
-        # Conduct insertion
-        return_id = self.cursor.execute(query)
-
-        student_id = return_id.fetchone()[0] # Get student id created from autoincrement
+        # Conduct query
+        self.cursor.execute(query)
         self.connection.commit()
 
-        updatedStudent = Student(student.number, student.first, student.last, student.school, student.grade, student_id)
-
-        self.logger.addedStudent(updatedStudent)
+        self.logger.addedStudent(student)
         # Return the newly generated id for student object manipulation
-        return student_id
+        return new_id
 
     # Removes student from DB.
     def removeStudent(self, student: Student) -> bool:
@@ -220,28 +261,21 @@ class DatabaseHandler():
     # Add teacher to teacher directory
     ## Does not check whether or not teacher is already in DB, assumes not
     def addTeacherToTeacherDirectory(self, teacher: Teacher):
+        # Generate new teacher id
+        new_id = self.newTeacherID()
         # Insert teacher into teacher directory
         query = f"""
-        INSERT INTO teacher_directory(
-                first_name, 
-                last_name, 
-                school)
-            VALUES (
-                '{teacher.first}',
-                '{teacher.last}',
-                '{teacher.school}'
+        INSERT INTO teacher_directory VALUES (
+            '{new_id}',
+            '{teacher.first}',
+            '{teacher.last}',
+            '{teacher.school}'
             )
-            RETURNING teacher_id
         """
-        # Conduct insertion
-        return_id = self.cursor.execute(query)
-        teacher_id = return_id.fetchone()[0] # Get teacher id created from autoincrement
-
+        self.cursor.execute(query)
         self.connection.commit()
-
         self.logger.addedTeacher(teacher)
-
-        return teacher_id
+        return new_id
     
     # Create a class entry for data table classes
     def addClassToClasses(self, teacher_id: int, block: SchoolBlock, student_id: int) -> Tuple[bool, int]:
@@ -250,58 +284,21 @@ class DatabaseHandler():
         # If any of the inputs are invalid, return False
         if teacher_id == None or str_block == None or student_id == None:
             return False, None
-        
+        new_id = self.newClassID()
         query = f"""
-        INSERT INTO classes(teacher_id, block, student_id) VALUES (
+        INSERT INTO classes VALUES (
+            '{new_id}',
             '{teacher_id}',
             '{str_block}',
             '{student_id}'
-            ) 
-            RETURNING class_id;
+            )
         """
-
-        # Conduct insertion
-        return_id = self.cursor.execute(query)
-        class_id = return_id.fetchone()[0] # Get class id created from autoincrement
-
-        self.connection.commit()
-
-        return True, class_id
-    
-    # Building block function for class
-    ## Should not be used standalone!
-    def removeClassFromClasses(self, class_id: int) -> bool:
-        if class_id == None:
-            return False
-        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
         self.cursor.execute(query)
         self.connection.commit()
-        return True
-    
-    # Remove class from classes table
-    def removeClass(self, teacher: Teacher, block: SchoolBlock, student: Student) -> bool:
-        if teacher.id == None or block == None or student.id == None:
-            return False
-        class_id = self.getClassID(teacher, block, student)
-        
-        query = f"DELETE FROM classes WHERE class_id = '{class_id}'"
-        self.cursor.execute(query)
-        self.connection.commit()
-        return True
+        return True, new_id
 
-    def addClass(self, student: Student, block: SchoolBlock, newTeacher: Teacher):
-        # Get teacher id
-        teacher_id = self.getTeacherID(newTeacher)
-        if teacher_id == None:
-            teacher_id = self.addTeacherToTeacherDirectory(newTeacher)
-        # Get student id
-        student_id = self.getStudentID(student)
-        # Add class to classes table
-        print(f"Created new class with id: {self.addClassToClasses(teacher_id, block, student_id)}")
-        return True
-    
     # Change existing class entry in data table classes
-    def changeClass(self, student: Student, old_teacher: Teacher, block: SchoolBlock, new_teacher: Teacher) -> bool:
+    def changeClass(self, student: Student, block: SchoolBlock, new_teacher: Teacher) -> bool:
         # Map enum SchoolBlock to string savable to DB
         str_block = BlockMapper()[block]
         
@@ -311,7 +308,7 @@ class DatabaseHandler():
             if student.id == None:
                 student.id = self.getStudentID(student)
             query = f"""
-            DELETE FROM classes WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
+            DELETE FROM classes WHERE block = '{str_block}' AND student_id = '{student.id}'
             """
             self.cursor.execute(query)
             self.connection.commit()
@@ -330,18 +327,18 @@ class DatabaseHandler():
             query = f"""
             SELECT teacher_id
             FROM classes
-            WHERE teacher_id = '{old_teacher.id}' AND block = '{str_block}' AND student_id = '{student.id}'
+            WHERE student_id = '{student.id}' AND block = '{str_block}'
             """
             res = self.cursor.execute(query).fetchone()
-            # If student has an empty block, we can just add this teacher to the directory.
+            # If student has a free, we can just add this teacher to the directory.
             if res == None:
                 self.addClassToClasses(new_teacher_id, block, student.id)
-            # Else class slot full, update the class entry that already exists.
+            # Else, update the class entry that already exists.
             else:
                 query = f"""
                 UPDATE classes 
                 SET teacher_id = '{new_teacher_id}' 
-                WHERE teacher_id = '{res[0]}' AND block = '{str_block}' AND student_id = '{student.id}'
+                WHERE teacher_id = '{res[0]}'
                 """
                 self.cursor.execute(query)
                 self.connection.commit()
@@ -357,14 +354,12 @@ class DatabaseHandler():
         else:
             student_id = res_student.id
         for block in schedule:
-            teachers = schedule[block]
-            if teachers != None:
-                for teacher in teachers:
-                    # Check if teacher is already in db
-                    teacher_id = self.getTeacherID(teacher)
-                    if teacher_id == None:
-                        teacher_id = self.addTeacherToTeacherDirectory(teacher)
-                    self.addClassToClasses(teacher_id, block, student_id)
+            teacher = schedule[block]
+            if teacher != None:
+                teacher_id = self.getTeacherID(teacher)
+                if teacher_id == None:
+                    teacher_id = self.addTeacherToTeacherDirectory(teacher)
+                self.addClassToClasses(teacher_id, block, student_id)
         return True
 
     # Gets a list of students by absent teacher.
@@ -402,12 +397,7 @@ class DatabaseHandler():
             res = self.cursor.execute(query).fetchall()
             for block in res:
                 block = ReverseBlockMapper()[block[0]]
-                if schedule[block] != None:
-                    schedule[block].add(teacher)
-                else:
-                    schedule[block] = ClassTeachers()
-                    schedule[block].add(teacher)
-
+                schedule[block] = teacher
         return schedule
     
     def getTeachersFromStudent(self, student: Student):

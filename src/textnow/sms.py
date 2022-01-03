@@ -1,7 +1,9 @@
+from os import wait3
 from database.logger import MessageLogger
 import pytextnow
 import time
 from dataStructs import *
+from datetime import datetime, timedelta
 from database.logger import MessageLogger
 
 class SMS:
@@ -13,15 +15,9 @@ class SMS:
         # Message logger 
         self.messageLog = MessageLogger()
     # Sends a message.
-    def sendMessage(self, number: str, message: str) -> bool:
+    def send(self, number: str, message: str) -> bool:
         self.client.send_sms(number, message)
         self.messageLog.log("abSENT", number, message) # Log message.
-        return True
-
-    def send(self, number: str, message: str) -> bool:
-        self.sendMessage(number, message)
-        delay = 0.22*(len(message) / 4.7)
-        time.sleep(delay)
         return True
 
     # Gets all unreads and marks them as read.

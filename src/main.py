@@ -78,7 +78,7 @@ def sc_listener():
     schoologySuccessCheck = False
     dayoffLatch = False
     while True:
-        currentTime = datetime.now(timezone.utc) - timedelta(hours=5) # Shift by 5 hours to get into EST.
+        currentTime = datetime.now(timezone.utc) - timedelta(hours=5)
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = currentTime.weekday() 
         
@@ -104,8 +104,6 @@ def sc_listener():
                 logger.resetSchoologySuccessCheck()
                 dayoffLatch = False
                 schoologySuccessCheck = False
-
-        time.sleep(15) # Sleep for 15 seconds.
             
 # Configure and start threads.
 threads = {

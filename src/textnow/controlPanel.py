@@ -167,7 +167,7 @@ class ControlConsole(Thread):
                     grade = array
                     return grade
                 else:
-                    self.sms.send(str(self.number), failedMessage)
+                    self.sms.send(str(number), failedMessage)
 
     def help(self):
         helpMessage = "Enter 'ANNOUNCE' to send an announcement. Enter 'ANALYTICS' to view analytics."
