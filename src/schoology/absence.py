@@ -40,12 +40,13 @@ class Absence:
             text = update[1].split("\n")
             # Table has historically had date on 4th column, used to differentiate between update and actual attendance table
             if len(text) > 4:
-                if text[3] in validDates:
-                    current_table = (update[0], text)
-                elif text[0] in validDates:
-                    current_table = (update[0], text)
-                elif text[8] in validDates:
-                    current_table = (update[0], text)
+                for date in validDates:
+                    if date in text[3]:
+                        current_table = (update[0], text)
+                    elif date in text[0]:
+                        current_table = (update[0], text)
+                    elif date in text[8]:
+                        current_table = (update[0], text)
             
         return current_table
 
@@ -138,7 +139,7 @@ class ContentParsers():
                 absences.append(teacher)
 
         # Clause #2 - Standard, with position as first column, 8 columns, and DoW as last.
-        elif rawTable[0] == 'Position' and rawTable[6] == 'DoW':
+        elif rawTable[0] == 'Position' and rawTable[5] == 'DoW':
             # Pop label row.
             for _ in range(8):
                 rawTable.pop(0)
@@ -155,7 +156,7 @@ class ContentParsers():
                 absences.append(teacher)
         
         # Clause #3 - Short, same as #2 without DoW.
-        elif rawTable[0] == 'Position' and rawTable[5] == 'Day':
+        elif rawTable[0] == 'Position' and rawTable[4] == 'Day':
             # Pop label row.
             for _ in range(7):
                 rawTable.pop(0)
