@@ -53,8 +53,8 @@ class Absence:
     # Takes the raw North attendance table from the prior function and parses it, using the AbsentTeacher dataclass. Returns an array of entries utilizing this class. 
     def filterAbsencesNorth(self, date):       
         self.date = date
-        table = self.getAbsenceTable(SchoolName.NEWTON_NORTH)    
-        absences = ContentParsers(date).parse(table)
+        table = self.getAbsenceTable(SchoolName.NEWTON_NORTH)
+        absences = ContentParser(date).parse(table)
 
         print(absences)
         return absences
@@ -63,7 +63,7 @@ class Absence:
     def filterAbsencesSouth(self, date):
         self.date = date
         table = self.getAbsenceTable(SchoolName.NEWTON_SOUTH)    
-        absences = ContentParsers(date).parse(table)
+        absences = ContentParser(date).parse(table)
 
         print(absences)
         return absences
@@ -71,7 +71,7 @@ class Absence:
     def __str__(self):
         return "{} is absent because {}".format(self.name, self.reason)
 
-class ContentParsers():
+class ContentParser():
     def __init__(self, date):
         self.date = date
     
