@@ -68,5 +68,3 @@ class SchoologyListener:
         with open('state.yml', 'w') as f:
             yaml.safe_dump(state, f)
         return state
-    
-

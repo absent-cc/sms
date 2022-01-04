@@ -50,7 +50,7 @@ def sms_listener():
                 textnow.markAsRead(msg) # Mark msg as read
                 activethreads.update({number: UI(textnowCreds, msg)}) # Add new thread to active threads.
                 activethreads[number].start() # Start the thread.
-                print(f"Thread created: {str(number)} with initial message '{msg.content}'.")
+                print(f"THREAD CREATED: {str(number)} WITH INITIAL MESSAGE '{msg.content}'.")
 
         # Thread cleaner.
         dead = []
@@ -58,7 +58,7 @@ def sms_listener():
             if not activethreads[number].is_alive():
                 dead.append(number)
         for number in dead:
-            print(f"Thread terminated: {str(number)}.")
+            print(f"THREAD TERMINATED: {str(number)}.")
             activethreads.pop(number)
 
         # Wait for a bit.
@@ -69,6 +69,9 @@ def sc_listener():
     saturday = 5
     sunday = 6
     holidays = []
+
+    # debug mode
+    debugMode = False
 
     dailyCheckTimeStart = 7 # hour
     dailyCheckTimeEnd = 12 # hour
@@ -82,15 +85,17 @@ def sc_listener():
         currentDate = currentTime.strftime('%d/%m/%Y')
         dayOfTheWeek = currentTime.weekday() 
         
-        if dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays:
+        print("LISTENING", currentTime)
+
+        if (dayOfTheWeek == saturday or dayOfTheWeek == sunday or currentDate in holidays) and not debugMode:
             if dayoffLatch == False:
                 logger.schoologyOffDay(currentDate)
-                print("abSENT Day Off")
+                print("abSENT DAY OFF")
                 dayoffLatch = True
         else:
             aboveStartTime: bool = currentTime.hour >= dailyCheckTimeStart
             belowEndTime: bool = currentTime.hour <= dailyCheckTimeEnd
-            if aboveStartTime and belowEndTime and not schoologySuccessCheck:
+            if (aboveStartTime and belowEndTime and not schoologySuccessCheck) or debugMode:
                 print("CHECKING SCHOOLOGY.")
                 sc = SchoologyListener(textnowCreds, scCreds)
                 schoologySuccessCheck = sc.run()
