@@ -175,9 +175,6 @@ class UI(Thread):
         doneMessage = "As always, when you're done, text 'DONE'"
         beginEditing = "Start editing your schedule:"
         
-        invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
-        invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
-        invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
         TimeoutErrorMessage = "You've taken too long to respond. Please restart the edit process."
 
         successMessage = "Great! Your schedule has been updated."
@@ -431,10 +428,10 @@ class UI(Thread):
         initialMessageSix = "ADV Paul Simon"
         initialMessageSeven = "ADV Art Garfunkel"
 
-        initialMessageEight = "'ADV' stands for advisory. For free blocks, DO NOT send a message at all. When done, text 'DONE'."
+        initialMessageEight = "For advisory, type in 'ADV' as the block. For free blocks, DO NOT send a message at all. When done, text 'DONE'."
         initialMessageNine = "Remember: you must SPELL your teacher's NAME CORRECTLY and that it must MATCH with whatever is on SCHOOLOGY's absent list. For help, check out our getting started post on Instagram: @absent.sms"
 
-        typePrompt = "Start building your schedule:"
+        typePrompt = "Begin building your schedule:"
 
         # Send initial messages.
         self.sms.send(str(self.number), initialMessageGreeting)
@@ -454,8 +451,8 @@ class UI(Thread):
 
     def scheduleBuilder(self, school) -> Schedule or None:
 
-        invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting."
-        invalidMessageBlock = "Please correct your block formatting. It is invalid."
+        invalidMessageTeacher = "Please type that teacher's name again. You used the wrong formatting\\nBLOCK FIRST LAST."
+        invalidMessageBlock = "Please correct your block formatting. It is invalid. Remember that 'ADV' is for advisory blocks and valid blocks are A-G"
         invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
 
         # Get sms.
