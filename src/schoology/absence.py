@@ -77,7 +77,9 @@ class ContentParsers():
     
     def parse(self, rawTable: list):
         parsed = None
-        if rawTable[0] == 'Casey Friend':
+        if rawTable == None:
+            return None
+        elif rawTable[0] == 'Casey Friend':
             parsed = self.caseyFriend(rawTable[1])
         elif rawTable[0] == 'Susan Spirito':
             parsed = self.susanSpirito(rawTable[1])
