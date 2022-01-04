@@ -173,7 +173,8 @@ class UI(Thread):
         initialMultipleTeachersThree = "B Ringo Starr"
         initialEditOverwrite = "Also know that editing a block will completly clear that block, so if you have a multi-teacher class and you edit that block, you will have to retype all your teachers."
         doneMessage = "As always, when you're done, text 'DONE'"
-
+        beginEditing = "Start editing your schedule:"
+        
         invalidMessageTeacher = "You've provided an invalid teacher. Please restart the edit process."
         invalidMessageBlock = "You've entered an invalid block. Please restart the edit process."
         invalidMessageNewline = "You've put more than one teacher in this message. Please send a new text message for each teacher."
@@ -190,7 +191,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMultipleTeachersThree)
         self.sms.send(str(self.number), initialEditOverwrite)
         self.sms.send(str(self.number), doneMessage)
-
+        self.sms.send(str(self.number), beginEditing)
         # Send in schedule
         self.returnSchedule(db, student, "Here is your schedule for editing:") # Give special message for this return
 
