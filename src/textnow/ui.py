@@ -35,7 +35,7 @@ class UI(Thread):
 
         # Creates messages
         alreadySubscribedMessage = "You are already subscribed. Type in 'HELP' to see a list of commands."
-        timeoutMessage = "You timed out! Please start your task again."
+        timeoutMessage = "You timed out! Text 'SUBSCRIBE' to sign up again. Text 'EDIT' to change your schedule."
         askForSubscription = "Hi! You've texted abSENT, an SMS based monitoring system for the NPS absent lists.\\nTo subscribe, please enter 'SUBSCRIBE'."
 
         # Sets the correct DB for the student if they exist.
@@ -85,10 +85,12 @@ class UI(Thread):
     # For new users, upon sending a subscribe message.
     def welcome(self, msg: Message) -> bool:
         # Sends welcome.
-        welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists. Enter 'CANCEL' at any time to terminate this process."
+        welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
+        beginMsg = "We will now begin registration. If you ever make a mistake, text 'CANCEL' to restart."
 
         self.sms.send(str(self.number), welcomeMessage)
         self.returnTOS(None, None)
+        self.sms.send(str(self.number), beginMsg)
         self.logger.accountSetupStarted(str(self.number))
 
         # Gets names.
@@ -121,10 +123,10 @@ class UI(Thread):
         db.addStudent(student, schedule)
 
         # Confirmation message.
-        successMessageOne = f"Amazing! You've sucessfully signed up. Here is your schedule:"
+        successMessageOne = f"Amazing! You've sucessfully signed up! abSENT will now text you in the mornings if your teacher is out.\\nHere is your schedule:"
         successMessageTwo = f"ADV: {schedule[SchoolBlock.ADV]}\\nA: {schedule[SchoolBlock.A]}\\nB: {schedule[SchoolBlock.B]}\\nC: {schedule[SchoolBlock.C]}\\nD: {schedule[SchoolBlock.D]}\\nE: {schedule[SchoolBlock.E]}\\nF: {schedule[SchoolBlock.F]}\\nG: {schedule[SchoolBlock.G]}"
         successMessageThree = "If your schedule has errors, you can change it by texting 'EDIT'."
-        successMessageFour = "Check out our site at beacons[.]ai/absent or follow us on Instagram @absent.sms"
+        successMessageFour = "Remember to check out our site at beacons[.]ai/absent or follow us on Instagram @absent.sms"
         successMessageFive = "We hope you enjoy abSENT!"
         
         self.sms.send(str(self.number), successMessageOne) # Welcome
@@ -149,7 +151,7 @@ class UI(Thread):
         # Cancels and sends message.
         db.removeStudent(resStudent)
         self.logger.removedStudent(resStudent)
-        cancelledMessage = "Service cancelled. Sorry to see you go!"
+        cancelledMessage = "Service cancelled. Sorry to see you go! Text 'SUBSCRIBE' to sign up again."
         self.sms.send(str(self.number), cancelledMessage)
         self.logger.canceledService(resStudent)
         return True
@@ -321,7 +323,7 @@ class UI(Thread):
         # Initial variables including messages and blank names.
         last = None
         first = None
-        initialMessage = "Please text your first and last name, separated by spaces.\\n(e.g: John Doe)"
+        initialMessage = "Please text your first and last name, separated by spaces:\\n(e.g: John Doe)"
         invalidMessage = "That's not a valid name. Enter your first and last name separated by spaces."
 
         # Send initial message.
@@ -422,14 +424,14 @@ class UI(Thread):
         initialMessageGreeting = "Great! Time to build your schedule."
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
         initialMessageTwo = "BLOCK FIRST LAST"
-        initialMessageFour = "A Kurt Cobain"
-        initialMessageThree = "B Elton John"
+        initialMessageThree = "A Elton John"
+        initialMessageFour = "B Kurt Cobain"
         initialMessageFive = "If you have two teachers, send in that block twice:"
         initialMessageSix = "ADV Paul Simon"
         initialMessageSeven = "ADV Art Garfunkel"
 
         initialMessageEight = "For advisory, type in 'ADV' as the block. For free blocks, DO NOT send a message at all. When done, text 'DONE'."
-        initialMessageNine = "Remember: you must SPELL your teacher's NAME CORRECTLY and that it must MATCH with whatever is on SCHOOLOGY's absent list. For help, check out our getting started post on Instagram: @absent.sms"
+        initialMessageNine = "Remember: you must SPELL your teacher's NAME CORRECTLY and that it must MATCH with whatever is on SCHOOLOGY's absent list.\\nFor help, check out our getting started post on Instagram: @absent.sms"
 
         typePrompt = "Begin building your schedule:"
 
@@ -461,6 +463,7 @@ class UI(Thread):
         # Check for timeout.
         if rawInput == None:
             return None
+            
         content = rawInput.content.upper()
         # Cancel at any time.
         if content == 'CANCEL':
