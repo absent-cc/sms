@@ -432,7 +432,7 @@ class UI(Thread):
         initialMessageSeven = "ADV Art Garfunkel"
 
         initialMessageEight = "'ADV' stands for advisory. For free blocks, DO NOT send a message at all. When done, text 'DONE'."
-        initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @absent.sms"
+        initialMessageNine = "Remember: you must SPELL your teacher's NAME CORRECTLY and that it must MATCH with whatever is on SCHOOLOGY's absent list. For help, check out our getting started post on Instagram: @absent.sms"
 
         typePrompt = "Start building your schedule:"
 
