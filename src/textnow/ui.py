@@ -437,6 +437,7 @@ class UI(Thread):
         self.sms.send(str(self.number), initialMessageGreeting)
         self.sms.send(str(self.number), initialMessageOne)
         self.sms.send(str(self.number), initialMessageTwo)
+        time.sleep(.125)
         self.sms.send(str(self.number), initialMessageThree)
         time.sleep(.5)
         self.sms.send(str(self.number), initialMessageFour)
