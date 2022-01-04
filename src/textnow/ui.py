@@ -422,16 +422,16 @@ class UI(Thread):
     
     # By far the most complex function, generates a schedule object based off of user input which it grabs.
     def getSchedule(self, school: SchoolName) -> Schedule or None:
-        initialMessageGreeting = "Great! Time to bulid your schedule."
+        initialMessageGreeting = "Great! Time to build your schedule."
         initialMessageOne = "Please send a new text message for each teacher that you have in the following format:"
-        initialMessageTwo = "A First Last"
-        initialMessageFour = "B Kurt Cobain"
-        initialMessageThree = "C Elton John"
+        initialMessageTwo = "BLOCK FIRST LAST"
+        initialMessageFour = "A Kurt Cobain"
+        initialMessageThree = "B Elton John"
         initialMessageFive = "If you have two teachers, send in that block twice:"
         initialMessageSix = "ADV Paul Simon"
         initialMessageSeven = "ADV Art Garfunkel"
 
-        initialMessageEight = "For free blocks, DO NOT send a message at all. When done, text 'DONE'."
+        initialMessageEight = "'ADV' stands for advisory. For free blocks, DO NOT send a message at all. When done, text 'DONE'."
         initialMessageNine = "For help with this process, check out our getting started post on our Instagram: @absent.sms"
 
         typePrompt = "Start building your schedule:"
