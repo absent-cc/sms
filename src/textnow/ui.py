@@ -86,7 +86,7 @@ class UI(Thread):
     def welcome(self, msg: Message) -> bool:
         # Sends welcome.
         welcomeMessage = "Welcome to abSENT - a monitoring system for the Newton Public Schools absent lists."
-        beginMsg = "We will now begin registration. If you ever make a mistake, text 'CANCEL' to restart."
+        beginMsg = "We will now begin registration. If you make a mistake, text 'CANCEL' to restart."
 
         self.sms.send(str(self.number), welcomeMessage)
         self.returnTOS(None, None)
