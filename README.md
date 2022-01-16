@@ -1,4 +1,4 @@
-# Deprecated!
+# This Codebase is Deprecated!
 Hey there! abSENT SMS is deprecated due to SMS traffic problems (we got banned from TextNow 🥳). App version soon to come!
 
 # abSENT    [![CodeQL](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml)
