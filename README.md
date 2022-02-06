@@ -1,5 +1,7 @@
 # This Codebase is Deprecated!
- Hey there! abSENT SMS is deprecated due to SMS traffic problems (we got banned from TextNow 🥳). Check out our [API](https://github.com/absent-cc/backend) + [mobile app](https://github.com/absent-cc/mobile)
+ Hey there! abSENT SMS is deprecated due to SMS traffic problems (we got banned from TextNow 🥳). 
+ 
+ ## Check out our [API](https://github.com/absent-cc/backend) + [mobile app](https://github.com/absent-cc/mobile)
 
 # abSENT    [![CodeQL](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bykevinyang/abSENT/actions/workflows/codeql-analysis.yml)
 
