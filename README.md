@@ -23,9 +23,5 @@ Every school day, abSENT retrives the new absence list and parses it. It then qu
 ## Why?
 Refreshing Schoology 20 times every morning is somewhat draining.
 
-## Contributors
-- [Kevin Yang](https://github.com/bykevinyang)
-- [Roshan Karim](https://github.com/karimroshan)
-
 ## Disclaimer:
 abSENT as a project is not affiliated with any of the entities whose students it serves. We are students and have written this project just for fun, as a minor QOL improvement in the morning.
