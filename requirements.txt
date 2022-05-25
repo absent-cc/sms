@@ -14,7 +14,7 @@ mock==4.0.3
 numpy==1.21.5
 ordereddict==1.1
 protobuf==3.19.1
-PyJWT==2.3.0
+PyJWT==2.4.0
 pyOpenSSL==21.0.0
 simplejson==3.17.6
 toml==0.10.2
